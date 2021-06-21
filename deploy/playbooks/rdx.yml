@@ -1,0 +1,144 @@
+- hosts: all
+  vars_files:
+    - vars/default.yml
+
+  tasks:
+    - name: Upgrade System
+      become: true
+      tags: [system]
+      apt: upgrade=dist update_cache=yes
+
+    - name: Install aptitude using apt
+      become: true
+      tags: [system]
+      apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
+
+    - name: Python 3 default
+      become: true
+      community.general.alternatives:
+        name: python
+        link: /usr/bin/python
+        path: /usr/bin/python3
+
+    - name: Install required system packages
+      become: true
+      tags: [system]
+      apt: name="{{ item }}" state=latest update_cache=yes
+      loop:
+        [
+          "apt-transport-https",
+          "gpg-agent",
+          "ca-certificates",
+          "curl",
+          "software-properties-common",
+          "python3-pip",
+          "virtualenv",
+          "python3-setuptools",
+          "dirmngr",
+        ]
+
+    - name: Install nginx
+      become: true
+      tags: [system]
+      apt: name="{{ item }}" state=present
+      loop: ["nginx", "nginx-core", "nginx-common"]
+
+    - name: "Start Nginx Services"
+      tags: ["system", "nginx"]
+      become: true
+      service:
+        name: nginx
+        state: started
+
+    - name: Add Docker GPG apt Key
+      become: true
+      tags: [docker]
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker Repository
+      become: true
+      tags: [docker]
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu bionic stable
+        state: present
+
+    - name: Update apt and install docker-ce
+      become: true
+      tags: [docker]
+      apt: update_cache=yes name=docker-ce state=latest
+
+    - name: Install Docker packages for Python
+      become: true
+      tags: [docker]
+      pip:
+        name: [docker, docker-compose]
+        extra_args: --user
+
+    - name: Add the default user to the docker group
+      become: true
+      tags: [docker]
+      user: name=ubuntu group=docker append=yes
+
+    - name: Reset ssh connection for the user change to take place
+      meta: reset_connection
+
+    - name: Pull Docker images
+      become: true
+      tags: [docker]
+      community.docker.docker_image: name="{{ item }}" source=pull
+      loop: "{{ docker_images }}"
+
+    - name: Install passlib for Python
+      become: true
+      tags: [nginx]
+      pip: name=passlib
+
+    - name: Copy nginx config
+      become: true
+      tags: [nginx]
+      template:
+        src: ../files/default.j2
+        dest: /etc/nginx/sites-available/default
+        mode: "0644"
+
+    - name: Remove old app
+      become: true
+      tags: [app]
+      command: rm -rf /var/www/html/*
+
+    - name: Copy frontend app
+      become: true
+      tags: [app]
+      ansible.builtin.copy:
+        src: ../../frontend-next/out/
+        dest: /var/www/html
+
+    - name: Add certbot repository
+      become: true
+      tags: [nginx, certbot]
+      apt_repository: repo='ppa:certbot/certbot' update_cache=yes
+
+    - name: Install certbot
+      become: true
+      tags: [nginx, certbot]
+      apt: name="{{item}}" state=latest
+      loop: ["certbot", "python-certbot-nginx"]
+
+    - name: Allow all access to tcp ports 80 and 443
+      become: true
+      tags: [nginx, system]
+      ufw:
+        rule: allow
+        port: "{{item}}"
+        proto: tcp
+      loop: ["80", "443"]
+
+    - name: Install certificates
+      become: true
+      tags: [nginx, certbot]
+      command: |
+        certbot --nginx --agree-tos -n \
+        -m mike.kotsur@surf.nl \
+        -d "{{inventory_hostname}}" --redirect

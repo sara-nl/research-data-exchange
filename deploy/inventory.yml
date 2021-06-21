@@ -1,0 +1,4 @@
+all:
+  hosts:
+    rdx-test-1.dataex-sara.surf-hosted.nl:
+      setup_basic_auth: False
