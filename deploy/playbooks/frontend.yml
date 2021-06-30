@@ -1,0 +1,17 @@
+---
+- hosts: all
+  # vars_files:
+  #   - vars/default.yml
+
+  tasks:
+    - name: Remove old app
+      become: true
+      tags: [app]
+      command: rm -rf /var/www/html/*
+
+    - name: Copy frontend app
+      become: true
+      tags: [app]
+      ansible.builtin.copy:
+        src: ../../frontend/out/
+        dest: /var/www/html

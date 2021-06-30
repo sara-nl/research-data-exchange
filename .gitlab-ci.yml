@@ -1,0 +1,90 @@
+# This file can be linted using a web tool:
+# - https://git.ia.surfsara.nl/SOIL/RDX/-/ci/lint
+
+# Configuration reference:
+# - https://docs.gitlab.com/ee/ci/yaml/
+
+variables:
+  SBT_DOCKER_IMAGE: "hseeberger/scala-sbt:16.0.1_1.5.4_2.13.6"
+  NODE_DOCKER_IMAGE: "node:14-alpine"
+  NODE_ENV: "test"
+  KANIKO_CONFIG: '{"auths":{"$CI_REGISTRY":{"username":"$CI_REGISTRY_USER","password":"$CI_REGISTRY_PASSWORD"}}}'
+  DOCKER_IMAGE_TAG: "$CI_COMMIT_SHORT_SHA"
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+after_script:
+  - date
+
+before_script:
+  - date
+
+stages:
+  - check
+  - build
+  - package
+  - deploy
+
+# backend_test:
+#   stage: check
+#   image: $SBT_DOCKER_IMAGE
+#   script:
+#     - cd hello-world/
+#     - sbt test
+
+backend_build:
+  stage: build
+  image: $SBT_DOCKER_IMAGE
+  script:
+    - cd hello-world/
+    - sbt assembly
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - hello-world/target/scala-2.13/backend-assembly-*.jar
+
+frontend_build:
+  stage: build
+  image: $NODE_DOCKER_IMAGE
+  cache:
+    key: $CI_COMMIT_REF_SLUG
+    paths:
+      - .npm/
+  script:
+    - cd frontend/
+    - npm ci --cache "$CI_PROJECT_DIR/.npm" --prefer-offline  
+    - npm run export
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - frontend/out/
+
+
+backend_docker:
+  stage: package
+  dependencies:
+    - backend_build
+  image:
+    # See: https://docs.gitlab.com/ee/ci/docker/using_kaniko.html
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  script:
+    - export DOCKER_REGISTRY_PATH="$CI_REGISTRY_IMAGE/hello-world"
+    - echo "$KANIKO_CONFIG" > /kaniko/.docker/config.json
+    - find . -name "backend-assembly-0.1.jar"
+    - /kaniko/executor --cache=true --context $CI_PROJECT_DIR/hello-world/ --dockerfile $CI_PROJECT_DIR/hello-world/Dockerfile --destination "$DOCKER_REGISTRY_PATH:$DOCKER_IMAGE_TAG" --destination "$DOCKER_REGISTRY_PATH:$CI_COMMIT_REF_NAME" --destination "$DOCKER_REGISTRY_PATH:latest"
+
+deploy_test1:
+  stage: deploy
+  dependencies:
+    - frontend_build  
+  image: python:3.9-slim
+  cache:
+    paths:
+      - .cache/pip  
+  script:
+    - chmod 0600 "${RDX_TEST1_SSH_KEY}"
+    - apt-get update
+    - apt -y install openssh-client
+    - pip install ansible
+    - cd deploy/
+    - ansible-playbook -u ubuntu -i inventory.yml playbooks/frontend.yml --key-file "$RDX_TEST1_SSH_KEY"
