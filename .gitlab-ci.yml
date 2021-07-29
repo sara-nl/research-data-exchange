@@ -24,23 +24,16 @@ stages:
   - package
   - deploy
 
-# backend_test:
-#   stage: check
-#   image: $SBT_DOCKER_IMAGE
-#   script:
-#     - cd hello-world/
-#     - sbt test
-
 backend_build:
   stage: build
   image: $SBT_DOCKER_IMAGE
   script:
-    - cd hello-world/
-    - sbt assembly
+    - cd backend/
+    - sbt "sharer / assembly"
   artifacts:
     expire_in: 1 week
     paths:
-      - hello-world/target/scala-2.13/backend-assembly-*.jar
+      - backend/sharer/target/scala-2.13/sharer-assembly-*.jar
 
 frontend_build:
   stage: build
@@ -51,13 +44,12 @@ frontend_build:
       - .npm/
   script:
     - cd frontend/
-    - npm ci --cache "$CI_PROJECT_DIR/.npm" --prefer-offline  
+    - npm ci --cache "$CI_PROJECT_DIR/.npm" --prefer-offline
     - npm run export
   artifacts:
     expire_in: 1 week
     paths:
       - frontend/out/
-
 
 backend_docker:
   stage: package
@@ -68,19 +60,19 @@ backend_docker:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
   script:
-    - export DOCKER_REGISTRY_PATH="$CI_REGISTRY_IMAGE/hello-world"
+    - export DOCKER_REGISTRY_PATH="$CI_REGISTRY_IMAGE/backend"
     - echo "$KANIKO_CONFIG" > /kaniko/.docker/config.json
     - find . -name "backend-assembly-0.1.jar"
-    - /kaniko/executor --cache=true --context $CI_PROJECT_DIR/hello-world/ --dockerfile $CI_PROJECT_DIR/hello-world/Dockerfile --destination "$DOCKER_REGISTRY_PATH:$DOCKER_IMAGE_TAG" --destination "$DOCKER_REGISTRY_PATH:$CI_COMMIT_REF_NAME" --destination "$DOCKER_REGISTRY_PATH:latest"
+    - /kaniko/executor --cache=true --context $CI_PROJECT_DIR/backend/ --dockerfile $CI_PROJECT_DIR/backend/Dockerfile --destination "$DOCKER_REGISTRY_PATH:$DOCKER_IMAGE_TAG" --destination "$DOCKER_REGISTRY_PATH:$CI_COMMIT_REF_NAME" --destination "$DOCKER_REGISTRY_PATH:latest"
 
 deploy_test1:
   stage: deploy
   dependencies:
-    - frontend_build  
+    - frontend_build
   image: python:3.9-slim
   cache:
     paths:
-      - .cache/pip  
+      - .cache/pip
   script:
     - chmod 0600 "${RDX_TEST1_SSH_KEY}"
     - apt-get update
@@ -88,3 +80,4 @@ deploy_test1:
     - pip install ansible
     - cd deploy/
     - ansible-playbook -u ubuntu -i inventory.yml playbooks/frontend.yml --key-file "$RDX_TEST1_SSH_KEY"
+    - ansible-playbook -u ubuntu -i inventory.yml playbooks/backend.yml --key-file "$RDX_TEST1_SSH_KEY"
