@@ -4,9 +4,6 @@
     - vars/backend.yml
 
   tasks:
-    # TODO: switch to Docker compose: docker-compose up --remove-orphans
-    # TODO: set DOCKER_IMAGE_TAG variable
-
     - name: Update backend and DB containers
       become: true
       tags: [docker]
