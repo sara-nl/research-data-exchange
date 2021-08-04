@@ -1,0 +1,23 @@
+services:
+  backend:
+    image: git.ia.surfsara.nl:5050/soil/rdx/backend:${DOCKER_IMAGE_TAG}
+    restart: "always"
+    depends_on: [postgres]
+    environment:
+      RDX_SMTP_HOST: ${RDX_SMTP_HOST}
+      RDX_SMTP_PORT: ${RDX_SMTP_PORT}
+      RDX_SMTP_USER: ${RDX_SMTP_USER}
+      RDX_SMTP_PASSWORD: ${RDX_SMTP_PASSWORD}
+      RDX_WEB_URL: ${RDX_WEB_URL}
+      RDX_WEBDAV_PASSWORD: ${RDX_WEBDAV_PASSWORD}
+      RDX_WEBDAV_USER: ${RDX_WEBDAV_USER}
+      DB_HOST: "postgres"
+      DB_NAME: "postgres"
+      DB_USER: "postgres"
+      DB_PORT: 5432
+      LOG_LEVEL: "info"
+  postgres:
+    image: postgres:13-alpine
+    restart: "always"
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust

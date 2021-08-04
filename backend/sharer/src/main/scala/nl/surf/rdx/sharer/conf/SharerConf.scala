@@ -40,6 +40,7 @@ object SharerConf {
 }
 
 case class SharerConf(
+    webUrl: String,
     conditionsFileName: String,
     tokenValidityInterval: FiniteDuration,
     owncloud: OwncloudConf,

@@ -1,43 +1,60 @@
 package nl.surf.rdx.sharer.owncloud
 
+import cats.Functor
 import cats.data.Kleisli
-import cats.effect.{ContextShift, IO, Resource}
-import com.github.sardine.Sardine
-import io.lemonlabs.uri.typesafe.dsl.{pathPartToUrlDsl, urlToUrlDsl}
-import nl.surf.rdx.sharer.owncloud.conf.OwncloudConf.WebdavBase
-import nl.surf.rdx.sharer.owncloud.webdav.Webdav
+import cats.effect.{ContextShift, IO, Resource, Timer}
 import cats.implicits._
+import com.github.sardine.Sardine
 import com.github.sardine.impl.SardineException
 import nl.surf.rdx.common.model.owncloud.OwncloudShare
+import nl.surf.rdx.sharer.SharerApp
+import nl.surf.rdx.sharer.SharerApp.EnvF
 import nl.surf.rdx.sharer.conf.SharerConf
+import nl.surf.rdx.sharer.owncloud.webdav.Webdav
 import nl.surf.rdx.sharer.owncloud.webdav.Webdav.implicits._
 import org.http4s.Status.NotFound
+import org.typelevel.log4cats.Logger
 
 object DexShares {
 
-  case class Deps(sharesDeps: OwncloudShares.Deps, conf: SharerConf)
+  case class Observation(share: OwncloudShare, files: List[String])
+
+  def stream(implicit
+      cs: ContextShift[IO],
+      timer: Timer[IO],
+      logger: Logger[EnvF[IO, *]]
+  ): EnvF[fs2.Stream[EnvF[IO, *], *], List[Observation]] =
+    Kleisli { deps: SharerApp.Deps =>
+      fs2.Stream
+        .awakeEvery[EnvF[IO, *]](deps.conf.fetchInterval)
+        .evalTap(_ => logger.debug(s"Starting shares fetch"))
+        .evalMap(_ => DexShares.observe)
+    }
 
   /**
     * Fetches recent DEX shares (i.e. shares that are folders and contain conditions document).
     */
-  def observe(implicit ec: ContextShift[IO]): Kleisli[IO, Deps, List[OwncloudShare]] =
+  def observe(implicit
+      ec: ContextShift[IO]
+  ): Kleisli[IO, SharerApp.Deps, List[Observation]] =
     (for {
       allShares <-
         OwncloudShares.getShares
-          .local[Deps](_.sharesDeps)
           .mapF[Resource[IO, *], List[OwncloudShare]](Resource.eval)
-      sardineR <- Webdav.makeSardine.local[Deps](_.conf.owncloud) // [Resource, Deps, Sardine]
+          .local[SharerApp.Deps](_.sharesDeps)
+      sardineR <- Webdav.makeSardine.local[SharerApp.Deps](_.conf.owncloud)
       dexShares <- doObserve(allShares)
-        .mapF[Resource[IO, *], List[OwncloudShare]](Resource.eval)
-        .local[Deps] { case Deps(_, conf) => (sardineR, conf) }
+        .mapF[Resource[IO, *], List[Observation]](Resource.eval)
+        .local[SharerApp.Deps] { case SharerApp.Deps(_, conf) => (sardineR, conf) }
     } yield dexShares).mapF(_.use(IO.pure))
 
   private def doObserve(
       allShares: List[OwncloudShare]
   )(implicit
       ec: ContextShift[IO]
-  ): Kleisli[IO, (Sardine, SharerConf), List[OwncloudShare]] =
+  ): Kleisli[IO, (Sardine, SharerConf), List[Observation]] =
     allShares
+      .filter(_.item_type === OwncloudShare.itemTypeFolder)
       .map(ocs =>
         OwncloudShares
           .listTopLevel(ocs.path)
@@ -57,7 +74,7 @@ object DexShares {
         results
           .collect {
             case (ocs, davResources) if davResources.hasFileNamed(deps._2.conditionsFileName) =>
-              ocs
+              Observation(ocs, davResources.map(_.getPath))
           }
       })
 

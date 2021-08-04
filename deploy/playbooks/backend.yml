@@ -4,27 +4,39 @@
     - vars/backend.yml
 
   tasks:
-    # - name: Pull Docker images
-    #   become: true
-    #   tags: [docker]
-    #   community.docker.docker_image: name="{{backend_image}}" source=pull
+    # TODO: switch to Docker compose: docker-compose up --remove-orphans
+    # TODO: set DOCKER_IMAGE_TAG variable
 
-    - name: (Re-)start backend containers
+    - name: Update backend and DB containers
       become: true
       tags: [docker]
-      community.docker.docker_container:
-        container_default_behavior: no_defaults
-        pull: yes
-        name: backend
-        image: "{{ backend_image }}"
-        recreate: yes
-        restart_policy: "on-failure"
-        env:
-          # Tip: this list should be in sync with the env variables in all
-          # `application.conf` and `reference.conf` files of the project.
-          RDX_SMTP_USER: "{{ lookup('env', 'RDX_SMTP_USER') }}"
-          RDX_SMTP_PASSWORD: "{{ lookup('env', 'RDX_SMTP_PASSWORD') }}"
-          RDX_SMTP_HOST: "{{ lookup('env', 'RDX_SMTP_HOST') }}"
-          RDX_SMTP_PORT: "{{ lookup('env', 'RDX_SMTP_PORT') }}"
-          RDX_WEBDAV_USER: "{{ lookup('env', 'RDX_WEBDAV_USER') }}"
-          RDX_WEBDAV_PASSWORD: "{{ lookup('env', 'RDX_WEBDAV_PASSWORD') }}"
+      community.docker.docker_compose:
+        project_name: rdx
+        remove_orphans: true
+        definition:
+          version: "2"
+          services:
+            postgres:
+              image: postgres
+              restart: "always"
+              environment:
+                POSTGRES_HOST_AUTH_METHOD: trust
+            backend:
+              image: git.ia.surfsara.nl:5050/soil/rdx/backend:{{ lookup('env', 'DOCKER_IMAGE_TAG') }}
+              restart: "always"
+              depends_on: [postgres]
+              environment:
+                # Tip: this list should be in sync with the env variables in all
+                # `application.conf` and `reference.conf` files of the project.
+                RDX_SMTP_HOST: "{{ lookup('env', 'RDX_SMTP_HOST') }}"
+                RDX_SMTP_PORT: "{{ lookup('env', 'RDX_SMTP_PORT') }}"
+                RDX_SMTP_USER: "{{ lookup('env', 'RDX_SMTP_USER') }}"
+                RDX_SMTP_PASSWORD: "{{ lookup('env', 'RDX_SMTP_PASSWORD') }}"
+                RDX_WEB_URL: "{{ lookup('env', 'RDX_WEB_URL') }}"
+                RDX_WEBDAV_USER: "{{ lookup('env', 'RDX_WEBDAV_USER') }}"
+                RDX_WEBDAV_PASSWORD: "{{ lookup('env', 'RDX_WEBDAV_PASSWORD') }}"
+                DB_HOST: "postgres"
+                DB_NAME: "postgres"
+                DB_USER: "postgres"
+                DB_PORT: 5432
+                LOG_LEVEL: "info"
