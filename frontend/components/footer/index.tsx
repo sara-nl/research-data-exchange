@@ -6,7 +6,7 @@ const Footer: React.FC = () => (
       <div className="text-center">
         <p>
           This is a prototype of SURF Research Data Exchange. Send an email to{' '}
-          <a href="mailto:support@rdx.labs.surf.nl">support@rdx.labs.surf.nl</a>{' '}
+          <a href="mailto:rdx@surf.nl">rdx@surf.nl</a>{' '}
           in case you need any assistance.
         </p>
       </div>
