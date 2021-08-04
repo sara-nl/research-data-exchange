@@ -5,7 +5,6 @@ import cats.effect.{ContextShift, IO, Resource}
 import com.github.sardine.{DavResource, Sardine}
 import io.circe.Json
 import io.circe.generic.auto._
-import io.lemonlabs.uri.Url
 import nl.surf.rdx.common.model.owncloud.OwncloudShare
 import nl.surf.rdx.sharer.owncloud.conf.OwncloudConf
 import nl.surf.rdx.sharer.owncloud.conf.OwncloudConf.WebdavBase
@@ -29,9 +28,9 @@ object OwncloudShares {
 
   def getShares(implicit ec: ContextShift[IO]): Kleisli[IO, Deps, List[OwncloudShare]] =
     Kleisli {
-      case Deps(httpClientR, creds, rdConf) =>
+      case Deps(httpClientR, creds, ocConf) =>
         val sharesRequest = Request[IO](
-          uri = Uri.unsafeFromString(rdConf.sharesSource.toString),
+          uri = Uri.unsafeFromString(ocConf.sharesSource.toString),
           headers = Headers.of(Authorization(creds))
         )
 

@@ -16,7 +16,7 @@ import org.http4s.server.blaze.BlazeServerBuilder
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 import java.net.URL
-import java.time.LocalDateTime
+import java.time.{LocalDateTime, OffsetDateTime}
 import java.util.UUID
 import scala.concurrent.ExecutionContext
 import scala.language.postfixOps
@@ -39,8 +39,11 @@ object LibrarianApp extends IOApp.Simple {
     val demoTokens = Seq(
       ShareToken(
         OwncloudShare("id1", "uuid1", Some("sales@microsoft.com"), "/ds1", "file", 12),
-        Some((LocalDateTime.now(), UUID.fromString("123e4567-e89b-12d3-a456-426614174000"))),
-        "sales@microsoft.com"
+        OffsetDateTime.now(),
+        UUID.fromString("123e4567-e89b-12d3-a456-426614174000"),
+        OffsetDateTime.now(),
+        "sales@microsoft.com",
+        Nil
       )
     )
 

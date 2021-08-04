@@ -7,7 +7,11 @@ ThisBuild / scalaVersion := "2.13.6"
 ThisBuild / useCoursier := false
 
 ThisBuild / assemblyMergeStrategy := {
+  case "META-INF/services/org.flywaydb.core.internal.database.DatabaseType" =>
+    MergeStrategy.first
   case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+  case "application.conf"            => MergeStrategy.concat
+  case "reference.conf"              => MergeStrategy.concat
   case x                             => MergeStrategy.first
 }
 
@@ -38,7 +42,7 @@ lazy val sharer = (project in file("sharer"))
       deps.pencil
     ) ++ deps.pureConfig ++ deps.sardine ++ deps.circe ++ deps.http4sClient ++ deps.logging
   )
-  .dependsOn(commonModel)
+  .dependsOn(commonDb)
 
 lazy val librarian = (project in file("librarian"))
   .settings(
@@ -58,6 +62,15 @@ lazy val commonModel = (project in file("common/model")).settings(
     deps.catsEffect
   ) ++ deps.logging
 )
+
+lazy val commonDb = (project in file("common/db"))
+  .settings(
+    libraryDependencies := Seq(
+      deps.catsEffect
+    ) ++ deps.skunk ++ deps.flyway
+      ++ deps.logging ++ deps.pureConfig ++ deps.circe
+  )
+  .dependsOn(commonModel)
 
 lazy val deps = new {
 
@@ -118,5 +131,10 @@ lazy val deps = new {
   )
 
   val pencil = "com.minosiants" %% "pencil" % "0.6.7"
+
+  val skunk =
+    Seq("org.tpolecat" %% "skunk-core" % "0.0.28", "org.tpolecat" %% "skunk-circe" % "0.0.28")
+  val flyway =
+    Seq("org.postgresql" % "postgresql" % "42.2.23", "org.flywaydb" % "flyway-core" % "7.11.4")
 
 }

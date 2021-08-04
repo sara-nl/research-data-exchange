@@ -1,5 +1,9 @@
 package nl.surf.rdx.common.model.owncloud
 
+object OwncloudShare {
+  val itemTypeFolder = "folder"
+}
+
 case class OwncloudShare(
     /**
       * Internal ID of the storage provider?
