@@ -1,0 +1,14 @@
+{
+  "folders": [
+	{
+		"path": "deploy"
+	},
+	{
+		"path": "docs"
+	},
+	{
+		"path": "frontend"
+	}
+],
+  "settings": {}
+}

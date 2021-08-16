@@ -46,5 +46,6 @@ case class SharerConf(
     owncloud: OwncloudConf,
     client: ClientConf,
     fetchInterval: FiniteDuration,
+    tokenSweepInterval: FiniteDuration,
     email: EmailConf
 )

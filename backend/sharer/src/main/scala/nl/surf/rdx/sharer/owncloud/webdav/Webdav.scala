@@ -1,7 +1,7 @@
 package nl.surf.rdx.sharer.owncloud.webdav
 
 import cats.data.Kleisli
-import cats.effect.{IO, Resource}
+import cats.effect.{IO, Resource, Sync}
 import com.github.sardine.{DavResource, Sardine, SardineFactory}
 import nl.surf.rdx.sharer.owncloud.conf.OwncloudConf
 
@@ -15,11 +15,11 @@ object Webdav {
     }
   }
 
-  def makeSardine: Kleisli[Resource[IO, *], OwncloudConf, Sardine] =
+  def makeSardine[F[_]: Sync]: Kleisli[Resource[F, *], OwncloudConf, Sardine] =
     Kleisli { conf =>
       Resource.make(
-        IO(SardineFactory.begin(conf.webdavUsername, conf.webdavPassword))
-      )(sardine => IO(sardine.shutdown()))
+        Sync[F].delay(SardineFactory.begin(conf.webdavUsername, conf.webdavPassword))
+      )(sardine => Sync[F].delay(sardine.shutdown()))
     }
 
 }

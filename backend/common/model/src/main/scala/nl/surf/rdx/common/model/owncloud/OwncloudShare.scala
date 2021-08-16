@@ -2,6 +2,7 @@ package nl.surf.rdx.common.model.owncloud
 
 object OwncloudShare {
   val itemTypeFolder = "folder"
+  val itemTypeFile = "file"
 }
 
 case class OwncloudShare(

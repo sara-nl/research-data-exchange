@@ -1,45 +1,71 @@
 package nl.surf.rdx.sharer.owncloud
 
+import cats.{FlatMap, Monad}
 import cats.data.Kleisli
-import cats.effect.{ContextShift, IO, Resource}
+import cats.effect.{Concurrent, ConcurrentEffect, ContextShift, IO, Resource, Sync}
 import com.github.sardine.{DavResource, Sardine}
 import io.circe.Json
 import io.circe.generic.auto._
+import cats.implicits._
 import nl.surf.rdx.common.model.owncloud.OwncloudShare
+import nl.surf.rdx.sharer.SharerApp
+import nl.surf.rdx.sharer.SharerApp.{Deps, KIO}
+import nl.surf.rdx.sharer.conf.SharerConf
 import nl.surf.rdx.sharer.owncloud.conf.OwncloudConf
 import nl.surf.rdx.sharer.owncloud.conf.OwncloudConf.WebdavBase
 import org.http4s.circe.CirceEntityDecoder._
 import org.http4s.client.Client
+import org.http4s.client.blaze.BlazeClientBuilder
 import org.http4s.headers.Authorization
 import org.http4s.{BasicCredentials, Headers, Request, Uri}
-import org.typelevel.log4cats.slf4j.Slf4jLogger
+import org.typelevel.log4cats.Logger
 
+import scala.concurrent.ExecutionContext
 import scala.jdk.CollectionConverters.ListHasAsScala
 
 object OwncloudShares {
 
-  private val logger = Slf4jLogger.getLogger[IO]
-
-  case class Deps(
-      httpClientR: Resource[IO, Client[IO]],
-      creds: BasicCredentials,
-      ocConf: OwncloudConf
-  )
-
-  def getShares(implicit ec: ContextShift[IO]): Kleisli[IO, Deps, List[OwncloudShare]] =
+  def getShares[F[_]: Monad: ConcurrentEffect: Logger: FlatMap]
+      : Kleisli[F, Deps, List[OwncloudShare]] =
     Kleisli {
-      case Deps(httpClientR, creds, ocConf) =>
-        val sharesRequest = Request[IO](
-          uri = Uri.unsafeFromString(ocConf.sharesSource.toString),
-          headers = Headers.of(Authorization(creds))
+      case Deps(conf) =>
+        val httpClientR = BlazeClientBuilder[F](ExecutionContext.global)
+          .withConnectTimeout(conf.client.connectionTimeout)
+          .withResponseHeaderTimeout(conf.client.responseHeaderTimeout)
+          .withRequestTimeout(conf.client.requestTimeout)
+          .withIdleTimeout(conf.client.idleTimeout)
+          .resource
+
+        val sharesRequest = Request[F](
+          uri = Uri.unsafeFromString(conf.owncloud.sharesSource),
+          headers = Headers.of(
+            Authorization(
+              BasicCredentials(conf.owncloud.webdavUsername, conf.owncloud.webdavPassword)
+            )
+          )
         )
 
         httpClientR.use { client =>
           for {
-            _ <- logger.trace(s"Begin shares request")
-            shares <- client.expect[Json](sharesRequest).flatMap(extractShares)
-            _ <- logger.trace(s"End shares request")
-            _ <- logger.debug(
+            _ <- Logger[F].trace(s"Begin shares request")
+            shares <-
+              client
+                .expect[Json](sharesRequest)
+                .flatMap(json =>
+                  for {
+                    _ <- Logger[F].trace(
+                      s"Extracting OC Shares from: ${json.spaces2}"
+                    )
+                    shares <- Sync[F].fromEither(
+                      json.hcursor
+                        .downField("ocs")
+                        .downField("data")
+                        .as[List[OwncloudShare]]
+                    )
+                  } yield shares
+                )
+            _ <- Logger[F].trace(s"End shares request")
+            _ <- Logger[F].debug(
               s"Retrieved ${shares.length} shares"
             )
           } yield shares
@@ -49,29 +75,23 @@ object OwncloudShares {
   //  TODO: SardineException 502 => retry
   //  TODO: org.apache.http.NoHttpResponseException => retry
   //  TODO: javax.net.ssl.SSLException: Connection reset
-  def listTopLevel(userPath: String): Kleisli[IO, (Sardine, WebdavBase), List[DavResource]] =
+  def listTopLevel[F[_]: Sync](
+      userPath: String
+  ): Kleisli[F, (Sardine, WebdavBase), List[DavResource]] =
     Kleisli {
       case (sardine, WebdavBase(serverUri, serverSuffix)) =>
         import io.lemonlabs.uri.typesafe.dsl.{pathPartToUrlDsl, urlToUrlDsl}
-        IO {
+        Sync[F].delay {
           sardine
-            .list((serverUri / serverSuffix / userPath).toStringPunycode, 1)
+            .list(
+              (serverUri / serverSuffix / userPath)
+                .normalize(removeEmptyPathParts = true)
+                .toStringPunycode,
+              1
+            )
             .asScala
             .toList
         }
     }
-
-  private def extractShares(json: Json): IO[List[OwncloudShare]] =
-    for {
-      _ <- logger.trace(
-        s"Extracting OC Shares from: ${json.spaces2}"
-      )
-      shares <- IO.fromEither(
-        json.hcursor
-          .downField("ocs")
-          .downField("data")
-          .as[List[OwncloudShare]]
-      )
-    } yield shares
 
 }

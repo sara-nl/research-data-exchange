@@ -40,7 +40,7 @@ object LibrarianApp extends IOApp.Simple {
       ShareToken(
         OwncloudShare("id1", "uuid1", Some("sales@microsoft.com"), "/ds1", "file", 12),
         OffsetDateTime.now(),
-        UUID.fromString("123e4567-e89b-12d3-a456-426614174000"),
+        UUID.fromString("123e4567-e89b-12d3-a456-426614174000").some,
         OffsetDateTime.now(),
         "sales@microsoft.com",
         Nil

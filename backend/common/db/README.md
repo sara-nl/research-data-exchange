@@ -1,3 +1,9 @@
+# Writing queries
+
+Backend connects to the database using Skunk: Postgres library for Scala.
+
+Check [Skunk](https://tpolecat.github.io/skunk/tutorial/) documentation.
+
 # Database access and migrations
 
 * Check [Managing Database Migrations in Scala](https://alexn.org/blog/2020/11/15/managing-database-migrations-scala.html) article for more details.

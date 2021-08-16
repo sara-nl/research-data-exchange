@@ -39,7 +39,9 @@ lazy val sharer = (project in file("sharer"))
       deps.betterFiles,
       deps.catsEffect,
       deps.scalaUri,
-      deps.pencil
+      deps.pencil,
+      deps.catsTestkit,
+      deps.mockitoScala
     ) ++ deps.pureConfig ++ deps.sardine ++ deps.circe ++ deps.http4sClient ++ deps.logging
   )
   .dependsOn(commonDb)
@@ -76,7 +78,7 @@ lazy val deps = new {
 
   lazy val V = new {
     val http4s = "0.21.24"
-    val catsEffect = "2.5.1"
+    val catsEffect = "2.5.3"
     val pureConf = "0.16.0"
     val logback = "1.2.3"
     val log4cats = "1.3.1"
@@ -96,8 +98,9 @@ lazy val deps = new {
       "org.http4s" %% "http4s-blaze-client" % V.http4s,
       "org.http4s" %% "http4s-circe" % V.http4s
     )
-  val scalaTest = "org.scalatest" %% "scalatest" % "3.1.1" % Test
-  val catsTestkit = "org.typelevel" %% "cats-testkit-scalatest" % "2.1.5" % Test
+  val scalaTest = "org.scalatest" %% "scalatest" % "3.2.9" % Test
+  val mockitoScala = "org.mockito" %% "mockito-scala" % "1.16.37"
+  val catsTestkit = "com.codecommit" %% "cats-effect-testing-scalatest" % "0.5.4" % Test
   val betterFiles = "com.github.pathikrit" %% "better-files" % "3.9.1"
   val scalaUri = "io.lemonlabs" %% "scala-uri" % "3.5.0"
 

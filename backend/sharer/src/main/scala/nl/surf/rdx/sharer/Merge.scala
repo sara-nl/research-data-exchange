@@ -1,7 +1,7 @@
 package nl.surf.rdx.sharer
 
 import nl.surf.rdx.common.model.owncloud.OwncloudShare
-import nl.surf.rdx.sharer.owncloud.DexShares.Observation
+import nl.surf.rdx.sharer.owncloud.OwncloudSharesObserver.Observation
 
 object Merge {
 

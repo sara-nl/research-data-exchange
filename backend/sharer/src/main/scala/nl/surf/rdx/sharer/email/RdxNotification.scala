@@ -29,7 +29,7 @@ object RdxNotification {
       |
       |<p>You can now add the required metadata and publish it. That will make it available for download upon agreement to the associated use conditions.</p>
       |
-      |<a style="font-size: 18px; color: #008cba;" href="${conf.webUrl}/publish/${token.token}">Proceed to publication screen</a>
+      |<a style="font-size: 18px; color: #008cba;" href="${conf.webUrl}/publish.html?${token.token.get}">Proceed to publication screen</a>
       |
       |
       |<p>Please note that the link above is valid for a limited amount of time and will expire in $tokenValidityHours hours, or on <span style="white-space: nowrap">
