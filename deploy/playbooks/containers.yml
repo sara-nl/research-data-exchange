@@ -37,3 +37,18 @@
                 DB_USER: "postgres"
                 DB_PORT: 5432
                 LOG_LEVEL: "info"
+                RDX_APP_NAME: "sharer"
+            librarian:
+              image: git.ia.surfsara.nl:5050/soil/rdx/backend:{{ lookup('env', 'DOCKER_IMAGE_TAG') }}
+              restart: "always"
+              ports:
+                - 8081:8081
+              environment:
+                RDX_APP_NAME: "librarian"
+                LOG_LEVEL: "info"
+            frontend:
+              image: git.ia.surfsara.nl:5050/soil/rdx/frontend:{{ lookup('env', 'DOCKER_IMAGE_TAG') }}
+              ports:
+                - 3000:3000
+              environment:
+                RDX_BACKEND_URL: http://librarian:8081

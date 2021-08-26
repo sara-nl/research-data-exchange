@@ -1,25 +1,20 @@
 package nl.surf.rdx.sharer.conf
 
-import cats.effect.{Blocker, ContextShift, IO, Resource}
+import cats.effect.{Blocker, ContextShift, IO, Resource, Sync}
 import nl.surf.rdx.sharer.conf.SharerConf.{ClientConf, EmailConf}
 import nl.surf.rdx.sharer.owncloud.conf.OwncloudConf
 import pureconfig.ConfigSource
 import pureconfig.module.catseffect2.syntax.CatsEffectConfigSource
 import pureconfig.generic.auto._
 
-import java.util.concurrent.Executors
 import scala.concurrent.duration.FiniteDuration
 
 object SharerConf {
 
-  protected val blocker = Resource
-    .make(IO(Executors.newCachedThreadPool()))(es => IO(es.shutdown()))
-    .map(Blocker.liftExecutorService)
-
   def configSrc: CatsEffectConfigSource = ConfigSource.default.at("sharer")
 
-  def loadIO(implicit cs: ContextShift[IO]): IO[SharerConf] = {
-    Blocker[IO].use(configSrc.loadF[IO, SharerConf])
+  def loadF[F[_]: Sync: ContextShift]: F[SharerConf] = {
+    Blocker[F].use(configSrc.loadF[F, SharerConf])
   }
 
   case class ClientConf(

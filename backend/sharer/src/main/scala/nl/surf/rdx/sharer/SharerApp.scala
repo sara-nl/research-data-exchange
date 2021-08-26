@@ -31,7 +31,7 @@ object SharerApp extends IOApp.Simple {
   val run: IO[Unit] =
     logger.info("Sharer service starting") >> logger.debug("Debug logging enabled") >> (for {
       _ <- MigrationApp.run
-      conf <- SharerConf.loadIO
+      conf <- SharerConf.loadF[IO]
       fiber1 <- RdxScheduler.start[IO]("share token sweeper", conf.tokenSweepInterval)(
         DbSession.resource[IO].use(session => session.execute(Shares.invalidateAllExpired))
       )

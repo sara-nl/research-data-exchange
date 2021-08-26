@@ -3,7 +3,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect } from 'react';
 
-const NavBarComponent: React.FC = () => {
+type Props = {
+  owner: string;
+};
+
+const NavBarComponent: React.FC<Props> = (props) => {
   useEffect(() => {
     const button = document.querySelector('.navbar-toggler');
     button.addEventListener('click', () => {
@@ -20,7 +24,7 @@ const NavBarComponent: React.FC = () => {
         <Navbar.Collapse className="justify-content-end">
           <Nav className="d-flex align-items-center">
             <Image src="/images/person-circle.svg" width="30px" height="30px" />
-            <Navbar.Text className="ml-2">someone@uva.nl</Navbar.Text>
+            <Navbar.Text className="ml-2">{props.owner}</Navbar.Text>
           </Nav>
         </Navbar.Collapse>
       </Navbar>

@@ -91,6 +91,7 @@ object OwncloudShares {
             )
             .asScala
             .toList
+            .tail // Skip the folder/file itself
         }
     }
 

@@ -30,6 +30,7 @@ lazy val backend = (project in file("."))
   .settings(
     name := "backend"
   )
+  .aggregate(sharer, librarian)
   .dependsOn(sharer, librarian)
 
 lazy val sharer = (project in file("sharer"))
@@ -54,15 +55,19 @@ lazy val librarian = (project in file("librarian"))
       deps.catsEffect,
       deps.scalaUri,
       deps.scalaTest,
-      deps.catsTestkit
-    ) ++ deps.pureConfig ++ deps.circe ++ deps.http4sServer ++ deps.logging
+      deps.catsTestkit,
+      deps.mockitoScala,
+      deps.circeLiteral
+    ) ++ deps.http4sClient
+      .map(_ % Test) ++ deps.pureConfig ++ deps.circe ++ deps.http4sServer ++ deps.logging
   )
-  .dependsOn(commonModel)
+  .dependsOn(commonModel, commonDb)
 
 lazy val commonModel = (project in file("common/model")).settings(
   libraryDependencies := Seq(
-    deps.catsEffect
-  ) ++ deps.logging
+    deps.catsEffect,
+    deps.scalaUri
+  ) ++ deps.circe ++ deps.logging
 )
 
 lazy val commonDb = (project in file("common/db"))
@@ -119,6 +124,8 @@ lazy val deps = new {
     "io.circe" %% "circe-generic",
     "io.circe" %% "circe-parser"
   ).map(_ % V.circe)
+
+  val circeLiteral = "io.circe" %% "circe-literal" % V.circe % Test
 
   val logging = Seq(
     "ch.qos.logback" % "logback-core" % V.logback,

@@ -103,18 +103,6 @@
         dest: /etc/nginx/sites-available/default
         mode: "0644"
 
-    - name: Remove old app
-      become: true
-      tags: [app]
-      command: rm -rf /var/www/html/*
-
-    - name: Copy frontend app
-      become: true
-      tags: [app]
-      ansible.builtin.copy:
-        src: ../../frontend-next/out/
-        dest: /var/www/html
-
     - name: Add certbot repository
       become: true
       tags: [nginx, certbot]
