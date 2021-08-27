@@ -28,6 +28,11 @@ class OwncloudSharesObserverTest
 
   object helpers {
 
+//    0 = {DavResource@8967} "/remote.php/nonshib-webdav/ds3/"
+//    1 = {DavResource@8968} "/remote.php/nonshib-webdav/ds3/conditions.pdf"
+//    2 = {DavResource@8969} "/remote.php/nonshib-webdav/ds3/f1/"
+//    3 = {DavResource@8970} "/remote.php/nonshib-webdav/ds3/sensitive-data.csv"
+
     def webdavApiURL(userPath: String) =
       s"https://owncloud.server/remote.php/nonshib-webdav/$userPath"
 
@@ -59,7 +64,12 @@ class OwncloudSharesObserverTest
 
   "OC Share observer" should "return new shares when available" in {
     val s1 = OwncloudShare("id1", "uid1", None, "dataset1", OwncloudShare.itemTypeFolder, 0)
-    val files1 = List("1.csv", "2.csv", "conditions.pdf")
+    val files1 = List(
+      "/remote.php/nonshib-webdav/dataset1/",
+      "/remote.php/nonshib-webdav/dataset1/1.csv",
+      "/remote.php/nonshib-webdav/dataset1/2.csv",
+      "/remote.php/nonshib-webdav/dataset1/conditions.pdf"
+    )
     val deps = OwncloudSharesObserver.Deps[IO](
       Resource.pure[IO, Sardine](
         helpers.sardineWithPaths("dataset1", files1)
@@ -70,14 +80,26 @@ class OwncloudSharesObserverTest
     )
 
     OwncloudSharesObserver.observe[IO].run(deps).asserting { observations =>
-      observations shouldBe List(Observation(s1, files1))
+      observations shouldBe List(
+        Observation(
+          s1,
+          List(
+            "dataset1/1.csv",
+            "dataset1/2.csv",
+            "dataset1/conditions.pdf"
+          )
+        )
+      )
     }
   }
 
   //TODO: implement as a part of "hardening"
   ignore should "retry when share listing failed with 502" in {
     val s1 = OwncloudShare("id1", "uid1", None, "conditions.pdf", OwncloudShare.itemTypeFolder, 0)
-    val files1 = List("conditions.pdf")
+    val files1 = List(
+      "/remote.php/nonshib-webdav/dataset1/",
+      "/remote.php/nonshib-webdav/dataset1/conditions.pdf"
+    )
     val deps = OwncloudSharesObserver.Deps[IO](
       Resource.pure[IO, Sardine](
         helpers.sardineFailFirstWithPaths("dataset1", files1)
@@ -95,7 +117,10 @@ class OwncloudSharesObserverTest
   //TODO: investigate as a part of "hardening"
   ignore should "fail when share listing failed with unknown reason" in {
     val s1 = OwncloudShare("id1", "uid1", None, "conditions.pdf", OwncloudShare.itemTypeFolder, 0)
-    val files1 = List("conditions.pdf")
+    val files1 = List(
+      "/remote.php/nonshib-webdav/dataset1/",
+      "/remote.php/nonshib-webdav/dataset1/conditions.pdf"
+    )
     val kaboom = new RuntimeException("Kaboom!")
     val deps = OwncloudSharesObserver.Deps[IO](
       Resource.pure[IO, Sardine](
@@ -113,7 +138,10 @@ class OwncloudSharesObserverTest
 
   it should "filter out shares that are not folders" in {
     val s1 = OwncloudShare("id1", "uid1", None, "conditions.pdf", OwncloudShare.itemTypeFile, 0)
-    val files1 = List("conditions.pdf")
+    val files1 = List(
+      "/remote.php/nonshib-webdav/dataset1/",
+      "/remote.php/nonshib-webdav/dataset1/conditions.pdf"
+    )
     val deps = OwncloudSharesObserver.Deps[IO](
       Resource.pure[IO, Sardine](
         helpers.sardineWithPaths("dataset1", files1)
@@ -130,7 +158,12 @@ class OwncloudSharesObserverTest
 
   it should "filter out shares that don't have conditions file" in {
     val s1 = OwncloudShare("id1", "uid1", None, "dataset1", OwncloudShare.itemTypeFolder, 0)
-    val files1 = List("1.csv", "2.csv")
+    val files1 =
+      List(
+        "/remote.php/nonshib-webdav/dataset1/",
+        "/remote.php/nonshib-webdav/dataset1/1.csv",
+        "/remote.php/nonshib-webdav/dataset1/2.csv"
+      )
     val deps = OwncloudSharesObserver.Deps[IO](
       Resource.pure[IO, Sardine](
         helpers.sardineWithPaths("dataset1", files1)
@@ -144,5 +177,36 @@ class OwncloudSharesObserverTest
       observations shouldBe List.empty[Observation]
     }
   }
+
+//  "OC Shares" should "return top level shares with normalized paths" in {
+//    val s1 = OwncloudShare("id1", "uid1", None, "dataset1", OwncloudShare.itemTypeFolder, 0)
+//    val files1 = List(
+//      "/remote.php/nonshib-webdav/dataset1/",
+//      "/remote.php/nonshib-webdav/dataset1/f1/",
+//      "/remote.php/nonshib-webdav/dataset1/conditions.pdf",
+//      "/remote.php/nonshib-webdav/dataset1/sensitive-data.csv"
+//    )
+//
+//    OwncloudShares
+//      .listTopLevel[IO]("ds3")
+//      .run(
+//        (
+//          helpers.sardineWithPaths("ds3", files1),
+//          WebdavBase("https://owncloud.server", "/remote.php/nonshib-webdav/")
+//        )
+//      )
+//      .asserting { observations =>
+//        observations shouldBe List(
+//          Observation(
+//            s1,
+//            List(
+//              "ds3/f1/",
+//              "conditions.pdf",
+//              "sensitive-data.csv"
+//            )
+//          )
+//        )
+//      }
+//  }
 
 }

@@ -56,7 +56,7 @@ object OwncloudSharesObserver {
         )
       } yield sharesAndListings.collect {
         case (ocs, davResources) if davResources.hasFileNamed(deps.conditionsFileName) =>
-          Observation(ocs, davResources.map(_.getPath))
+          Observation(ocs, davResources.map(_.getPath.replace(deps.webdavBase.serverSuffix, "")))
       }
     }
 

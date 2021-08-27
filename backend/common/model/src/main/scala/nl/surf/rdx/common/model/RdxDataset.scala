@@ -1,4 +1,4 @@
-package nl.surf.rdx.librarian
+package nl.surf.rdx.common.model
 
 import io.lemonlabs.uri.{AbsoluteUrl, RelativeUrl}
 

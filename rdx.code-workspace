@@ -1,14 +1,18 @@
 {
-  "folders": [
-	{
-		"path": "deploy"
-	},
-	{
-		"path": "docs"
-	},
-	{
-		"path": "frontend"
+	"folders": [
+		{
+			"path": "deploy"
+		},
+		{
+			"path": "docs"
+		},
+		{
+			"path": "frontend"
+		}
+	],
+	"settings": {
+		"files.watcherExclude": {
+			"**/target": true
+		}
 	}
-],
-  "settings": {}
 }

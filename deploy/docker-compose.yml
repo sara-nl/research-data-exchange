@@ -3,23 +3,41 @@
 # Deployment configuration is in `.gitlab-ci.yml`.
 
 services:
-  backend:
-    image: backend:latest
+  sharer:
+    # image: git.ia.surfsara.nl:5050/soil/rdx/backend:${DOCKER_IMAGE_TAG}
+    image: rdx-backend:latest
     restart: "always"
     depends_on: [postgres]
     environment:
+      RDX_APP_NAME: "sharer"
       RDX_SMTP_HOST: ${RDX_SMTP_HOST}
       RDX_SMTP_PORT: ${RDX_SMTP_PORT}
       RDX_SMTP_USER: ${RDX_SMTP_USER}
       RDX_SMTP_PASSWORD: ${RDX_SMTP_PASSWORD}
       RDX_WEB_URL: ${RDX_WEB_URL}
       RDX_WEBDAV_PASSWORD: ${RDX_WEBDAV_PASSWORD}
-      RDX_WEBDAV_USER: ${RDX_WEBDAV_USER}
+      RDX_WEBDAV_USER  : ${RDX_WEBDAV_USER}
       DB_HOST: "postgres"
       DB_NAME: "postgres"
       DB_USER: "postgres"
       DB_PORT: 5432
       LOG_LEVEL: "info"
+  librarian:
+    # image: git.ia.surfsara.nl:5050/soil/rdx/backend:${DOCKER_IMAGE_TAG}
+    image: rdx-backend:latest
+    restart: "always"
+    ports:
+      - 8081:8081
+    environment:
+      RDX_APP_NAME: "librarian"
+      LOG_LEVEL: "info"
+
+  frontend:
+    image: rdx-frontend:latest
+    ports:
+      - 3000:3000
+    environment:
+      RDX_BACKEND_URL: librarian:8081
   postgres:
     image: postgres:13-alpine
     restart: "always"
