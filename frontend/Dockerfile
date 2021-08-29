@@ -14,13 +14,14 @@ RUN npm install --frozen-lockfile
 # Rebuild the source code only when needed
 FROM node:14-alpine AS builder
 ENV NEXT_TELEMETRY_DISABLED 1
+# This env variable will be overriden when starting app
+ENV RDX_BACKEND_URL=http://noop
 WORKDIR .
 COPY . .
 COPY --from=deps node_modules ./node_modules
 RUN npm install --verbose sharp
 RUN npm run build
-# This env variable will be overriden when starting app
-# ENV RDX_BACKEND_URL=http://noop
+
 
 # Production image, copy all the files and run next
 FROM node:14-alpine AS runner
