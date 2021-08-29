@@ -53,6 +53,7 @@
                 LOG_LEVEL: "info"
             frontend:
               image: git.ia.surfsara.nl:5050/soil/rdx/frontend:{{ lookup('env', 'DOCKER_IMAGE_TAG') }}
+              depends_on: [librarian]
               ports:
                 - 3000:3000
               environment:
