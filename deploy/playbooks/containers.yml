@@ -45,6 +45,10 @@
               ports:
                 - 8081:8081
               environment:
+                DB_HOST: "postgres"
+                DB_NAME: "postgres"
+                DB_USER: "postgres"
+                DB_PORT: 5432
                 RDX_APP_NAME: "librarian"
                 LOG_LEVEL: "info"
             frontend:
