@@ -41,6 +41,7 @@
             librarian:
               image: git.ia.surfsara.nl:5050/soil/rdx/backend:{{ lookup('env', 'DOCKER_IMAGE_TAG') }}
               restart: "always"
+              depends_on: [postgres]
               ports:
                 - 8081:8081
               environment:
