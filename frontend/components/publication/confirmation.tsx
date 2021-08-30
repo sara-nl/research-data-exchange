@@ -19,7 +19,7 @@ const PublicationConfirmation: React.FC<Props> = ({ accessUrl }) => {
       <h4 className="alert-heading">Well done!</h4>
       <p>✨ Your dataset has been published under use conditions. What now?</p>
 
-      <p className="text-center py-3 text-nowrap border border-info">
+      <p className="text-center py-3 text-nowrap overflow-auto border border-info">
         <samp>{accessUrl}</samp>
       </p>
 
