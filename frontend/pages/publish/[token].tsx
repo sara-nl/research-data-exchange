@@ -8,7 +8,12 @@ import { GetServerSideProps } from 'next';
 import Error, { ErrorProps } from 'next/error';
 import absoluteUrl from 'next-absolute-url';
 
-type Props = { share?: Share; submitUrl: string; baseUrl?: string; error?: ErrorProps };
+type Props = {
+  share?: Share;
+  submitUrl: string;
+  baseUrl?: string;
+  error?: ErrorProps;
+};
 
 const Publish: React.FC<Props> = ({ share, baseUrl, submitUrl, error }) => {
   if (error) {
@@ -33,6 +38,7 @@ const Publish: React.FC<Props> = ({ share, baseUrl, submitUrl, error }) => {
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
+  console.log('process.env.RDX_BACKEND_URL', process.env.RDX_BACKEND_URL);
   const token = context.query['token'];
   const { origin } = absoluteUrl(context.req);
 
@@ -53,9 +59,15 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return {
       props: { error: { statusCode: res.status, title: await res.json() } },
     };
-}
+  }
 
-  return { props: { share: await res.json(), baseUrl: origin, submitUrl :"/api/dataset/" + token } };
+  return {
+    props: {
+      share: await res.json(),
+      baseUrl: origin,
+      submitUrl: '/api/dataset/' + token,
+    },
+  };
 };
 
 export default Publish;

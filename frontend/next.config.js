@@ -1,4 +1,8 @@
 module.exports = {
+  // TODO: check if this is actually needed...
+  env: {
+    RDX_BACKEND_URL: process.env.RDX_BACKEND_URL,
+  },
   future: {
     webpack5: true,
   },

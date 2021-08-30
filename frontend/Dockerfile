@@ -15,7 +15,9 @@ RUN npm install --frozen-lockfile
 FROM node:14-alpine AS builder
 ENV NEXT_TELEMETRY_DISABLED 1
 # This env variable will be overriden when starting app
-ENV RDX_BACKEND_URL=http://noop
+ARG RDX_BACKEND_URL
+ENV RDX_BACKEND_URL=$RDX_BACKEND_URL
+
 WORKDIR .
 COPY . .
 COPY --from=deps node_modules ./node_modules

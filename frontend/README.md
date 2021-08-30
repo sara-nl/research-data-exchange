@@ -7,6 +7,10 @@
 - `brew install nvm`
 - `nvm install lts`
 
+### VScode
+
+- Install [Prettier - Code formatter](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) extension;
+
 ### Requirements
 
 - NodeJS 14.x LTS
