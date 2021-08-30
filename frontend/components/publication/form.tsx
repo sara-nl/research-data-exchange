@@ -95,13 +95,19 @@ const PublicationForm: React.FC<Props> = ({
           errors,
           isValidating,
           isValid,
+          dirty,
         }) => (
           <RForm noValidate validated={!errors} onSubmit={handleSubmit}>
             <RForm.Row>
               <Field name="doi">
                 {(fp) => (
                   <RForm.Group as={Col} controlId="doi">
-                    <RForm.Label>Digital Object Identifier (DOI)</RForm.Label>
+                    <RForm.Label>
+                      <span className="lead">
+                        Digital Object Identifier (DOI){' '}
+                      </span>
+                      <sup className="font-weight-light">required</sup>
+                    </RForm.Label>
                     <RForm.Control
                       required
                       type="text"
@@ -121,7 +127,9 @@ const PublicationForm: React.FC<Props> = ({
               <Field name="title">
                 {(fp) => (
                   <RForm.Group as={Col} controlId="title">
-                    <RForm.Label>Title</RForm.Label>
+                    <RForm.Label>
+                      <span className="lead">Title</span> <sup>required</sup>
+                    </RForm.Label>
                     <RForm.Control
                       required
                       type="text"
@@ -140,7 +148,9 @@ const PublicationForm: React.FC<Props> = ({
               <Field name="authors">
                 {(fp) => (
                   <RForm.Group as={Col} controlId="authors">
-                    <RForm.Label>Authors</RForm.Label>
+                    <RForm.Label>
+                      <span className="lead">Authors</span> <sup>required</sup>
+                    </RForm.Label>
                     <RForm.Control
                       required
                       type="text"
@@ -159,7 +169,10 @@ const PublicationForm: React.FC<Props> = ({
               <Field name="description">
                 {(fp) => (
                   <RForm.Group as={Col} controlId="description">
-                    <RForm.Label>Description</RForm.Label>
+                    <RForm.Label>
+                      <span className="lead">Description</span>{' '}
+                      <sup>required</sup>
+                    </RForm.Label>
                     <RForm.Control
                       required
                       as="textarea"
@@ -175,7 +188,11 @@ const PublicationForm: React.FC<Props> = ({
                 )}
               </Field>
             </RForm.Row>
-            <Button type="submit" variant="primary">
+            <Button
+              disabled={!dirty || !isValid}
+              type="submit"
+              variant="primary"
+            >
               Publish
             </Button>
           </RForm>
