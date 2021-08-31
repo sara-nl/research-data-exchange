@@ -69,9 +69,14 @@ const Publication: React.FC<Props> = ({ share, baseUrl, submitUrl }) => {
                 <div className="dataset">
                   <div className="dataset-title">
                     <h4>Dataset "{share.path}"</h4>
-                    <p>Shared with Reaserch Data Exchange {timeSince} ago</p>
+                    <p>
+                      {/* Shared with Reaserch Data Exchange <br /> */}
+                      <span className="text-nowrap font-weight-light">
+                        Shared {timeSince} ago
+                      </span>
+                    </p>
                   </div>
-                  <div className="group mt-3">
+                  <div className="group mt-5">
                     {share.files.map((file) => (
                       <div
                         key={file}
