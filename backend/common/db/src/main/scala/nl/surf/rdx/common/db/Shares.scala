@@ -9,19 +9,20 @@ import skunk.implicits._
 import skunk.codec.all._
 import skunk.circe.codec.json._
 import io.circe.syntax.EncoderOps
-import nl.surf.rdx.common.model.{ShareToken, UserMetadata}
+import nl.surf.rdx.common.model.{RdxDataset, RdxShare}
 import io.circe.generic.auto._
+import nl.surf.rdx.common.model.api.UserMetadata
 
 import java.util.UUID
 
 object Shares {
 
-  def add: Command[ShareToken] = {
-    val enc = (json ~ json ~ timestamptz ~ uuid.opt ~ timestamptz)
-    sql"""INSERT INTO Shares (metadata, preview, created_at, token, token_expires_at) 
+  def add: Command[RdxShare] = {
+    val enc = (json ~ json ~ timestamptz ~ uuid.opt ~ timestamptz ~ varchar)
+    sql"""INSERT INTO Shares (metadata, preview, created_at, token, token_expires_at, conditions_url) 
          VALUES ($enc)""".command.contramap {
-      case ShareToken(share, createdAt, token, expiresAt, _, files) =>
-        share.asJson ~ files.asJson ~ createdAt ~ token ~ expiresAt
+      case RdxShare(share, createdAt, token, expiresAt, _, files, conditionsUrl) =>
+        share.asJson ~ files.asJson ~ createdAt ~ token ~ expiresAt ~ conditionsUrl
     }
   }
 
@@ -46,31 +47,51 @@ object Shares {
   private val owncloudShareDec: Decoder[OwncloudShare] =
     (json).emap { case (p) => p.as[OwncloudShare].leftMap(_.getMessage()) }
 
-  def list: Query[Void, OwncloudShare] = {
+  def listOC: Query[Void, OwncloudShare] = {
     sql"""SELECT metadata 
          FROM Shares""".query(owncloudShareDec)
   }
 
-  def find(token: UUID): Query[UUID, ShareToken] = {
-    val shareDec: Decoder[ShareToken] =
-      (json ~ timestamptz ~ timestamptz ~ json).emap {
-        case p ~ createdAt ~ expiresAt ~ files =>
+  def findShare: Query[UUID, RdxShare] = {
+    val shareDec: Decoder[RdxShare] =
+      (uuid ~ json ~ timestamptz ~ timestamptz ~ json ~ varchar).emap {
+        case token ~ p ~ createdAt ~ expiresAt ~ files ~ conditionsUrl =>
           for {
             ocs <- p.as[OwncloudShare].leftMap(_.getMessage())
             fl <- files.as[List[String]].leftMap(_.getMessage())
-          } yield ShareToken(
+          } yield RdxShare(
             ocs,
             createdAt,
             Some(token),
             expiresAt,
             ocs.additional_info_owner.orEmpty,
-            fl
+            fl,
+            conditionsUrl
           )
       }
 
-    sql"""SELECT metadata, created_at, token_expires_at, preview FROM shares where token = $uuid"""
+    sql"""SELECT token, metadata, created_at, token_expires_at, preview, conditions_url 
+         FROM shares WHERE token = $uuid"""
       .query(shareDec)
 
+  }
+
+  def findDataset: Query[String, RdxDataset] = {
+    val decoder = (text ~ text ~ text ~ varchar ~ json).emap {
+      case owner ~ title ~ description ~ conditionsUrl ~ list =>
+        for {
+          files <- list.as[List[String]].leftMap(_.getMessage())
+        } yield RdxDataset(
+          owner,
+          title,
+          description,
+          conditionsUrl,
+          files
+        )
+    }
+
+    sql"""SELECT metadata->>'additional_info_owner', user_metadata->>'title', user_metadata->>'description', conditions_url, preview 
+         FROM shares WHERE user_metadata->>'doi' =  $varchar""".query(decoder)
   }
 
 }

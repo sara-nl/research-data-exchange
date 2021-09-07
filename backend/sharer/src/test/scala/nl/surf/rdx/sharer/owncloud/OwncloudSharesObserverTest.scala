@@ -63,7 +63,7 @@ class OwncloudSharesObserverTest
   }
 
   "OC Share observer" should "return new shares when available" in {
-    val s1 = OwncloudShare("id1", "uid1", None, "dataset1", OwncloudShare.itemTypeFolder, 0)
+    val s1 = OwncloudShare("id1", "uid1", None, "/dataset1", OwncloudShare.itemTypeFolder, 0, 0)
     val files1 = List(
       "/remote.php/nonshib-webdav/dataset1/",
       "/remote.php/nonshib-webdav/dataset1/1.csv",
@@ -84,9 +84,9 @@ class OwncloudSharesObserverTest
         Observation(
           s1,
           List(
-            "dataset1/1.csv",
-            "dataset1/2.csv",
-            "dataset1/conditions.pdf"
+            "1.csv",
+            "2.csv",
+            "conditions.pdf"
           )
         )
       )
@@ -95,7 +95,8 @@ class OwncloudSharesObserverTest
 
   //TODO: implement as a part of "hardening"
   ignore should "retry when share listing failed with 502" in {
-    val s1 = OwncloudShare("id1", "uid1", None, "conditions.pdf", OwncloudShare.itemTypeFolder, 0)
+    val s1 =
+      OwncloudShare("id1", "uid1", None, "conditions.pdf", OwncloudShare.itemTypeFolder, 0, 0)
     val files1 = List(
       "/remote.php/nonshib-webdav/dataset1/",
       "/remote.php/nonshib-webdav/dataset1/conditions.pdf"
@@ -116,7 +117,8 @@ class OwncloudSharesObserverTest
 
   //TODO: investigate as a part of "hardening"
   ignore should "fail when share listing failed with unknown reason" in {
-    val s1 = OwncloudShare("id1", "uid1", None, "conditions.pdf", OwncloudShare.itemTypeFolder, 0)
+    val s1 =
+      OwncloudShare("id1", "uid1", None, "conditions.pdf", OwncloudShare.itemTypeFolder, 0, 0)
     val files1 = List(
       "/remote.php/nonshib-webdav/dataset1/",
       "/remote.php/nonshib-webdav/dataset1/conditions.pdf"
@@ -137,7 +139,7 @@ class OwncloudSharesObserverTest
   }
 
   it should "filter out shares that are not folders" in {
-    val s1 = OwncloudShare("id1", "uid1", None, "conditions.pdf", OwncloudShare.itemTypeFile, 0)
+    val s1 = OwncloudShare("id1", "uid1", None, "conditions.pdf", OwncloudShare.itemTypeFile, 0, 0)
     val files1 = List(
       "/remote.php/nonshib-webdav/dataset1/",
       "/remote.php/nonshib-webdav/dataset1/conditions.pdf"
@@ -157,7 +159,7 @@ class OwncloudSharesObserverTest
   }
 
   it should "filter out shares that don't have conditions file" in {
-    val s1 = OwncloudShare("id1", "uid1", None, "dataset1", OwncloudShare.itemTypeFolder, 0)
+    val s1 = OwncloudShare("id1", "uid1", None, "dataset1", OwncloudShare.itemTypeFolder, 0, 0)
     val files1 =
       List(
         "/remote.php/nonshib-webdav/dataset1/",

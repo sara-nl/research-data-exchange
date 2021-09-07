@@ -2,11 +2,9 @@ package nl.surf.rdx.librarian
 
 import cats.effect.IO
 import cats.implicits._
-import nl.surf.rdx.common.model.{ShareToken, UserMetadata}
+import nl.surf.rdx.common.model.{RdxDataset, RdxShare}
 import nl.surf.rdx.common.model.owncloud.OwncloudShare
-import nl.surf.rdx.librarian.LibrarianApp.Deps
 import nl.surf.rdx.librarian.codecs.service.DatasetService
-import nl.surf.rdx.librarian.conf.LibrarianConf
 import org.http4s.implicits._
 import org.http4s._
 import org.mockito.ArgumentMatchers.any
@@ -16,152 +14,186 @@ import org.scalatest.matchers.should.Matchers
 import java.time.OffsetDateTime
 import org.mockito.{ArgumentMatchers, MockitoSugar}
 import io.circe.literal._
+import io.lemonlabs.uri.RelativeUrl
+import nl.surf.rdx.common.model.api.UserMetadata
 import org.http4s.client.dsl.io._
 import org.http4s.dsl.io.POST
 
 import java.util.UUID
 
-//todo extract common code
-class LibrarianRoutesTest extends AnyFlatSpec with Matchers with MockitoSugar {
+class LibrarianRoutesTest
+    extends AnyFlatSpec
+    with Matchers
+    with MockitoSugar
+    with LibrarianFixtures {
   import LibrarianRoutesTest._
+  import LibrarianRoutes._
 
-  private val conf = LibrarianConf(80, "conditions.pdf")
-
-  val deps: Deps = Deps(
-    conf, {
-      val dsmock = mock[DatasetService[IO]]
-      when(dsmock.fetchShare(any())).thenReturn(IO.none)
-      when(dsmock.fetchShare(uuid)).thenReturn(IO.pure(shareToken.some))
-      when(dsmock.fetchShare(expiredUuid)).thenReturn(IO.pure(expiredShareToken.some))
-      dsmock
-    }
-  )
-
-  "Get unpublished share route" should "return an available share" in {
-    val io = for {
-      uri <- IO.fromEither(Uri.fromString(s"/share/${uuid.toString}"))
-      request = Request[IO](Method.GET, uri)
-      response <- LibrarianRoutes.getUnpublishedShareRoute(deps).orNotFound.run(request)
-      _ <- IO(response.status shouldBe Status.Ok)
-    } yield ()
-
-    io.unsafeRunSync()
+  "Get unpublished share route" should "return an available share" in withDataService4Share {
+    dsService =>
+      for {
+        uri <- IO.fromEither(Uri.fromString(s"/share/${uuid.toString}"))
+        request = Request[IO](Method.GET, uri)
+        response <- getRdxShareRoute(dsService).orNotFound.run(request)
+        _ <- IO(response.status shouldBe Status.Ok)
+      } yield ()
   }
 
-  it should "return 400 error for missing token" in {
-    val io = for {
+  it should "return 400 error for missing token" in withDataService4Share { dsService =>
+    for {
       uri <- IO.fromEither(Uri.fromString(s"/share/"))
       request = Request[IO](Method.GET, uri)
-      response <- LibrarianRoutes.getUnpublishedShareRoute(deps).orNotFound.run(request)
+      response <- getRdxShareRoute(dsService).orNotFound.run(request)
       _ <- IO(response.status shouldBe Status.BadRequest)
     } yield ()
-
-    io.unsafeRunSync()
   }
 
-  it should "return 403 error for invalid token" in {
-    val io = for {
+  it should "return 403 error for invalid token" in withDataService4Share { dsService =>
+    for {
       uri <- IO.fromEither(Uri.fromString("/share/bla"))
       request = Request[IO](Method.GET, uri)
-      response <- LibrarianRoutes.getUnpublishedShareRoute(deps).orNotFound.run(request)
+      response <- getRdxShareRoute(dsService).orNotFound.run(request)
       _ <- IO(response.status shouldBe Status.Forbidden)
     } yield ()
-
-    io.unsafeRunSync()
   }
 
-  it should "return 403 error for expired token" in {
-    val io = for {
+  it should "return 403 error for expired token" in withDataService4Share { dsService =>
+    for {
       uri <- IO.fromEither(Uri.fromString(s"/share/${expiredUuid.toString}"))
       request = Request[IO](Method.GET, uri)
-      response <- LibrarianRoutes.getUnpublishedShareRoute(deps).orNotFound.run(request)
+      response <- getRdxShareRoute(dsService).orNotFound.run(request)
       _ <- IO(response.status shouldBe Status.Forbidden)
     } yield ()
-
-    io.unsafeRunSync()
   }
 
-  it should "return 404 for unavailable share" in {
-    val io = for {
+  it should "return 404 for unavailable share" in withDataService4Share { dsService =>
+    for {
       uri <- IO.fromEither(Uri.fromString(s"/share/${UUID.randomUUID().toString}"))
       request = Request[IO](Method.GET, uri)
-      response <- LibrarianRoutes.getUnpublishedShareRoute(deps).orNotFound.run(request)
+      response <- getRdxShareRoute(dsService).orNotFound.run(request)
       _ <- IO(response.status shouldBe Status.NotFound)
     } yield ()
-
-    io.unsafeRunSync()
   }
 
-  val dsService4Publish = {
-    val dsMock = mock[DatasetService[IO]]
-    when(dsMock.publishShare(any[UUID], any[UserMetadata]))
-      .thenReturn(IO.raiseError(new RuntimeException("Oeps")))
-    when(dsMock.publishShare(ArgumentMatchers.eq(uuid), any[UserMetadata])).thenReturn(IO.unit)
-    dsMock
+  "Publish " should "call dataset service and return created status" in withDataService4Publish {
+    dsService =>
+      import org.http4s.circe.CirceEntityEncoder._
+
+      for {
+        uri <- IO.fromEither(Uri.fromString(s"/dataset/${uuid.toString}"))
+        request <- POST(publishJson, uri)
+        response <- publishDatasetRoute(dsService).orNotFound.run(request)
+        _ <- IO(response.status shouldBe Status.Created)
+      } yield ()
   }
 
-  "Publish " should "call dataset service and return created status" in {
+  it should "return error if error occurred while publishing" in withDataService4Publish {
+    dsService =>
+      import org.http4s.circe.CirceEntityEncoder._
+      for {
+        uri <- IO.fromEither(Uri.fromString(s"/dataset/${UUID.randomUUID().toString}"))
+        request <- POST(publishJson, uri)
+        response <- publishDatasetRoute(dsService).orNotFound.run(request)
+        _ <- IO(response.status shouldBe Status.InternalServerError)
+      } yield ()
+  }
+
+  it should "return error for malformed json" in withDataService4Publish { dsService =>
     import org.http4s.circe.CirceEntityEncoder._
 
-    val io = for {
-      uri <- IO.fromEither(Uri.fromString(s"/dataset/${uuid.toString}"))
-      request <- POST(publishJson, uri)
-      response <- LibrarianRoutes.publishDatasetRoute(dsService4Publish).orNotFound.run(request)
-      _ <- IO(response.status shouldBe Status.Created)
-    } yield ()
-
-    io.unsafeRunSync()
-  }
-  it should "return error if error occurred while publishing" in {
-    import org.http4s.circe.CirceEntityEncoder._
-    val random = UUID.randomUUID()
-    val io = for {
-      uri <- IO.fromEither(Uri.fromString(s"/dataset/${random.toString}"))
-      request <- POST(publishJson, uri)
-      response <- LibrarianRoutes.publishDatasetRoute(dsService4Publish).orNotFound.run(request)
-      _ <- IO(response.status shouldBe Status.InternalServerError)
-    } yield ()
-
-    io.unsafeRunSync()
-  }
-  it should "return error for malformed json" in {
-    import org.http4s.circe.CirceEntityEncoder._
-
-    val io = for {
+    for {
       uri <- IO.fromEither(Uri.fromString(s"/dataset/${uuid.toString}"))
       request <- POST(notValidJson, uri)
-      response <- LibrarianRoutes.publishDatasetRoute(dsService4Publish).orNotFound.run(request)
+      response <- publishDatasetRoute(dsService).orNotFound.run(request)
       _ <- IO(response.status shouldBe Status.BadRequest)
     } yield ()
-
-    io.unsafeRunSync()
   }
 
+  "Load dataset details" should "return dataset details if doi is provided" in withDataService4Dataset {
+    dsService =>
+      for {
+        uri <- IO.fromEither(Uri.fromString(s"/dataset/$doi"))
+        request = Request[IO](Method.GET, uri)
+        response <- getDatasetRoute(dsService).orNotFound.run(request)
+        _ <- IO(response.status shouldBe Status.Ok)
+      } yield ()
+  }
+
+  it should "return not found if doi is not provided" in withDataService4Dataset { dsService =>
+    for {
+      uri <- IO.fromEither(Uri.fromString(s"/dataset/"))
+      request = Request[IO](Method.GET, uri)
+      response <- getDatasetRoute(dsService).orNotFound.run(request)
+      _ <- IO(response.status shouldBe Status.NotFound)
+    } yield ()
+  }
 }
 
-object LibrarianRoutesTest {
-
+trait LibrarianFixtures extends MockitoSugar {
   val uuid: UUID = UUID.randomUUID()
   val expiredUuid: UUID = UUID.randomUUID()
+  val doi: String = "10.1000%2Fthe.last.part"
 
-  private val shareToken: ShareToken = ShareToken(
-    OwncloudShare("id1", "user1", None, "/share1", "file", 10),
+  private val shareToken: RdxShare = RdxShare(
+    OwncloudShare("id1", "user1", None, "/share1", "file", 10, 0),
     OffsetDateTime.now(),
     uuid.some,
     OffsetDateTime.now().plusDays(1),
     "sales@microsoft.com",
-    List.empty
+    List.empty,
+    "http://example.com"
   )
 
-  val expiredShareToken: ShareToken = ShareToken(
-    OwncloudShare("id1", "user1", None, "/share1", "file", 10),
+  val expiredShareToken: RdxShare = RdxShare(
+    OwncloudShare("id1", "user1", None, "/share1", "file", 10, 0),
     OffsetDateTime.now(),
     uuid.some,
     OffsetDateTime.now().minusDays(1),
     "sales@microsoft.com",
-    List.empty
+    List.empty,
+    "http://example.com"
   )
 
+  private[librarian] val publishedDataset: RdxDataset = RdxDataset(
+    "owner",
+    "title",
+    "description",
+    "http:/example.com/conditions.pdf",
+    Seq("file.csv", "folder/")
+  )
+
+  protected def withDataService4Publish(test: DatasetService[IO] => IO[Unit]): Unit = {
+    val dsMock = mock[DatasetService[IO]]
+    when(dsMock.publishShare(any[UUID], any[UserMetadata]))
+      .thenReturn(IO.raiseError(new RuntimeException("Oeps")))
+    when(dsMock.publishShare(ArgumentMatchers.eq(uuid), any[UserMetadata])).thenReturn(IO.unit)
+    val io = test(dsMock)
+    io.unsafeRunSync()
+  }
+
+  protected def withDataService4Dataset(test: DatasetService[IO] => IO[Unit]): Unit = {
+    val dsMock = mock[DatasetService[IO]]
+    val doiUrl = RelativeUrl.parse("10.1000/the.last.part")
+    when(dsMock.fetchDataset(any[RelativeUrl]))
+      .thenReturn(IO.none)
+    when(dsMock.fetchDataset(ArgumentMatchers.eq(doiUrl)))
+      .thenReturn(IO(Some(publishedDataset)))
+
+    val io = test(dsMock)
+    io.unsafeRunSync()
+  }
+
+  protected def withDataService4Share(test: DatasetService[IO] => IO[Unit]): Unit = {
+    val dsmock = mock[DatasetService[IO]]
+    when(dsmock.fetchShare(any())).thenReturn(IO.none)
+    when(dsmock.fetchShare(uuid)).thenReturn(IO.pure(shareToken.some))
+    when(dsmock.fetchShare(expiredUuid)).thenReturn(IO.pure(expiredShareToken.some))
+    val io = test(dsmock)
+    io.unsafeRunSync()
+  }
+
+}
+object LibrarianRoutesTest {
   val publishJson = json"""{
               "doi": "10.000/dsda",
               "title": "this is a title",

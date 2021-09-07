@@ -11,6 +11,18 @@
 
 - Install [Prettier - Code formatter](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) extension;
 
+### Running the app
+
+There are some environment variables required for startup. For local development use `.env.local` (_NOTE_ this file shouldn't be commited to git) to override `RDX_BACKEND_URL` f.e. :
+
+```
+RDX_BACKEND_URL="http://localhost:8081"
+```
+
+This way you don't need to set any variables manually. For other non-secret environment variables use `.env`.
+
+[Read More on this topic>>](https://frontend-digest.com/environment-variables-in-next-js-9a272f0bf655)
+
 ### Requirements
 
 - NodeJS 14.x LTS

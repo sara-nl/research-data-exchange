@@ -3,14 +3,14 @@ package nl.surf.rdx.librarian
 import cats.effect.IO
 import cats.implicits.catsSyntaxFlatMapOps
 import io.lemonlabs.uri.RelativeUrl
-import nl.surf.rdx.common.model.{RdxDataset, UserMetadata}
+import nl.surf.rdx.common.model.RdxDataset
+import nl.surf.rdx.common.model.api.UserMetadata
 import nl.surf.rdx.librarian.codecs.service.DatasetService
-import nl.surf.rdx.librarian.model.UnpublishedShare
 import org.http4s.circe.CirceEntityEncoder._
 import org.http4s.circe.jsonOf
 import org.http4s.dsl.io._
 import org.http4s.server.Router
-import org.http4s.{EntityDecoder, HttpRoutes, InvalidMessageBodyFailure, Response, Status}
+import org.http4s._
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 import java.time.OffsetDateTime
@@ -20,12 +20,12 @@ object LibrarianRoutes {
 
   private val logger = Slf4jLogger.getLogger[IO]
 
-  def getDatasetRoute(dsSearch: RelativeUrl => IO[Option[RdxDataset]]): HttpRoutes[IO] =
+  def getDatasetRoute(datasetService: DatasetService[IO]): HttpRoutes[IO] =
     Router("/dataset" -> HttpRoutes.of[IO] {
       case GET -> Root / doi =>
-        for {
+        val result = for {
           doi <- IO.fromTry(RelativeUrl.parseTry(doi))
-          dsOption <- dsSearch(doi)
+          dsOption <- datasetService.fetchDataset(doi)
           response <- {
             dsOption match {
               case Some(ds) =>
@@ -36,45 +36,45 @@ object LibrarianRoutes {
             }
           }
         } yield response
+        result.handleErrorWith(e => {
+          logger.warn(e)(s"Cannot load dataset ${e.getMessage}") >>
+            InternalServerError("Cannot load dataset details")
+        })
     })
 
-  def getUnpublishedShareRoute(deps: LibrarianApp.Deps): HttpRoutes[IO] =
-    deps match {
-      case LibrarianApp.Deps(conf, dsServices) =>
-        Router("/share" -> HttpRoutes.of[IO] {
-          case GET -> Root => BadRequest()
-          case GET -> Root / token =>
-            val response = for {
-              token <- IO(UUID.fromString(token))
-              shareOption <- dsServices.fetchShare(token)
-              now <- IO(OffsetDateTime.now())
-              response <- {
-                shareOption match {
-                  case Some(share) =>
-                    if (share.expiresAt.isAfter(now)) {
-                      import UnpublishedShare.codecs._
-                      import org.http4s.circe.CirceEntityCodec._
-                      Ok(UnpublishedShare.fromShare(share, conf.conditionsFileName))
-                    } else Forbidden("Token expired")
-                  case None => NotFound(s"Can not find share")
-                }
-              }
-            } yield response
-            response.handleErrorWith(e => {
-              logger.warn(e)("Error when applying token") >>
-                Forbidden("Invalid Token")
-            })
+  def getRdxShareRoute(dsServices: DatasetService[IO]): HttpRoutes[IO] =
+    Router("/share" -> HttpRoutes.of[IO] {
+      case GET -> Root => BadRequest()
+      case GET -> Root / token =>
+        val response = for {
+          token <- IO(UUID.fromString(token))
+          shareInfoOpt <- dsServices.fetchShare(token)
+          now <- IO(OffsetDateTime.now())
+          response <- {
+            shareInfoOpt match {
+              case Some(share) =>
+                if (share.expiresAt.isAfter(now)) {
+                  import io.circe.generic.auto._
+                  import org.http4s.circe.CirceEntityCodec._
+                  dsServices.prepareApiView(share).flatMap(Ok(_))
+                } else Forbidden("Token expired")
+              case None => NotFound(s"Can not find share")
+            }
+          }
+        } yield response
+        response.handleErrorWith(e => {
+          logger.warn(e)("Error when applying token") >>
+            Forbidden("Invalid Token")
         })
-    }
+    })
 
   def publishDatasetRoute(
       datasetService: DatasetService[IO]
   ): HttpRoutes[IO] = {
-
-    import UserMetadata.codecs._
-    implicit val decoder: EntityDecoder[IO, UserMetadata] = jsonOf[IO, UserMetadata]
     Router("/dataset" -> HttpRoutes.of[IO] {
       case req @ POST -> Root / token =>
+        import UserMetadata.codecs._
+        implicit val decoder: EntityDecoder[IO, UserMetadata] = jsonOf[IO, UserMetadata]
         val response: IO[Response[IO]] = for {
           uuid <- IO(UUID.fromString(token))
           ds <- req.as[UserMetadata]

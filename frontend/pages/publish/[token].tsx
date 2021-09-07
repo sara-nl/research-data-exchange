@@ -1,4 +1,3 @@
-import React from 'react';
 import NavBarComponent from '../../components/navBar';
 import Publication from '../../components/publication';
 import Footer from '../../components/footer';
@@ -41,17 +40,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   console.log('process.env.RDX_BACKEND_URL', process.env.RDX_BACKEND_URL);
   const token = context.query['token'];
   const { origin } = absoluteUrl(context.req);
-
-  if (!token) {
-    return {
-      props: {
-        error: {
-          statusCode: 400,
-          title: 'Invalid URL',
-        },
-      },
-    };
-  }
 
   const res = await fetch(process.env.RDX_BACKEND_URL + `/share/` + token);
 

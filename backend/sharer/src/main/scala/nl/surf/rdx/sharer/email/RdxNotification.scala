@@ -4,7 +4,7 @@ import cats.data.Kleisli
 import cats.effect.Sync
 import com.minosiants.pencil.data.{Body, Email, From, Mailbox, Subject, To}
 import io.lemonlabs.uri.Uri
-import nl.surf.rdx.common.model.ShareToken
+import nl.surf.rdx.common.model.RdxShare
 import nl.surf.rdx.sharer.conf.SharerConf
 
 import java.time.{Duration, LocalDateTime, Period, ZonedDateTime}
@@ -15,7 +15,7 @@ object RdxNotification {
   private val formatter = DateTimeFormatter.ofPattern("EEE, d MMM yyyy HH:mm Z")
 
   def newToken[F[_]: Sync](
-      token: ShareToken
+      token: RdxShare
   ): Kleisli[F, SharerConf, Email] =
     Kleisli { conf =>
       val tokenValidityHours = Duration.between(ZonedDateTime.now(), token.expiresAt).toHours

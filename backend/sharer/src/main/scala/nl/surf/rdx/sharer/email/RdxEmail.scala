@@ -1,7 +1,7 @@
 package nl.surf.rdx.sharer.email
 
 import cats.data.Kleisli
-import cats.effect.{Blocker, ContextShift, IO}
+import cats.effect.{Blocker, Concurrent, ContextShift, Sync}
 import com.minosiants.pencil.Client
 import com.minosiants.pencil.data.{Credentials, Email, Password, Username}
 import com.minosiants.pencil.protocol.Replies
@@ -13,16 +13,16 @@ import cats.implicits._
 
 object RdxEmail {
 
-  def send(
+  def send[F[_]: ContextShift: Logger: Sync: Concurrent](
       email: Email
-  )(implicit cs: ContextShift[IO], logger: Logger[IO]): Kleisli[IO, EmailConf, Replies] =
+  ): Kleisli[F, EmailConf, Replies] =
     Kleisli { conf =>
-      Blocker[IO]
+      Blocker[F]
         .use { blocker =>
-          SocketGroup[IO](blocker).use { sg =>
-            TLSContext.system[IO](blocker).flatMap { tls =>
+          SocketGroup[F](blocker).use { sg =>
+            TLSContext.system[F](blocker).flatMap { tls =>
               val client =
-                Client[IO](
+                Client[F](
                   conf.host,
                   conf.port,
                   (conf.user, conf.password).tupled.map {
@@ -32,7 +32,7 @@ object RdxEmail {
                   blocker,
                   sg,
                   tls,
-                  logger
+                  Logger[F]
                 )
               client.send(email)
             }
