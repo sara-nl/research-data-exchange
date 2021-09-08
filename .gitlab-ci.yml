@@ -26,7 +26,7 @@ stages:
 
 frontend_e2e:
   stage: check
-  image: node:latest
+  image: node:lts-alpine
   script:
     - cd frontend/
     - npm ci
