@@ -13,11 +13,11 @@
 
 ### Running the app
 
-There are some environment variables required for startup. For local development use `.env.local` (_NOTE_ this file shouldn't be commited to git) to override `RDX_BACKEND_URL` and `RDX_PROXY_HOST` f.e. :
+There are some environment variables required for startup. For local development use `.env.local` (_NOTE_ this file shouldn't be commited to git) to override `RDX_BACKEND_URL` and `RDX_PDF_HEADERS_PROXY_URL` f.e. :
 
 ```
 RDX_BACKEND_URL=http://localhost:8081
-RDX_PROXY_HOST=http://some.rdx.host
+RDX_PDF_HEADERS_PROXY_URL=http://some.rdx.host/conditions
 ```
 
 This way you don't need to set any variables manually. For other non-secret environment variables use `.env`.

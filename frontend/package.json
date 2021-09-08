@@ -8,7 +8,8 @@
     "start": "next start",
     "export": "next build && next export",
     "format": "prettier --write .",
-    "cypress": "cypress open"
+    "cypress": "cypress open",
+    "cypress:run": "cypress run"
   },
   "dependencies": {
     "bootstrap": "^4.6.0",

@@ -24,53 +24,66 @@ stages:
   - package
   - deploy
 
-backend_build:
-  stage: build
-  image: $SBT_DOCKER_IMAGE
+frontend_e2e:
+  stage: check
+  image: node:latest
   script:
-    - cd backend/
-    - sbt "assembly"
-  artifacts:
-    expire_in: 1 week
-    paths:
-      - backend/sharer/target/scala-2.13/sharer-assembly-*.jar
-      - backend/librarian/target/scala-2.13/librarian-assembly-*.jar
-
-backend_docker:
-  stage: package
-  dependencies:
-    - backend_build
-  image:
-    # See: https://docs.gitlab.com/ee/ci/docker/using_kaniko.html
-    name: gcr.io/kaniko-project/executor:debug
-    entrypoint: [""]
-  script:
-    - export DOCKER_REGISTRY_PATH="$CI_REGISTRY_IMAGE/backend"
-    - echo "$KANIKO_CONFIG" > /kaniko/.docker/config.json
-    - find . -name "backend-assembly-0.1.jar"
-    - /kaniko/executor --cache=true --context $CI_PROJECT_DIR/backend/ --dockerfile $CI_PROJECT_DIR/backend/Dockerfile --destination "$DOCKER_REGISTRY_PATH:$DOCKER_IMAGE_TAG" --destination "$DOCKER_REGISTRY_PATH:$CI_COMMIT_REF_NAME" --destination "$DOCKER_REGISTRY_PATH:latest"
-
-frontend_docker:
-  stage: package
-  image:
-    # See: https://docs.gitlab.com/ee/ci/docker/using_kaniko.html
-    name: gcr.io/kaniko-project/executor:debug
-    entrypoint: [""]
-  script:
-    - export DOCKER_REGISTRY_PATH="$CI_REGISTRY_IMAGE/frontend"
-    - echo "$KANIKO_CONFIG" > /kaniko/.docker/config.json
-    - find . -name ".next"
-    - /kaniko/executor --build-arg RDX_BACKEND_URL="$RDX_BACKEND_URL" --cache=false --context $CI_PROJECT_DIR/frontend/ --dockerfile $CI_PROJECT_DIR/frontend/Dockerfile --destination "$DOCKER_REGISTRY_PATH:$DOCKER_IMAGE_TAG" --destination "$DOCKER_REGISTRY_PATH:$CI_COMMIT_REF_NAME" --destination "$DOCKER_REGISTRY_PATH:latest"
-deploy_test1:
-  stage: deploy
-  image: python:3.9-slim
+    - cd frontend/
+    - npm ci
+    - npm run build
+    - npm run start &
+    - npm run cypress:run
   cache:
+    key: $CI_COMMIT_REF_SLUG
     paths:
-      - .cache/pip
-  script:
-    - chmod 0600 "${RDX_TEST1_SSH_KEY}"
-    - apt-get update
-    - apt -y install openssh-client
-    - pip install ansible
-    - cd deploy/
-    - ansible-playbook -u ubuntu -i inventory.yml playbooks/containers.yml --key-file "$RDX_TEST1_SSH_KEY"
+      - .npm/
+# backend_build:
+#   stage: build
+#   image: $SBT_DOCKER_IMAGE
+#   script:
+#     - cd backend/
+#     - sbt "assembly"
+#   artifacts:
+#     expire_in: 1 week
+#     paths:
+#       - backend/sharer/target/scala-2.13/sharer-assembly-*.jar
+#       - backend/librarian/target/scala-2.13/librarian-assembly-*.jar
+
+# backend_docker:
+#   stage: package
+#   dependencies:
+#     - backend_build
+#   image:
+#     # See: https://docs.gitlab.com/ee/ci/docker/using_kaniko.html
+#     name: gcr.io/kaniko-project/executor:debug
+#     entrypoint: [""]
+#   script:
+#     - export DOCKER_REGISTRY_PATH="$CI_REGISTRY_IMAGE/backend"
+#     - echo "$KANIKO_CONFIG" > /kaniko/.docker/config.json
+#     - find . -name "backend-assembly-0.1.jar"
+#     - /kaniko/executor --cache=true --context $CI_PROJECT_DIR/backend/ --dockerfile $CI_PROJECT_DIR/backend/Dockerfile --destination "$DOCKER_REGISTRY_PATH:$DOCKER_IMAGE_TAG" --destination "$DOCKER_REGISTRY_PATH:$CI_COMMIT_REF_NAME" --destination "$DOCKER_REGISTRY_PATH:latest"
+
+# frontend_docker:
+#   stage: package
+#   image:
+#     # See: https://docs.gitlab.com/ee/ci/docker/using_kaniko.html
+#     name: gcr.io/kaniko-project/executor:debug
+#     entrypoint: [""]
+#   script:
+#     - export DOCKER_REGISTRY_PATH="$CI_REGISTRY_IMAGE/frontend"
+#     - echo "$KANIKO_CONFIG" > /kaniko/.docker/config.json
+#     - find . -name ".next"
+#     - /kaniko/executor --build-arg RDX_BACKEND_URL="$RDX_BACKEND_URL" --cache=false --context $CI_PROJECT_DIR/frontend/ --dockerfile $CI_PROJECT_DIR/frontend/Dockerfile --destination "$DOCKER_REGISTRY_PATH:$DOCKER_IMAGE_TAG" --destination "$DOCKER_REGISTRY_PATH:$CI_COMMIT_REF_NAME" --destination "$DOCKER_REGISTRY_PATH:latest"
+# deploy_test1:
+#   stage: deploy
+#   image: python:3.9-slim
+#   cache:
+#     paths:
+#       - .cache/pip
+#   script:
+#     - chmod 0600 "${RDX_TEST1_SSH_KEY}"
+#     - apt-get update
+#     - apt -y install openssh-client
+#     - pip install ansible
+#     - cd deploy/
+#     - ansible-playbook -u ubuntu -i inventory.yml playbooks/containers.yml --key-file "$RDX_TEST1_SSH_KEY"

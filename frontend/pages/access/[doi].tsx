@@ -41,7 +41,7 @@ function transformDownloadLink(conditionsUrl: string) {
       .split('index.php')
       .reverse()[0];
     if (path) {
-      return process.env.DOWNLOAD_PROXY + path + '/download';
+      return process.env.PDF_HEADERS_PROXY_URL + path + '/download';
     }
   } catch (error) {
     console.error('Conditions url is not valid', error);
