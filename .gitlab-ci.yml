@@ -26,7 +26,7 @@ stages:
 
 frontend_e2e:
   stage: check
-  image: node:lts-alpine
+  image: cypress/base
   script:
     - cd frontend/
     - npm ci
@@ -37,6 +37,7 @@ frontend_e2e:
     key: $CI_COMMIT_REF_SLUG
     paths:
       - .npm/
+      - .next/cache
 # backend_build:
 #   stage: build
 #   image: $SBT_DOCKER_IMAGE
