@@ -8,7 +8,8 @@ case class OwncloudConf(
     webdavPassword: String,
     sharesSource: Url,
     maxFolderDepth: Short,
-    webdavBase: WebdavBase
+    webdavBase: WebdavBase,
+    minimumPermissionLevel: Byte
 )
 
 object OwncloudConf {

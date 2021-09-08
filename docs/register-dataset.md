@@ -13,7 +13,10 @@ Before you can _publish_ a dataset, RDX has to receive read access to the datase
 
 <img src="./img/register-dataset/rdx-share.png" />
 
-4. You'll receive an email with a publication URL that is valid for 48 hours. Follow the link to the publication page.
+4. Expand additional settings by clicking on the cogwheel;
+5. Check "can share".
+
+And done! You'll receive an email with a publication URL that is valid for 48 hours. Follow the link to the publication page.
 
 ## The publication URL is valid for 48 hours only.
 

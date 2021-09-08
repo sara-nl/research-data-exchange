@@ -1,3 +1,15 @@
+# How to provision VM
+
+See `.gitlab-ci` to know the order of applying playbooks.
+
+Applying a playbook:
+
+```
+$ cd deploy
+$ pipenv install
+$ pipenv run ansible-playbook -i inventory.yml -u ubuntu <playbook_you_want_to_run>
+```
+
 # How to deploy
 
 See: [.gitlab-ci.yml](../.gitlab-ci.yml)

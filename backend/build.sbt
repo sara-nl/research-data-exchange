@@ -45,7 +45,7 @@ lazy val sharer = (project in file("sharer"))
       deps.mockitoScala
     ) ++ deps.pureConfig ++ deps.sardine ++ deps.circe ++ deps.http4sClient ++ deps.logging
   )
-  .dependsOn(commonDb)
+  .dependsOn(commonDb, commonTestutils % "test->compile")
 
 lazy val librarian = (project in file("librarian"))
   .settings(
@@ -54,7 +54,6 @@ lazy val librarian = (project in file("librarian"))
       deps.betterFiles,
       deps.catsEffect,
       deps.scalaUri,
-      deps.scalaTest,
       deps.catsTestkit,
       deps.mockitoScala,
       deps.circeLiteral
@@ -66,7 +65,9 @@ lazy val librarian = (project in file("librarian"))
 lazy val commonModel = (project in file("common/model")).settings(
   libraryDependencies := Seq(
     deps.catsEffect,
-    deps.scalaUri
+    deps.scalaUri,
+    deps.scalaTest,
+    deps.catsTestkit
   ) ++ deps.circe ++ deps.logging
 )
 
@@ -78,6 +79,14 @@ lazy val commonDb = (project in file("common/db"))
       ++ deps.logging ++ deps.pureConfig ++ deps.circe
   )
   .dependsOn(commonModel)
+
+lazy val commonTestutils = (project in file("common/testutils"))
+  .settings(
+    libraryDependencies := Seq(
+      deps.catsEffect
+    )
+      ++ deps.logging
+  )
 
 lazy val deps = new {
 

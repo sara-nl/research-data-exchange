@@ -9,10 +9,15 @@ import nl.surf.rdx.common.model.owncloud.OwncloudShare
 import nl.surf.rdx.sharer.owncloud.webdav.Webdav.implicits._
 import org.http4s.Status.NotFound
 import cats.implicits._
+import io.lemonlabs.uri.EmptyPath.normalize
+import io.lemonlabs.uri.Path.SlashTermination.{AddForAll, RemoveForAll}
 import nl.surf.rdx.sharer.owncloud.conf.OwncloudConf.WebdavBase
 import org.typelevel.log4cats.Logger
 
 object OwncloudSharesObserver {
+
+  case class ObservedShare(share: OwncloudShare, topLevelFiles: List[String])
+  case class Observation2(shares: List[ObservedShare])
 
   case class Observation(share: OwncloudShare, files: List[String])
 
@@ -24,7 +29,10 @@ object OwncloudSharesObserver {
   )
 
   /**
-    * Fetches recent DEX shares (i.e. shares that are folders and contain conditions document).
+    * Fetches OC shares that match the requirements of DEX:
+    *  - are folders;
+    *  - contain conditions document;
+    *  - can be re-shared.
     */
   def observe[F[_]: ContextShift: Monad: ConcurrentEffect: Logger: Parallel]
       : Kleisli[F, Deps[F], List[Observation]] =
@@ -55,8 +63,12 @@ object OwncloudSharesObserver {
           }.parSequence
         )
       } yield sharesAndListings.collect {
-        case (ocs, davResources) if davResources.hasFileNamed(deps.conditionsFileName) =>
-          Observation(ocs, davResources.map(_.getPath.replace(deps.webdavBase.serverSuffix, "")))
+        case (ocs, davResources) =>
+          import io.lemonlabs.uri.typesafe.dsl.pathPartToUrlDsl
+          val prefix = (deps.webdavBase.serverSuffix / ocs.path)
+            .normalize(removeEmptyPathParts = true, slashTermination = AddForAll)
+            .toStringPunycode
+          Observation(ocs, davResources.map(_.getPath.replace(prefix, "")))
       }
     }
 
