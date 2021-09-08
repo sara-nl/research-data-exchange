@@ -27,6 +27,13 @@ stages:
 frontend_e2e:
   stage: check
   image: cypress/base
+  variables:
+    CYPRESS_RDX_BACKEND_URL: "$RDX_BACKEND_URL"
+  artifacts:
+    paths:
+      - frontend/cypress/screenshots
+      - frontend/cypress/videos
+    expire_in: 1 week
   script:
     - cd frontend/
     - npm ci
