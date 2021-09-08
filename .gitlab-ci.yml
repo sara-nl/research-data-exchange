@@ -11,6 +11,7 @@ variables:
   KANIKO_CONFIG: '{"auths":{"$CI_REGISTRY":{"username":"$CI_REGISTRY_USER","password":"$CI_REGISTRY_PASSWORD"}}}'
   DOCKER_IMAGE_TAG: "$CI_COMMIT_SHORT_SHA"
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  RDX_BACKEND_URL: "http://librarian:8081"
 
 after_script:
   - date
