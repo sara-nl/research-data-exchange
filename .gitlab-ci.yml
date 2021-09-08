@@ -38,6 +38,7 @@ frontend_e2e:
   script:
     - cd frontend/
     - npm ci
+    - echo $RDX_BACKEND_URL
     - npm run build
     - npm run start &
     - npm run cypress:run
