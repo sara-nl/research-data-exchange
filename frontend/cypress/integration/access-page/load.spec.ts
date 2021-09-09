@@ -17,7 +17,7 @@ describe('RDX access page', () => {
   });
 
   it('displays dataset details returned by the service', () => {
-    cy.get('.dataset-title h4').should('have.text', 'Dataset "My Dataset"');
+    cy.get('.dataset-title h4').should('have.text', 'My Dataset');
     cy.get('.dataset-title p').should('have.text', 'Foo');
     cy.get('.dataset-content span')
       .first()
