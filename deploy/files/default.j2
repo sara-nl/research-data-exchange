@@ -11,6 +11,11 @@ server {
         proxy_cache_bypass $http_upgrade;
     }
 
-    root /var/www/html;
+
+    location /conditions {
+        proxy_pass https://researchdrive.surfsara.nl/index.php/;
+        proxy_hide_header Access-Control-Allow-Origin;
+        add_header Access-Control-Allow-Origin $http_origin;
+    }
 
 }

@@ -11,6 +11,9 @@ variables:
   KANIKO_CONFIG: '{"auths":{"$CI_REGISTRY":{"username":"$CI_REGISTRY_USER","password":"$CI_REGISTRY_PASSWORD"}}}'
   DOCKER_IMAGE_TAG: "$CI_COMMIT_SHORT_SHA"
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  RDX_BACKEND_URL: "http://librarian:8081"
+  RDX_PDF_HEADERS_PROXY_URL: "https://rdx-test-1.dataex-sara.surf-hosted.nl/conditions"
+  RDX_WEB_URL: "https://rdx-test-1.dataex-sara.surf-hosted.nl"
 
 after_script:
   - date
@@ -24,6 +27,31 @@ stages:
   - package
   - deploy
 
+frontend_e2e:
+  stage: check
+  image: cypress/base
+  variables:
+    RDX_BACKEND_URL: "http://localhost:8081"
+    CYPRESS_RDX_BACKEND_URL: $RDX_BACKEND_URL
+  artifacts:
+    paths:
+      - frontend/cypress/screenshots
+      - frontend/cypress/videos
+    expire_in: 1 week
+  script:
+    - cd frontend/
+    - npm ci
+    - echo $RDX_BACKEND_URL
+    # This build is not suitable for productions.
+    # See: nextjs environment variables caching.
+    - npm run build
+    - npm run start &
+    - npm run cypress:run
+  cache:
+    key: $CI_COMMIT_REF_SLUG
+    paths:
+      - .npm/
+      - .next/cache
 backend_build:
   stage: build
   image: $SBT_DOCKER_IMAGE

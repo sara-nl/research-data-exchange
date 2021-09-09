@@ -1,4 +1,3 @@
-import * as React from 'react';
 import {
   Container,
   Row,
@@ -41,8 +40,7 @@ const PublicationConfirmation: React.FC<Props> = ({ accessUrl }) => {
       </p>
       <h5 className="text-center">3. Get notified</h5>
       <p className="text-justify">
-        Whenever someone accesses the dataset, you'll get an email with details.
-        You'll know who, when and under what conditions can download the data.
+        You'll get an email when someone requests access to this dataset.
       </p>
       <hr />
       <p className="text-center alert-link">

@@ -1,8 +1,4 @@
 module.exports = {
-  // TODO: check if this is actually needed...
-  env: {
-    RDX_BACKEND_URL: process.env.RDX_BACKEND_URL,
-  },
   future: {
     webpack5: true,
   },
@@ -10,6 +6,12 @@ module.exports = {
   //   loader: 'imgix',
   //   path: 'https://noop/',
   // },
+
+  // Here we redefine vars from .env files to make them available on client side
+  env: {
+    PDF_HEADERS_PROXY_URL: process.env.RDX_PDF_HEADERS_PROXY_URL,
+    BACKEND_URL: process.env.RDX_BACKEND_URL,
+  },
   rewrites: async () => [
     {
       source: '/api/:path*',
@@ -25,7 +27,7 @@ module.exports = {
           loader: 'file-loader',
           options: {
             name: '[contenthash].[ext]',
-            publicPath: '_next/static/worker',
+            publicPath: '/_next/static/worker',
             outputPath: 'static/worker',
           },
         },
