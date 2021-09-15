@@ -88,7 +88,7 @@ frontend_docker:
     - export DOCKER_REGISTRY_PATH="$CI_REGISTRY_IMAGE/frontend"
     - echo "$KANIKO_CONFIG" > /kaniko/.docker/config.json
     - find . -name ".next"
-    - /kaniko/executor --build-arg RDX_BACKEND_URL="$RDX_BACKEND_URL" --cache=false --context $CI_PROJECT_DIR/frontend/ --dockerfile $CI_PROJECT_DIR/frontend/Dockerfile --destination "$DOCKER_REGISTRY_PATH:$DOCKER_IMAGE_TAG" --destination "$DOCKER_REGISTRY_PATH:$CI_COMMIT_REF_NAME" --destination "$DOCKER_REGISTRY_PATH:latest"
+    - /kaniko/executor --build-arg RDX_PDF_HEADERS_PROXY_URL="$RDX_PDF_HEADERS_PROXY_URL" --build-arg RDX_BACKEND_URL="$RDX_BACKEND_URL" --cache=false --context $CI_PROJECT_DIR/frontend/ --dockerfile $CI_PROJECT_DIR/frontend/Dockerfile --destination "$DOCKER_REGISTRY_PATH:$DOCKER_IMAGE_TAG" --destination "$DOCKER_REGISTRY_PATH:$CI_COMMIT_REF_NAME" --destination "$DOCKER_REGISTRY_PATH:latest"
 deploy_test1:
   stage: deploy
   image: python:3.9-slim

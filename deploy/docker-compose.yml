@@ -16,7 +16,7 @@ services:
       RDX_SMTP_PASSWORD: ${RDX_SMTP_PASSWORD}
       RDX_WEB_URL: ${RDX_WEB_URL}
       RDX_WEBDAV_PASSWORD: ${RDX_WEBDAV_PASSWORD}
-      RDX_WEBDAV_USER  : ${RDX_WEBDAV_USER}
+      RDX_WEBDAV_USER: ${RDX_WEBDAV_USER}
       DB_HOST: "postgres"
       DB_NAME: "postgres"
       DB_USER: "postgres"
@@ -38,6 +38,7 @@ services:
       - 3000:3000
     environment:
       RDX_BACKEND_URL: http://librarian:8081
+      RDX_PDF_HEADERS_PROXY_URL: ${RDX_PDF_HEADERS_PROXY_URL}
   postgres:
     image: postgres:13-alpine
     restart: "always"

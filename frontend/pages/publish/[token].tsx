@@ -37,7 +37,6 @@ const Publish: React.FC<Props> = ({ share, baseUrl, submitUrl, error }) => {
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  console.log('process.env.RDX_BACKEND_URL', process.env.RDX_BACKEND_URL);
   const token = context.query['token'];
   const { origin } = absoluteUrl(context.req);
 
