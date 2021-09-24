@@ -29,7 +29,7 @@ object Shares {
   def delete(ss: List[OwncloudShare]): Command[ss.type] = {
     val enc = (varchar).values.contramap((s: OwncloudShare) => s.id).list(ss)
     sql"""DELETE FROM Shares 
-         WHERE metadata->>'id' IN ${enc}""".command
+         WHERE metadata->>'id' IN ($enc)""".command
   }
 
   def update: Command[(UserMetadata, UUID)] = {
