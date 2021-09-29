@@ -3,7 +3,7 @@ package nl.surf.rdx.sharer.owncloud.webdav
 import cats.data.Kleisli
 import cats.effect.{IO, Resource, Sync}
 import com.github.sardine.{DavResource, Sardine, SardineFactory}
-import nl.surf.rdx.sharer.owncloud.conf.OwncloudConf
+import nl.surf.rdx.common.owncloud.conf.OwncloudConf
 
 object Webdav {
 

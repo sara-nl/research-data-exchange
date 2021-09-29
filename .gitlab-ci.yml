@@ -52,6 +52,17 @@ frontend_e2e:
     paths:
       - .npm/
       - .next/cache
+
+backend_test:
+  stage: check
+  image: $SBT_DOCKER_IMAGE
+  script:
+    - cd backend/
+    - sbt "test"
+  cache:
+    paths:
+      - ~/.ivy2/
+
 backend_build:
   stage: build
   image: $SBT_DOCKER_IMAGE
@@ -63,6 +74,9 @@ backend_build:
     paths:
       - backend/sharer/target/scala-2.13/sharer-assembly-*.jar
       - backend/librarian/target/scala-2.13/librarian-assembly-*.jar
+  cache:
+    paths:
+      - ~/.ivy2/
 
 backend_docker:
   stage: package

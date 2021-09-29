@@ -35,8 +35,8 @@ const Access: React.FC<Props> = ({ dataset, submitUrl, error }) => {
 };
 
 function transformDownloadLink(conditionsUrl: string) {
-  // take the last element of the path to rewrite the url
   try {
+    // take the last element of the path to rewrite the url
     const path = new URL(conditionsUrl).pathname
       .split('index.php')
       .reverse()[0];
@@ -74,7 +74,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {
       dataset: dataset,
-      submitUrl: '/api/dataset/' + encodeURIComponent(doi),
+      submitUrl: '/api/access/' + encodeURIComponent(doi),
     },
   };
 };

@@ -9,48 +9,46 @@ import skunk.Session
 import cats.implicits._
 import nl.surf.rdx.common.db.Shares
 import nl.surf.rdx.common.model.owncloud.OwncloudShare
+import nl.surf.rdx.common.owncloud.OwncloudShares
+import nl.surf.rdx.common.owncloud.conf.OwncloudConf
 import nl.surf.rdx.sharer.conf.SharerConf
-import nl.surf.rdx.sharer.owncloud.OwncloudShares
 import org.typelevel.log4cats.Logger
+
+import java.nio.file.Paths
 
 object ShareEventHandlers {
 
-  case class Deps[F[_]](session: Session[F], conf: SharerConf)
+  case class Deps[F[_]](session: Session[F], conf: SharerConf, owncloudConf: OwncloudConf)
 
   def handleShareAdded[F[
       _
   ]: Parallel: Sync: Monad: Logger: ConcurrentEffect: ContextShift: Applicative](
       observations: List[Observation]
   ): Kleisli[F, Deps[F], List[RdxShare]] =
-    for {
-      shareTokens <- Kleisli((deps: Deps[F]) =>
+    Kleisli {
+      case Deps(session, conf, ocConf) =>
         for {
-          Deps(session, conf) <- Sync[F].pure(deps)
           newTokens <-
             observations
               .parTraverseFilter {
                 case Observation(share, files) =>
-                  import io.lemonlabs.uri.typesafe.dsl.pathPartToUrlDsl
                   for {
-                    conditionsFile <- Sync[F].fromOption(
-                      files.find(_.toLowerCase() === conf.conditionsFileName.toLowerCase()),
+                    conditionsPath <- Sync[F].fromOption(
+                      files.find(
+                        _.toString.toLowerCase() === conf.conditionsFileName.toLowerCase()
+                      ),
                       new RuntimeException(
                         s"Can not find conditions document in share ${share.path}"
                       )
                     )
-                    conditionsUrl <-
-                      OwncloudShares
-                        .makePublicLink[F](
-                          (share.path / conditionsFile)
-                            .normalize(removeEmptyPathParts = true)
-                            .toStringPunycode
-                        )
-                        .run(OwncloudShares.Deps(conf.owncloud, conf.client))
+                    mkPublicLink <- OwncloudShares.makePublicLink[F].run(ocConf)
+                    conditionsUrl <- mkPublicLink(
+                      Paths.get(share.path).resolve(conditionsPath)
+                    )
                     res <-
                       RdxShare
                         .createFor[F](share, files, conf.tokenValidityInterval, conditionsUrl)
                   } yield res
-
               }
           _ <-
             session
@@ -58,14 +56,14 @@ object ShareEventHandlers {
               .use(prep => newTokens.map(prep.execute).sequence)
           _ <- Logger[F].debug("Finished handling added shares")
         } yield newTokens
-      )
-    } yield shareTokens
+
+    }
 
   def handleShareRemoved[F[_]: Parallel: Sync: Monad: Logger](
       shares: List[OwncloudShare]
   ): Kleisli[F, Deps[F], Unit] =
     Kleisli {
-      case Deps(session, _) =>
+      case Deps(session, _, _) =>
         if (shares.nonEmpty)
           session
             .prepare(Shares.delete(shares))

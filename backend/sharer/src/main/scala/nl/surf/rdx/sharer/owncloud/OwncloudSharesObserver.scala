@@ -9,17 +9,16 @@ import nl.surf.rdx.common.model.owncloud.OwncloudShare
 import nl.surf.rdx.sharer.owncloud.webdav.Webdav.implicits._
 import org.http4s.Status.NotFound
 import cats.implicits._
-import io.lemonlabs.uri.EmptyPath.normalize
-import io.lemonlabs.uri.Path.SlashTermination.{AddForAll, RemoveForAll}
-import nl.surf.rdx.sharer.owncloud.conf.OwncloudConf.WebdavBase
+import nl.surf.rdx.common.owncloud.conf.OwncloudConf.WebdavBase
 import org.typelevel.log4cats.Logger
+
+import java.nio.file.Path
 
 object OwncloudSharesObserver {
 
   case class ObservedShare(share: OwncloudShare, topLevelFiles: List[String])
-  case class Observation2(shares: List[ObservedShare])
 
-  case class Observation(share: OwncloudShare, files: List[String])
+  case class Observation(share: OwncloudShare, files: List[Path])
 
   case class Deps[F[_]](
       sardineR: Resource[F, Sardine],
@@ -38,11 +37,10 @@ object OwncloudSharesObserver {
       : Kleisli[F, Deps[F], List[Observation]] =
     Kleisli { deps =>
       for {
-        shares <- deps.getShares
-        folderShares = shares.filter(_.item_type === OwncloudShare.itemTypeFolder)
+        folderShares <- deps.getShares.map(_.filter(_.item_type === OwncloudShare.itemTypeFolder))
         sharesAndListings <- deps.sardineR.use(sardine =>
-          folderShares.map { ocs =>
-            OwncloudShares
+          folderShares.parTraverse { ocs =>
+            OwncloudFiles
               .listTopLevel(ocs.path)
               .mapF(
                 _.handleErrorWith(
@@ -60,15 +58,14 @@ object OwncloudSharesObserver {
               )
               .map((ocs, _))
               .run((sardine, deps.webdavBase))
-          }.parSequence
+          }
         )
       } yield sharesAndListings.collect {
-        case (ocs, davResources) =>
-          import io.lemonlabs.uri.typesafe.dsl.pathPartToUrlDsl
-          val prefix = (deps.webdavBase.serverSuffix / ocs.path)
-            .normalize(removeEmptyPathParts = true, slashTermination = AddForAll)
-            .toStringPunycode
-          Observation(ocs, davResources.map(_.getPath.replace(prefix, "")))
+        case (ocs, davResources) if davResources.hasFileNamed(deps.conditionsFileName) =>
+          import better.files.{File => BFile}
+          val shareRoot = BFile(deps.webdavBase.serverSuffix, ocs.path)
+          val userPaths = davResources.map(r => BFile(r.getPath)).map(shareRoot.relativize)
+          Observation(ocs, userPaths)
       }
     }
 

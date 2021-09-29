@@ -11,7 +11,6 @@ import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 import scala.jdk.CollectionConverters._
 
-// TODO: integrate into app start or SBT
 object MigrationApp extends IOApp.Simple {
 
   private implicit val logger = Slf4jLogger.getLogger[IO]

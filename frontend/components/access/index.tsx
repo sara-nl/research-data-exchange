@@ -1,13 +1,9 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { Dataset } from '../../types';
+import AccessForm, { Values as FormValues } from './form';
 import { Container, Row, Button, Col, Form, InputGroup } from 'react-bootstrap';
-import dynamic from 'next/dynamic';
 import { Alert } from 'react-bootstrap';
-
-const PDFViewer = dynamic(() => import('../pdf-view'), {
-  ssr: false,
-});
 
 type Props = {
   dataset?: Dataset;
@@ -15,109 +11,48 @@ type Props = {
 };
 
 const Access: React.FC<Props> = ({ dataset, submitUrl }) => {
-  const [scrollBottom, setScrollBottom] = useState(0);
-  const [agree, setAgree] = useState(false);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-
-  const [validated, setValidated] = useState(false);
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const form = event.currentTarget;
-    if (form.checkValidity() === false) {
-      event.stopPropagation();
-    } else {
-      console.log('value', agree, name, email);
-    }
-    setValidated(true);
-  };
-
-  const handleScroll = (e) => {
-    const { target } = e;
-    if (target.scrollHeight - target.scrollTop === target.clientHeight) {
-      let i = scrollBottom;
-      i += 1;
-      setScrollBottom(i);
-    }
-  };
+  const [submitted, setSubmitted] = useState<Boolean | undefined>(false);
+  type StoreValues = (values: FormValues) => Promise<FormValues>;
+  // FIXME Can be extracted as common code
+  const storeValues: StoreValues = async (values) =>
+    fetch(submitUrl, {
+      body: JSON.stringify(values),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+    }).then((res) =>
+      res.ok
+        ? Promise.resolve(values)
+        : res.text().then(Promise.reject.bind(Promise)),
+    );
 
   return (
     <section>
       <Container>
         <Row className="access-layout my-5">
           <Col sm={8} className="right-side pr-3">
-            <div>
-              <Alert variant="info" className="px-5">
-                <h4>You are about to request access to a sensitive dataset</h4>
-                Please read the following use conditions carefully. You can
-                download the dataset only if you fully agree to them. Your name
-                and email address along with the fact of agreement will be
-                stored in our system in order to ensure that the data is used
-                appropriately.
+            {Boolean(submitted) ? (
+              <Alert variant="success" className="px-5">
+                <h4 className="alert-heading">Request submitted!</h4>
+                <p>
+                  📬 We've sent an email with the access link for downloading
+                  dataset files and the conditions document to your address.
+                </p>
+                <p>
+                  If the email doesn't arrive within a few minutes, please check
+                  your spam folder.
+                </p>
               </Alert>
-            </div>
-            <div className="pdf-view mb-5" onScroll={handleScroll}>
-              <PDFViewer conditionsUrl={dataset.conditionsUrl} />
-            </div>
-            <Form noValidate validated={validated} onSubmit={handleSubmit}>
-              <Form.Row>
-                <Form.Group
-                  as={Col}
-                  controlId="formBasicCheckbox"
-                  className="text-center"
-                >
-                  <Form.Check
-                    type="checkbox"
-                    label={
-                      <React.Fragment>
-                        <span className="lead">
-                          I hereby agree to the terms and conditions{' '}
-                        </span>
-                        <sup className="font-weight-light">required</sup>
-                      </React.Fragment>
-                    }
-                    checked={agree}
-                    disabled={scrollBottom >= 1 ? false : true}
-                    onChange={(e) => setAgree(e.target.checked)}
-                  />
-                </Form.Group>
-              </Form.Row>
-              <Form.Row>
-                <Form.Group as={Col} controlId="validationCustom01">
-                  <Form.Label>
-                    <span className="lead">Name</span>{' '}
-                    <sup className="font-weight-light">required</sup>
-                  </Form.Label>
-                  <Form.Control
-                    required
-                    type="text"
-                    className="name-text"
-                    value={name}
-                    disabled={!agree}
-                    onChange={(e) => setName(e.target.value)}
-                  />
-                </Form.Group>
-              </Form.Row>
-              <Form.Row>
-                <Form.Group as={Col} controlId="validationCustom02">
-                  <Form.Label>
-                    <span className="lead">Email</span>{' '}
-                    <sup className="font-weight-light">required</sup>
-                  </Form.Label>
-                  <Form.Control
-                    required
-                    type="email"
-                    className="email-text"
-                    value={email}
-                    disabled={!agree}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </Form.Group>
-              </Form.Row>
-              <Button type="submit" variant="primary">
-                Request Access
-              </Button>
-            </Form>
+            ) : (
+              <AccessForm
+                dataset={dataset}
+                storeValues={storeValues}
+                onSuccessSubmission={(values) => {
+                  setSubmitted(values != undefined);
+                }}
+              />
+            )}
           </Col>
           <Col sm={4} className="left-side">
             <div className="dataset-content">

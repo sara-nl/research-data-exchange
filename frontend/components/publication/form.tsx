@@ -9,7 +9,7 @@ import {
   Alert,
 } from 'react-bootstrap';
 import { Formik, Field } from 'formik';
-import FieldFeedback from './fieldFeedback';
+import FieldFeedback from './../form/fieldFeedback';
 import { useState } from 'react';
 import Error, { ErrorProps } from 'next/error';
 

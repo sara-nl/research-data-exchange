@@ -2,7 +2,10 @@ package nl.surf.rdx.sharer
 
 import cats.effect.IO
 import cats.effect.testing.scalatest.{AsyncIOSpec, EffectTestSupport}
+import cats.implicits._
+import nl.surf.rdx.common.email.conf.EmailConf
 import nl.surf.rdx.common.model.owncloud.OwncloudShare
+import nl.surf.rdx.common.owncloud.conf.OwncloudConf
 import nl.surf.rdx.common.testutils
 import nl.surf.rdx.sharer.SharePipes.Result
 import nl.surf.rdx.sharer.SharerApp.EnvF
@@ -13,6 +16,8 @@ import org.mockito.MockitoSugar
 import org.scalatest.funspec.AsyncFunSpecLike
 import org.scalatest.matchers.should.Matchers
 import org.typelevel.log4cats.Logger
+
+import java.nio.file.Paths
 class SharePipesTest
     extends AsyncFunSpecLike
     with AsyncIOSpec
@@ -26,11 +31,11 @@ class SharePipesTest
       List(
         Observation(
           OwncloudShare("test0", "test", None, "/test_folder", OwncloudShare.itemTypeFolder, 0, 16),
-          List("conditions.pdf")
+          List(Paths.get("conditions.pdf"))
         ),
         Observation(
           OwncloudShare("test1", "test", None, "/test_file", OwncloudShare.itemTypeFile, 0, 16),
-          List("conditions.pdf")
+          List(Paths.get("conditions.pdf"))
         ),
         Observation(
           OwncloudShare("test2", "test", None, "/test_folder", OwncloudShare.itemTypeFolder, 0, 16),
@@ -46,21 +51,26 @@ class SharePipesTest
             0,
             1
           ),
-          List("conditions.pdf")
+          List(Paths.get("conditions.pdf"))
         )
       )
     def testObservations(implicit l: Logger[IO]) =
-      SharerConf
-        .loadF[IO]
-        .flatMap(conf =>
+      (
+        SharerConf
+          .loadF[IO],
+        EmailConf.loadF[IO],
+        OwncloudConf.loadF[IO]
+      ).parTupled
+        .map(SharerApp.Deps.tupled)
+        .flatMap {
           fs2
             .Stream(sharesFixture)
             .covary[EnvF[IO, *]]
             .through(SharePipes.onlyElegible)
             .compile
             .toList
-            .run(SharerApp.Deps(conf))
-        )
+            .run
+        }
 
     it("should let good shares through") {
       import nl.surf.rdx.common.testutils.ConsoleLogger._
@@ -127,7 +137,7 @@ class SharePipesTest
         OwncloudShare("id1", "mike", None, "/1", "file", 0, 0),
         OwncloudShare("id2", "mike", None, "/2", "file", 0, 0),
         OwncloudShare("id3", "mike", None, "/3", "file", 0, 0)
-      ).map(Observation(_, List.empty[String]))
+      ).map(Observation(_, List.empty))
       SharePipes.diff(Set.empty, observed) shouldEqual Result(Set.empty, observed)
     }
 
@@ -148,7 +158,7 @@ class SharePipesTest
         OwncloudShare("id3", "mike", None, "/3", "folder", 0, 0)
       )
 
-      val observed = stored.map(Observation(_, List.empty[String]))
+      val observed = stored.map(Observation(_, List.empty))
       SharePipes.diff(stored, observed) shouldEqual Result(removed = Set.empty, added = Set.empty)
     }
 
@@ -159,7 +169,7 @@ class SharePipesTest
       val share4 = OwncloudShare("id4", "mike", None, "/4", "folder", 0, 0)
 
       val stored = Set(share2, share3, share4)
-      val observed = Set(share1, share2, share3).map(Observation(_, List.empty[String]))
+      val observed = Set(share1, share2, share3).map(Observation(_, List.empty))
 
       SharePipes.diff(stored, observed) shouldEqual Result(
         removed = Set(share4),

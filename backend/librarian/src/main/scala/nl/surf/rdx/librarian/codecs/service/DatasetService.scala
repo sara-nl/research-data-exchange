@@ -6,7 +6,8 @@ import cats.implicits.catsSyntaxFlatMapOps
 import cats.{Applicative, Functor}
 import io.lemonlabs.uri.RelativeUrl
 import nl.surf.rdx.common.db.Shares
-import nl.surf.rdx.common.model.api.{ShareInfo, UserMetadata}
+import nl.surf.rdx.common.model.access.RdxDownloadableDataset
+import nl.surf.rdx.common.model.api.UserMetadata
 import nl.surf.rdx.common.model.{RdxDataset, RdxShare}
 import nl.surf.rdx.librarian.codecs.service.DatasetService.Deps
 import nl.surf.rdx.librarian.conf.LibrarianConf
@@ -20,8 +21,7 @@ object DatasetService {
 
   case class Deps[F[_]](
       session: Resource[F, Session[F]],
-      config: LibrarianConf,
-      shareToShareInfo: RdxShare => F[ShareInfo]
+      config: LibrarianConf
   )
 
   def make[F[_]: Sync: Logger: Functor: Applicative]: Kleisli[F, Deps[F], DatasetService[F]] =
@@ -57,16 +57,21 @@ class DatasetService[F[_]: Logger: Applicative: Sync: Functor](
   def fetchShare(token: UUID): F[Option[RdxShare]] =
     (for {
       session <- deps.session
-      cmd <- session.prepare(Shares.findShare)
+      cmd <- session.prepare(Shares.findShareByToken)
       shareOption <- Resource.eval(cmd.option(token))
     } yield shareOption).use(Sync[F].pure(_))
 
-  val prepareApiView: RdxShare => F[ShareInfo] = deps.shareToShareInfo
+  def fetchOCShare(doi: RelativeUrl): F[Option[RdxDownloadableDataset]] =
+    (for {
+      session <- deps.session
+      cmd <- session.prepare(Shares.findShareByDoi)
+      dsOption <- Resource.eval(cmd.option(doi.toStringPunycode))
+    } yield dsOption).use(Sync[F].pure(_))
 
   def fetchDataset(doi: RelativeUrl): F[Option[RdxDataset]] =
     (for {
       session <- deps.session
       cmd <- session.prepare(Shares.findDataset)
-      share <- Resource.eval(cmd.option(doi.toStringPunycode))
-    } yield share).use(Sync[F].pure(_))
+      dsOption <- Resource.eval(cmd.option(doi.toStringPunycode))
+    } yield dsOption).use(Sync[F].pure(_))
 }

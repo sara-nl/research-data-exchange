@@ -40,12 +40,11 @@ lazy val sharer = (project in file("sharer"))
       deps.betterFiles,
       deps.catsEffect,
       deps.scalaUri,
-      deps.pencil,
       deps.catsTestkit,
       deps.mockitoScala
-    ) ++ deps.pureConfig ++ deps.sardine ++ deps.circe ++ deps.http4sClient ++ deps.logging
+    ) ++ deps.pureConfig ++ deps.sardine ++ deps.circe ++ deps.logging
   )
-  .dependsOn(commonDb, commonTestutils % "test->compile")
+  .dependsOn(commonDb, commonEmail, commonOwncloud, commonTestutils % "test->compile")
 
 lazy val librarian = (project in file("librarian"))
   .settings(
@@ -60,7 +59,7 @@ lazy val librarian = (project in file("librarian"))
     ) ++ deps.http4sClient
       .map(_ % Test) ++ deps.pureConfig ++ deps.circe ++ deps.http4sServer ++ deps.logging
   )
-  .dependsOn(commonModel, commonDb)
+  .dependsOn(commonModel, commonEmail, commonDb, commonOwncloud, commonTestutils % "test->compile")
 
 lazy val commonModel = (project in file("common/model")).settings(
   libraryDependencies := Seq(
@@ -80,6 +79,24 @@ lazy val commonDb = (project in file("common/db"))
   )
   .dependsOn(commonModel)
 
+lazy val commonOwncloud = (project in file("common/owncloud"))
+  .settings(
+    libraryDependencies := Seq(
+      deps.catsEffect
+    ) ++ deps.http4sClient
+      ++ deps.logging ++ deps.pureConfig ++ deps.circe
+  )
+  .dependsOn(commonModel)
+
+lazy val commonEmail = (project in file("common/email"))
+  .settings(
+    libraryDependencies := Seq(
+      deps.catsEffect,
+      deps.pencil
+    ) ++ deps.logging ++ deps.pureConfig
+  )
+  .dependsOn(commonModel)
+
 lazy val commonTestutils = (project in file("common/testutils"))
   .settings(
     libraryDependencies := Seq(
@@ -91,7 +108,7 @@ lazy val commonTestutils = (project in file("common/testutils"))
 lazy val deps = new {
 
   lazy val V = new {
-    val http4s = "0.21.24"
+    val http4s = "0.22.4"
     val catsEffect = "2.5.3"
     val pureConf = "0.16.0"
     val logback = "1.2.3"
@@ -113,7 +130,7 @@ lazy val deps = new {
       "org.http4s" %% "http4s-circe" % V.http4s
     )
   val scalaTest = "org.scalatest" %% "scalatest" % "3.2.9" % Test
-  val mockitoScala = "org.mockito" %% "mockito-scala" % "1.16.37"
+  val mockitoScala = "org.mockito" %% "mockito-scala" % "1.16.39"
   val catsTestkit = "com.codecommit" %% "cats-effect-testing-scalatest" % "0.5.4" % Test
   val betterFiles = "com.github.pathikrit" %% "better-files" % "3.9.1"
   val scalaUri = "io.lemonlabs" %% "scala-uri" % "3.5.0"
@@ -152,7 +169,10 @@ lazy val deps = new {
   val pencil = "com.minosiants" %% "pencil" % "0.6.7"
 
   val skunk =
-    Seq("org.tpolecat" %% "skunk-core" % "0.0.28", "org.tpolecat" %% "skunk-circe" % "0.0.28")
+    Seq(
+      "org.tpolecat" %% "skunk-core" % "0.0.28",
+      "org.tpolecat" %% "skunk-circe" % "0.0.28"
+    )
   val flyway =
     Seq("org.postgresql" % "postgresql" % "42.2.23", "org.flywaydb" % "flyway-core" % "7.11.4")
 

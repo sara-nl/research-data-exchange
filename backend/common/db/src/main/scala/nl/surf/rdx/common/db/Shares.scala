@@ -11,6 +11,8 @@ import skunk.circe.codec.json._
 import io.circe.syntax.EncoderOps
 import nl.surf.rdx.common.model.{RdxDataset, RdxShare}
 import io.circe.generic.auto._
+import io.lemonlabs.uri.AbsoluteUrl
+import nl.surf.rdx.common.model.access.RdxDownloadableDataset
 import nl.surf.rdx.common.model.api.UserMetadata
 
 import java.util.UUID
@@ -52,7 +54,7 @@ object Shares {
          FROM Shares""".query(owncloudShareDec)
   }
 
-  def findShare: Query[UUID, RdxShare] = {
+  def findShareByToken: Query[UUID, RdxShare] = {
     val shareDec: Decoder[RdxShare] =
       (uuid ~ json ~ timestamptz ~ timestamptz ~ json ~ varchar).emap {
         case token ~ p ~ createdAt ~ expiresAt ~ files ~ conditionsUrl =>
@@ -91,6 +93,17 @@ object Shares {
 
     sql"""SELECT user_metadata->>'title', user_metadata->>'description', conditions_url, preview 
          FROM shares WHERE user_metadata->>'doi' =  $varchar""".query(decoder)
+  }
+
+  def findShareByDoi: Query[String, RdxDownloadableDataset] = {
+    val decoder = (json ~ varchar).emap {
+      case metadata ~ url =>
+        for {
+          share <- metadata.as[OwncloudShare].leftMap(_.getMessage())
+        } yield RdxDownloadableDataset(share, url)
+    }
+    sql"""SELECT metadata, conditions_url FROM shares WHERE user_metadata->>'doi' =  $varchar"""
+      .query(decoder)
   }
 
 }
