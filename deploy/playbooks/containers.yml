@@ -45,6 +45,10 @@
               ports:
                 - 8081:8081
               environment:
+                RDX_SMTP_HOST: "{{ lookup('env', 'RDX_SMTP_HOST') }}"
+                RDX_SMTP_PORT: "{{ lookup('env', 'RDX_SMTP_PORT') }}"
+                RDX_SMTP_USER: "{{ lookup('env', 'RDX_SMTP_USER') }}"
+                RDX_SMTP_PASSWORD: "{{ lookup('env', 'RDX_SMTP_PASSWORD') }}"
                 DB_HOST: "postgres"
                 DB_NAME: "postgres"
                 DB_USER: "postgres"

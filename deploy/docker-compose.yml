@@ -33,6 +33,10 @@ services:
       LOG_LEVEL: "info"
       RDX_WEBDAV_PASSWORD: ${RDX_WEBDAV_PASSWORD}
       RDX_WEBDAV_USER: ${RDX_WEBDAV_USER}
+      RDX_SMTP_HOST: ${RDX_SMTP_HOST}
+      RDX_SMTP_PORT: ${RDX_SMTP_PORT}
+      RDX_SMTP_USER: ${RDX_SMTP_USER}
+      RDX_SMTP_PASSWORD: ${RDX_SMTP_PASSWORD}
 
   frontend:
     image: rdx-frontend:latest
