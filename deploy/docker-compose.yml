@@ -31,6 +31,8 @@ services:
     environment:
       RDX_APP_NAME: "librarian"
       LOG_LEVEL: "info"
+      RDX_WEBDAV_PASSWORD: ${RDX_WEBDAV_PASSWORD}
+      RDX_WEBDAV_USER: ${RDX_WEBDAV_USER}
 
   frontend:
     image: rdx-frontend:latest
