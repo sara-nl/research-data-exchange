@@ -51,6 +51,8 @@
                 DB_PORT: 5432
                 RDX_APP_NAME: "librarian"
                 LOG_LEVEL: "info"
+                RDX_WEBDAV_USER: "{{ lookup('env', 'RDX_WEBDAV_USER') }}"
+                RDX_WEBDAV_PASSWORD: "{{ lookup('env', 'RDX_WEBDAV_PASSWORD') }}"
             frontend:
               image: git.ia.surfsara.nl:5050/soil/rdx/frontend:{{ lookup('env', 'DOCKER_IMAGE_TAG') }}
               depends_on: [librarian]
