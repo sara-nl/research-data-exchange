@@ -69,6 +69,11 @@ object OwncloudShares {
       )
     } yield shares
 
+//  for local testing
+//  def makePublicLink2[F[_]: Monad: Functor: FlatMap: ConcurrentEffect: ContextShift: Logger]
+//      : Kleisli[F, Deps, JPath => F[String]] =
+//    Kleisli.fromFunction { deps => path => Sync[F].pure("http://example.com") }
+
   def makePublicLink[F[_]: Monad: Functor: FlatMap: ConcurrentEffect: ContextShift: Logger]
       : Kleisli[F, Deps, JPath => F[String]] =
     for {

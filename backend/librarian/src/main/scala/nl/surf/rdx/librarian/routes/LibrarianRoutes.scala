@@ -13,7 +13,7 @@ import nl.surf.rdx.common.model.api.{ShareInfo, UserMetadata}
 import nl.surf.rdx.common.model.{RdxDataset, RdxShare}
 import nl.surf.rdx.librarian.codecs.service.DatasetService
 import nl.surf.rdx.librarian.email.DatasetAccessLinkEml
-import nl.surf.rdx.librarian.email.DatasetAccessLinkEml.Vars
+import nl.surf.rdx.librarian.email.DatasetAccessOwnerEml
 import nl.surf.rdx.librarian.error.{PublicRouteError, RoutesErrorHandler}
 import nl.surf.rdx.librarian.routes.extractors._
 import org.http4s._
@@ -36,6 +36,7 @@ object LibrarianRoutes {
       prepareApiView: RdxShare => F[ShareInfo],
       sendMail: SendMail[F],
       accessLinkTpl: RdxEmail.Template[F, DatasetAccessLinkEml.Vars],
+      toOwnerTpl: RdxEmail.Template[F, DatasetAccessOwnerEml.Vars],
       makePublicLink: JPath => F[String],
       downloadConditions: String => F[String]
   )
@@ -71,6 +72,7 @@ object LibrarianRoutes {
             _,
             sendMail,
             accessLinkTpl,
+            toOwnerTpl,
             mkPublicLink,
             downloadConditions
           ) =>
@@ -84,10 +86,16 @@ object LibrarianRoutes {
               doi <- Sync[F].fromTry(RelativeUrl.parseTry(doi))
               dsOption <- datasetService.fetchOCShare(doi)
               dataset <- Sync[F].fromOption(dsOption, PublicRouteError(Status.NotFound))
-              vars = Vars[F](access.name, access.email, dataset, mkPublicLink, downloadConditions)
-              _ <- sendMail(accessLinkTpl.resolveVars(vars)).adaptError {
+              linkVars =
+                DatasetAccessLinkEml
+                  .Vars[F](access.name, access.email, dataset, mkPublicLink, downloadConditions)
+              ownerVars =
+                DatasetAccessOwnerEml
+                  .Vars[F](access.name, access.email, dataset)
+              _ <- sendMail(accessLinkTpl.resolveVars(linkVars)).adaptError {
                 case InvalidMailBox(msg) => PublicRouteError(Status(Status.BadRequest.code, msg))
               }
+              _ <- sendMail(toOwnerTpl.resolveVars(ownerVars)) //todo log and ignore errors
               res <- Ok()
             } yield res
         })
@@ -95,7 +103,7 @@ object LibrarianRoutes {
 
   private def getDatasetRoute[F[_]: Logger: Sync: FlatMap: DsEncoder]: HttpRoutesD[F] =
     Kleisli.fromFunction {
-      case Deps(ds, _, _, _, _, _) =>
+      case Deps(ds, _, _, _, _, _, _) =>
         val dsl = Http4sDsl[F]
         import dsl._
         Router("/dataset" -> HttpRoutes.of[F] {
@@ -117,7 +125,7 @@ object LibrarianRoutes {
 
   private def getRdxShareRoute[F[_]: Logger: Sync: FlatMap: DsEncoder]: HttpRoutesD[F] =
     Kleisli.fromFunction {
-      case Deps(ds, prepareApiView, _, _, _, _) =>
+      case Deps(ds, prepareApiView, _, _, _, _, _) =>
         val dsl = Http4sDsl[F]
         import dsl._
         Router("/share" -> HttpRoutes.of[F] {
@@ -146,7 +154,7 @@ object LibrarianRoutes {
 
   private def publishDatasetRoute[F[_]: Logger: Sync: FlatMap: UmDecoder]: HttpRoutesD[F] =
     Kleisli.fromFunction {
-      case Deps(ds, _, _, _, _, _) =>
+      case Deps(ds, _, _, _, _, _, _) =>
         val dsl = Http4sDsl[F]
         import dsl._
         Router("/dataset" -> HttpRoutes.of[F] {

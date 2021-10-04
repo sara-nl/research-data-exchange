@@ -11,7 +11,7 @@ import nl.surf.rdx.common.owncloud.OwncloudShares
 import nl.surf.rdx.common.owncloud.conf.OwncloudConf
 import nl.surf.rdx.librarian.codecs.service.DatasetService
 import nl.surf.rdx.librarian.conf.LibrarianConf
-import nl.surf.rdx.librarian.email.DatasetAccessLinkEml
+import nl.surf.rdx.librarian.email.{DatasetAccessLinkEml, DatasetAccessOwnerEml}
 import nl.surf.rdx.librarian.routes.LibrarianRoutes
 import org.http4s.blaze.server._
 import org.http4s.implicits._
@@ -49,6 +49,7 @@ object LibrarianApp extends IOApp.Simple {
                 share2shareInfo,
                 sendMail,
                 DatasetAccessLinkEml[IO],
+                DatasetAccessOwnerEml[IO],
                 mkPublicLink,
                 downloadConditions
               )

@@ -8,14 +8,14 @@ import com.minosiants.pencil.data.{Body, Email, Mailbox, Subject, To}
 import com.minosiants.pencil.protocol.Replies
 import io.lemonlabs.uri.RelativeUrl
 import nl.surf.rdx.common.email.RdxEmail
-import nl.surf.rdx.common.email.RdxEmail.{SendTemplate, Template, SendMail}
+import nl.surf.rdx.common.email.RdxEmail.{SendMail, SendTemplate, Template}
 import nl.surf.rdx.common.email.conf.EmailConf
 import nl.surf.rdx.common.model.access.RdxDownloadableDataset
 import nl.surf.rdx.common.model.api.{ShareInfo, UserMetadata}
 import nl.surf.rdx.common.model.owncloud.OwncloudShare
 import nl.surf.rdx.common.model.{RdxDataset, RdxShare}
 import nl.surf.rdx.librarian.codecs.service.DatasetService
-import nl.surf.rdx.librarian.email.DatasetAccessLinkEml
+import nl.surf.rdx.librarian.email.{DatasetAccessLinkEml, DatasetAccessOwnerEml}
 import org.mockito.{MockitoSugar, ArgumentMatchers => matchers}
 
 import java.nio.file.{Paths, Path => JPath}
@@ -77,7 +77,7 @@ abstract class LibrarianRoutesFixtures[F[_]: Applicative: Sync] extends MockitoS
         when(downloadConditions.apply(matchers.any[String]))
           .thenReturn(attachmentPath.pure[F])
 
-        val dummyMailTemplate = Kleisli.fromFunction[F, (EmailConf, DatasetAccessLinkEml.Vars[F])] {
+        val linkMailTemplate = Kleisli.fromFunction[F, (EmailConf, DatasetAccessLinkEml.Vars[F])] {
           case (_, vars) =>
             RdxEmail(
               To(Mailbox.unsafeFromString(vars.contactEmail)),
@@ -86,11 +86,22 @@ abstract class LibrarianRoutesFixtures[F[_]: Applicative: Sync] extends MockitoS
             )
         }
 
+        val ownerMailTemplate =
+          Kleisli.fromFunction[F, (EmailConf, DatasetAccessOwnerEml.Vars[F])] {
+            case (_, vars) =>
+              RdxEmail(
+                To(Mailbox.unsafeFromString(vars.requesterEmail)),
+                Subject(s"Received access request for to ${vars.ds.owncloudShare.path}"),
+                Body.Ascii(s"Received access request for to ${vars.ds.owncloudShare.path}")
+              )
+          }
+
         LibrarianRoutes.Deps(
           dsMock,
           _ => ocShareInfo.pure[F],
           sendMailMock,
-          dummyMailTemplate,
+          linkMailTemplate,
+          ownerMailTemplate,
           mkPublicLinkMock,
           downloadConditions
         )
