@@ -49,9 +49,7 @@ const Publication: React.FC<Props> = ({ share, baseUrl, submitUrl }) => {
           <Col sm={8} className="mb-5 mt-3 right-side">
             {Boolean(publishedDoi) ? (
               <PublicationConfirmation
-                accessUrl={
-                  baseUrl + '/access/' + encodeURIComponent(publishedDoi)
-                }
+                accessUrl={baseUrl + '/access/' + publishedDoi}
               />
             ) : (
               <React.Fragment>

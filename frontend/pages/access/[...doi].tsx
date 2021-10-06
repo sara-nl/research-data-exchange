@@ -50,10 +50,10 @@ function transformDownloadLink(conditionsUrl: string) {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const doi = context.query['doi'] as string;
+  const doi = (context.query.doi as string[]) || [];
 
   const res = await fetch(
-    process.env.BACKEND_URL + `/dataset/` + encodeURIComponent(doi),
+    process.env.BACKEND_URL + `/dataset/` + encodeURIComponent(doi.join('/')),
   );
 
   if (!res.ok) {
@@ -74,7 +74,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {
       dataset: dataset,
-      submitUrl: '/api/access/' + encodeURIComponent(doi),
+      submitUrl: '/api/access/' + encodeURIComponent(doi.join("/")),
     },
   };
 };

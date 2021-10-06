@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 describe('RDX access page', () => {
   beforeEach(() => {
-    cy.intercept('GET', '**/api/dataset/10.21942%2Fuva.14680362.v3', {
+    cy.intercept('GET', '**/api/dataset/10.21942/uva.14680362.v3', {
       fixture: '10.21942%2Fuva.14680362.v3.json',
     }).as('getDataset');
 
@@ -13,7 +13,7 @@ describe('RDX access page', () => {
       fixture: '10.21942%2Fuva.14680362.v3.json',
     });
 
-    cy.visit('http://localhost:3000/access/10.21942%2Fuva.14680362.v3');
+    cy.visit('http://localhost:3000/access/10.21942/uva.14680362.v3');
   });
 
   it('displays dataset details returned by the service', () => {
