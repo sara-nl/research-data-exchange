@@ -66,7 +66,7 @@ class SharePipesTest
           fs2
             .Stream(sharesFixture)
             .covary[EnvF[IO, *]]
-            .through(SharePipes.onlyElegible)
+            .through(SharePipes.onlyEligible)
             .compile
             .toList
             .run
@@ -174,6 +174,21 @@ class SharePipesTest
       SharePipes.diff(stored, observed) shouldEqual Result(
         removed = Set(share4),
         added = Set(Observation(share1, Nil))
+      )
+    }
+
+    it("Changing permissions,path should not influence added/removed") {
+      val share1 = OwncloudShare("id1", "mike", None, "/1", "folder", 0, 0)
+      val share2 = OwncloudShare("id2", "mike", None, "/2", "folder", 0, 0)
+      val share1Updated = OwncloudShare("id1", "mike", None, "/1", "folder", 0, 3)
+      val share2Updated = OwncloudShare("id2", "mike", None, "/2+1", "folder", 0, 0)
+
+      val stored = Set(share1, share2)
+      val observed = Set(share1Updated, share2Updated).map(Observation(_, List.empty))
+
+      SharePipes.diff(stored, observed) shouldEqual Result(
+        removed = Set(),
+        added = Set()
       )
     }
   }

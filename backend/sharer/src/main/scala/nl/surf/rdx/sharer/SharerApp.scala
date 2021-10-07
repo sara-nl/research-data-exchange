@@ -56,7 +56,7 @@ object SharerApp extends IOApp.Simple {
                 )
               )
           )
-          .through(SharePipes.onlyElegible[IO])
+          .through(SharePipes.onlyEligible[IO])
           .evalTap(SharePipes.doMergeShares[IO])
           .compile
           .drain

@@ -24,10 +24,17 @@ object SharePipes {
       stored: Set[OwncloudShare],
       observed: Set[Observation]
   ): Result = {
-    Result(stored.diff(observed.map(_.share)), observed.filterNot(o => stored.contains(o.share)))
+    val observedShares = observed.map(_.share)
+    val removed = stored.foldLeft(Set.empty[OwncloudShare])((result, elem) =>
+      if (observedShares.exists(_.id === elem.id)) result else result + elem
+    )
+    Result(
+      removed,
+      observed.filterNot(o => stored.exists(_.id.equals(o.share.id)))
+    )
   }
 
-  def onlyElegible[F[_]: Applicative: Functor: Logger: Parallel: Sync]
+  def onlyEligible[F[_]: Applicative: Functor: Logger: Parallel: Sync]
       : Pipe[EnvF[F, *], List[Observation], List[Observation]] =
     _.evalMap { observations =>
       for {
