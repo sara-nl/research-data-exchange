@@ -41,7 +41,7 @@ lazy val sharer = (project in file("sharer"))
       deps.scalaUri
     ) ++ deps.pureConfig ++ deps.sardine ++ deps.circe ++ deps.logging
   )
-  .dependsOn(commonDb, commonEmail, commonOwncloud, commonTestutils)
+  .dependsOn(commonDb, commonEmail, commonOwncloud, commonTestutils % Test)
 
 lazy val librarian = (project in file("librarian"))
   .settings(
@@ -58,7 +58,7 @@ lazy val librarian = (project in file("librarian"))
     commonEmail,
     commonDb,
     commonOwncloud,
-    commonTestutils
+    commonTestutils % Test
   )
 
 lazy val commonModel = (project in file("common/model"))
@@ -68,7 +68,7 @@ lazy val commonModel = (project in file("common/model"))
       deps.scalaUri
     ) ++ deps.circe ++ deps.logging
   )
-  .dependsOn(commonTestutils)
+  .dependsOn(commonTestutils % Test)
 
 lazy val commonDb = (project in file("common/db"))
   .settings(
@@ -95,7 +95,7 @@ lazy val commonEmail = (project in file("common/email"))
       deps.pencil
     ) ++ deps.logging ++ deps.pureConfig
   )
-  .dependsOn(commonModel, commonTestutils)
+  .dependsOn(commonModel, commonTestutils % Test)
 
 lazy val commonTestutils = (project in file("common/testutils"))
   .settings(
