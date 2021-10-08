@@ -6,8 +6,7 @@ import cats.implicits.{catsSyntaxFlatMapOps, _}
 import cats.{ApplicativeError, FlatMap, Monad}
 import com.minosiants.pencil.data.Error.InvalidMailBox
 import io.lemonlabs.uri.RelativeUrl
-import nl.surf.rdx.common.email.RdxEmail
-import nl.surf.rdx.common.email.RdxEmail.SendMail
+import nl.surf.rdx.common.email.{RdxEmail, RdxEmailService}
 import nl.surf.rdx.common.model.access.AccessRequest
 import nl.surf.rdx.common.model.api.{ShareInfo, UserMetadata}
 import nl.surf.rdx.common.model.{RdxDataset, RdxShare}
@@ -34,7 +33,7 @@ object LibrarianRoutes {
   case class Deps[F[_]](
       ds: DatasetService[F],
       prepareApiView: RdxShare => F[ShareInfo],
-      sendMail: SendMail[F],
+      emailService: RdxEmailService[F],
       accessLinkTpl: RdxEmail.Template[F, DatasetAccessLinkEml.Vars],
       toOwnerTpl: RdxEmail.Template[F, DatasetAccessOwnerEml.Vars],
       makePublicLink: JPath => F[String],
@@ -70,7 +69,7 @@ object LibrarianRoutes {
       case Deps(
             datasetService,
             _,
-            sendMail,
+            emailService,
             accessLinkTpl,
             toOwnerTpl,
             mkPublicLink,
@@ -80,7 +79,7 @@ object LibrarianRoutes {
         import dsl._
         Router("/access" -> HttpRoutes.of[F] {
           case req @ POST -> Root / NonEmptyVar(doi) =>
-            import RdxEmail.Template.implicits._
+            import RdxEmail.Template.syntax._
             for {
               access <- req.as[AccessRequest]
               doi <- Sync[F].fromTry(RelativeUrl.parseTry(doi))
@@ -92,10 +91,18 @@ object LibrarianRoutes {
               ownerVars =
                 DatasetAccessOwnerEml
                   .Vars[F](access.name, access.email, dataset)
-              _ <- sendMail(accessLinkTpl.resolveVars(linkVars)).adaptError {
-                case InvalidMailBox(msg) => PublicRouteError(Status(Status.BadRequest.code, msg))
-              }
-              _ <- sendMail(toOwnerTpl.resolveVars(ownerVars)) //todo log and ignore errors
+              _ <-
+                emailService
+                  .sendMany(
+                    List(
+                      accessLinkTpl.seal(linkVars),
+                      toOwnerTpl.seal(ownerVars)
+                    )
+                  )
+                  .adaptError {
+                    case InvalidMailBox(msg) =>
+                      PublicRouteError(Status(Status.BadRequest.code, msg))
+                  }
               res <- Ok()
             } yield res
         })

@@ -1,20 +1,16 @@
 package nl.surf.rdx.sharer
 
-import cats.{Applicative, Parallel}
 import cats.data.Kleisli
-import cats.effect.{Blocker, Concurrent, ContextShift, IO, IOApp, Sync}
-import cats.implicits.catsSyntaxFlatMapOps
+import cats.effect.{IO, IOApp, Sync}
 import nl.surf.rdx.sharer.conf.SharerConf
 import nl.surf.rdx.sharer.owncloud.OwncloudSharesObserver
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 import scala.language.postfixOps
 import cats.implicits._
-import natchez.Trace
 import nl.surf.rdx.common.db.{DbSession, MigrationApp, Shares}
-import nl.surf.rdx.common.model.RdxShare
-import nl.surf.rdx.sharer.email.NewDatasetEml
 import natchez.Trace.Implicits.noop
+import nl.surf.rdx.common.email.RdxEmailService
 import nl.surf.rdx.common.email.conf.EmailConf
 import nl.surf.rdx.common.owncloud.OwncloudShares
 import nl.surf.rdx.common.owncloud.conf.OwncloudConf
@@ -24,9 +20,9 @@ import org.typelevel.log4cats.Logger
 
 object SharerApp extends IOApp.Simple {
 
-  type EnvF[F[_], C] = Kleisli[F, Deps, C]
+  type EnvF[F[_], C] = Kleisli[F, Deps[F], C]
 
-  case class Deps(conf: SharerConf, emailConf: EmailConf, ocConf: OwncloudConf)
+  case class Deps[F[_]](conf: SharerConf, emailService: RdxEmailService[F], ocConf: OwncloudConf)
 
   private implicit def loggerF[F[_]: Sync] = Slf4jLogger.getLogger[F]
 
@@ -42,12 +38,14 @@ object SharerApp extends IOApp.Simple {
       sweeperFiber <- RdxScheduler.start[IO]("share token sweeper", conf.tokenSweepInterval)(
         DbSession.resource[IO].use(session => session.execute(Shares.invalidateAllExpired))
       )
+      emailService <- RdxEmailService[IO]()
+        .run(RdxEmailService.Deps[IO](emailConf, RdxEmailService.Deps.clientR(emailConf)))
       observerFiber <-
         RdxScheduler
           .stream("share observer", conf.fetchInterval)(
             OwncloudSharesObserver
               .observe[IO]
-              .local[Deps](_ =>
+              .local[Deps[IO]](_ =>
                 OwncloudSharesObserver.Deps(
                   Webdav.makeSardine[IO].run(ocConf),
                   OwncloudShares.getShares[IO].run(ocConf),
@@ -57,10 +55,11 @@ object SharerApp extends IOApp.Simple {
               )
           )
           .through(SharePipes.onlyEligible[IO])
-          .evalTap(SharePipes.doMergeShares[IO])
+          .evalMap(SharePipes.doMergeShares[IO])
+          .evalMap(SharePipes.notifyDataOwner[IO])
           .compile
           .drain
-          .run(Deps(conf, emailConf, ocConf))
+          .run(Deps(conf, emailService, ocConf))
           .start
       _ <- List(sweeperFiber, observerFiber).map(_.join).parSequence
     } yield ()

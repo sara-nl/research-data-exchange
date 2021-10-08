@@ -4,7 +4,7 @@ import cats.effect.{IO, IOApp}
 import cats.implicits._
 import natchez.Trace.Implicits.noop
 import nl.surf.rdx.common.db.DbSession
-import nl.surf.rdx.common.email.RdxEmail
+import nl.surf.rdx.common.email.{RdxEmail, RdxEmailService}
 import nl.surf.rdx.common.email.conf.EmailConf
 import nl.surf.rdx.common.model.api.ShareInfo
 import nl.surf.rdx.common.owncloud.OwncloudShares
@@ -33,7 +33,8 @@ object LibrarianApp extends IOApp.Simple {
       (conf, emailConf, ocConf) <-
         (LibrarianConf.loadF[IO], EmailConf.loadF[IO], OwncloudConf.loadF[IO]).parTupled
       share2shareInfo <- ShareInfo.fromShare[IO].run(ShareInfo.Deps(conf.conditionsFileName))
-      sendMail <- RdxEmail.send[IO].run(emailConf)
+      sendMail <- RdxEmailService[IO]()
+        .run(RdxEmailService.Deps(emailConf, RdxEmailService.Deps.clientR(emailConf)))
       mkPublicLink <- OwncloudShares.makePublicLink[IO].run(ocConf)
       downloadConditions <- OwncloudShares.downloadConditions[IO].run(conf.conditionsFileName)
       dsService <-

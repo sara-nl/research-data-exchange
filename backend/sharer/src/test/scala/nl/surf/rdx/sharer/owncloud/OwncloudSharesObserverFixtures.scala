@@ -28,7 +28,7 @@ abstract class OwncloudSharesObserverFixtures[F[_]: Applicative: Sync] extends M
     case object NoCondtionsFile extends Flow
   }
 
-  def depsFor[B](flow: Flow): Deps =
+  def depsFor(flow: Flow): Deps =
     flow match {
       case Flow.Happy =>
         depsFor(Flow.FolderName(helpers.defaultDatasetName))

@@ -1,6 +1,6 @@
 package nl.surf.rdx.sharer
 
-import cats.{Applicative, ApplicativeError, Functor, Parallel}
+import cats.{Applicative, ApplicativeError, Functor, Monad, Parallel}
 import cats.data.Kleisli
 import cats.effect.{Concurrent, ConcurrentEffect, ContextShift, Sync}
 import natchez.Trace
@@ -13,6 +13,8 @@ import org.typelevel.log4cats.Logger
 import cats.implicits._
 import fs2.Pipe
 import nl.surf.rdx.common.email.RdxEmail
+import nl.surf.rdx.common.email.RdxEmail.Sealed
+import nl.surf.rdx.common.model.RdxShare
 object SharePipes {
 
   case class Result(
@@ -38,8 +40,8 @@ object SharePipes {
       : Pipe[EnvF[F, *], List[Observation], List[Observation]] =
     _.evalMap { observations =>
       for {
-        deps <- Kleisli.ask[F, SharerApp.Deps]
-        res <- Kleisli.liftF[F, SharerApp.Deps, List[Observation]](
+        deps <- Kleisli.ask[F, Deps[F]]
+        res <- Kleisli.liftF[F, Deps[F], List[Observation]](
           observations.map(Sync[F].pure).parTraverseFilter {
             _ flatMap {
               case Observation(share, _) if !OwncloudShare.itemTypeFolder.equals(share.item_type) =>
@@ -66,50 +68,51 @@ object SharePipes {
       } yield res
     }
 
-  //TODO: split this into small nice testable pipes
-  def doMergeShares[F[
-      _
-  ]: Applicative: Logger: Sync: ContextShift: ApplicativeError[
+  def doMergeShares[F[_]: Applicative: Logger: Sync: ContextShift: ApplicativeError[
     *[_],
     Throwable
   ]: ConcurrentEffect: Trace: Parallel](
       observedDexShares: List[Observation]
-  ): EnvF[F, Unit] =
+  ): EnvF[F, List[RdxShare]] =
     Kleisli { deps =>
       DbSession
         .resource[F]
         .use(session => {
-          import nl.surf.rdx.common.email.RdxEmail.Template.implicits._
           for {
             storedShares <- session.execute(Shares.listOC)
             _ <- Logger[F].info(
               s"Observed ${observedDexShares.size} shares, found ${storedShares.size} stored shares"
             )
             compared = SharePipes.diff(storedShares.toSet, observedDexShares.toSet)
-            _ <- (for {
-                newShareTokens <-
+            newShares <- (for {
+                newShares <-
                   ShareEventHandlers
                     .handleShareAdded[F](compared.added.toList)
-                    .local[Deps](dd => ShareEventHandlers.Deps(session, dd.conf, dd.ocConf))
+                    .local[Deps[F]](dd => ShareEventHandlers.Deps(session, dd.conf, dd.ocConf))
                 _ <-
                   ShareEventHandlers
                     .handleShareRemoved[F](compared.removed.toList)
-                    .local[Deps](dd => ShareEventHandlers.Deps(session, dd.conf, dd.ocConf))
+                    .local[Deps[F]](dd => ShareEventHandlers.Deps(session, dd.conf, dd.ocConf))
                 _ <- Kleisli.liftF(
                   Logger[F].info(
                     s"Update finished. +${compared.added.size} shares / -${compared.removed.size} shares"
                   )
                 )
-                emailTemplates =
-                  newShareTokens
-                    .map(share =>
-                      NewDatasetEml[F].resolveVars(NewDatasetEml.Vars(deps.conf.webUrl, share))
-                    )
-                sendEmail <- RdxEmail.send.local[Deps](_.emailConf)
-                _ <- Kleisli.liftF(emailTemplates.parTraverse(sendEmail))
-              } yield ()).run(deps)
-          } yield ()
+              } yield newShares).run(deps)
+          } yield newShares
         })
+    }
+
+  def notifyDataOwner[F[_]: Sync: Monad](newShares: List[RdxShare]): EnvF[F, Unit] =
+    Kleisli { deps =>
+      import RdxEmail.Template.syntax._
+      deps.emailService
+        .sendMany(
+          newShares
+            .map(NewDatasetEml.Vars[F](deps.conf.webUrl, _))
+            .map(NewDatasetEml[F].seal)
+        )
+        .map(_ => ())
     }
 
 }

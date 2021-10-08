@@ -36,38 +36,30 @@ lazy val backend = (project in file("."))
 lazy val sharer = (project in file("sharer"))
   .settings(
     libraryDependencies := Seq(
-      deps.scalaTest,
       deps.betterFiles,
       deps.catsEffect,
-      deps.scalaUri,
-      deps.catsTestkit,
-      deps.mockitoScala
-    ) ++ deps.pureConfig ++ deps.sardine ++ deps.circe ++ deps.logging
+      deps.scalaUri
+    ) ++ deps.pureConfig ++ deps.sardine ++ deps.circe ++ deps.logging ++ deps.testing
   )
   .dependsOn(commonDb, commonEmail, commonOwncloud, commonTestutils % "test->compile")
 
 lazy val librarian = (project in file("librarian"))
   .settings(
     libraryDependencies := Seq(
-      deps.scalaTest,
       deps.betterFiles,
       deps.catsEffect,
       deps.scalaUri,
-      deps.catsTestkit,
-      deps.mockitoScala,
       deps.circeLiteral
-    ) ++ deps.http4sClient
-      .map(_ % Test) ++ deps.pureConfig ++ deps.circe ++ deps.http4sServer ++ deps.logging
+    ) ++ deps.http4sClient.map(_ % Test)
+      ++ deps.pureConfig ++ deps.circe ++ deps.http4sServer ++ deps.logging ++ deps.testing
   )
   .dependsOn(commonModel, commonEmail, commonDb, commonOwncloud, commonTestutils % "test->compile")
 
 lazy val commonModel = (project in file("common/model")).settings(
   libraryDependencies := Seq(
     deps.catsEffect,
-    deps.scalaUri,
-    deps.scalaTest,
-    deps.catsTestkit
-  ) ++ deps.circe ++ deps.logging
+    deps.scalaUri
+  ) ++ deps.circe ++ deps.logging ++ deps.testing
 )
 
 lazy val commonDb = (project in file("common/db"))
@@ -93,9 +85,9 @@ lazy val commonEmail = (project in file("common/email"))
     libraryDependencies := Seq(
       deps.catsEffect,
       deps.pencil
-    ) ++ deps.logging ++ deps.pureConfig
+    ) ++ deps.logging ++ deps.pureConfig ++ deps.testing
   )
-  .dependsOn(commonModel)
+  .dependsOn(commonModel, commonTestutils % "test->compile")
 
 lazy val commonTestutils = (project in file("common/testutils"))
   .settings(
@@ -129,9 +121,6 @@ lazy val deps = new {
       "org.http4s" %% "http4s-blaze-client" % V.http4s,
       "org.http4s" %% "http4s-circe" % V.http4s
     )
-  val scalaTest = "org.scalatest" %% "scalatest" % "3.2.9" % Test
-  val mockitoScala = "org.mockito" %% "mockito-scala" % "1.16.39"
-  val catsTestkit = "com.codecommit" %% "cats-effect-testing-scalatest" % "0.5.4" % Test
   val betterFiles = "com.github.pathikrit" %% "better-files" % "3.9.1"
   val scalaUri = "io.lemonlabs" %% "scala-uri" % "3.5.0"
 
@@ -176,4 +165,11 @@ lazy val deps = new {
   val flyway =
     Seq("org.postgresql" % "postgresql" % "42.2.23", "org.flywaydb" % "flyway-core" % "7.11.4")
 
+  val testing = {
+    val mockitoScala = "org.mockito" %% "mockito-scala" % "1.16.39"
+    val catsTestkit = "com.codecommit" %% "cats-effect-testing-scalatest" % "0.5.4"
+    val scalaTest = "org.scalatest" %% "scalatest" % "3.2.9"
+
+    Seq(catsTestkit, scalaTest, mockitoScala).map(_ % Test)
+  }
 }

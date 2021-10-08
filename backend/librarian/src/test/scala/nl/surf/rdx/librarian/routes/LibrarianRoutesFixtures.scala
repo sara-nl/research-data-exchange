@@ -7,8 +7,8 @@ import cats.implicits._
 import com.minosiants.pencil.data.{Body, Email, Mailbox, Subject, To}
 import com.minosiants.pencil.protocol.Replies
 import io.lemonlabs.uri.RelativeUrl
-import nl.surf.rdx.common.email.RdxEmail
-import nl.surf.rdx.common.email.RdxEmail.{SendMail, SendTemplate, Template}
+import nl.surf.rdx.common.email.{RdxEmail, RdxEmailService}
+import nl.surf.rdx.common.email.RdxEmail.{Sealed, Template}
 import nl.surf.rdx.common.email.conf.EmailConf
 import nl.surf.rdx.common.model.access.RdxDownloadableDataset
 import nl.surf.rdx.common.model.api.{ShareInfo, UserMetadata}
@@ -66,8 +66,9 @@ abstract class LibrarianRoutesFixtures[F[_]: Applicative: Sync] extends MockitoS
         when(dsMock.fetchDataset(matchers.eq(doiUrl)))
           .thenReturn(publishedDataset.some.pure[F])
 
-        val sendMailMock = mock[SendMail[F]]
-        when(sendMailMock.apply(matchers.any[SendTemplate[F]])).thenReturn(Replies(Nil).pure[F])
+        val sendMailMock = mock[RdxEmailService[F]]
+        when(sendMailMock.sendMany(matchers.any[List[Sealed[F]]]))
+          .thenReturn(List(Replies(Nil)).pure[F])
 
         val mkPublicLinkMock = mock[JPath => F[String]]
         when(mkPublicLinkMock.apply(matchers.eq(Paths.get("/dataset folder"))))

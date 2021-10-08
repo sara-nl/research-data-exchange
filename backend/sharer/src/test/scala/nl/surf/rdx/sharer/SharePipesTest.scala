@@ -3,6 +3,7 @@ package nl.surf.rdx.sharer
 import cats.effect.IO
 import cats.effect.testing.scalatest.{AsyncIOSpec, EffectTestSupport}
 import cats.implicits._
+import nl.surf.rdx.common.email.RdxEmailService
 import nl.surf.rdx.common.email.conf.EmailConf
 import nl.surf.rdx.common.model.owncloud.OwncloudShare
 import nl.surf.rdx.common.owncloud.conf.OwncloudConf
@@ -56,12 +57,13 @@ class SharePipesTest
       )
     def testObservations(implicit l: Logger[IO]) =
       (
-        SharerConf
-          .loadF[IO],
-        EmailConf.loadF[IO],
+        SharerConf.loadF[IO],
         OwncloudConf.loadF[IO]
       ).parTupled
-        .map(SharerApp.Deps.tupled)
+        .map {
+          case (sharerConf, ocConf) =>
+            SharerApp.Deps[IO](sharerConf, mock[RdxEmailService[IO]], ocConf)
+        }
         .flatMap {
           fs2
             .Stream(sharesFixture)
