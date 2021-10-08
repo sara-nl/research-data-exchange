@@ -39,9 +39,9 @@ lazy val sharer = (project in file("sharer"))
       deps.betterFiles,
       deps.catsEffect,
       deps.scalaUri
-    ) ++ deps.pureConfig ++ deps.sardine ++ deps.circe ++ deps.logging ++ deps.testing
+    ) ++ deps.pureConfig ++ deps.sardine ++ deps.circe ++ deps.logging
   )
-  .dependsOn(commonDb, commonEmail, commonOwncloud, commonTestutils % "test->compile")
+  .dependsOn(commonDb, commonEmail, commonOwncloud, commonTestutils)
 
 lazy val librarian = (project in file("librarian"))
   .settings(
@@ -51,16 +51,24 @@ lazy val librarian = (project in file("librarian"))
       deps.scalaUri,
       deps.circeLiteral
     ) ++ deps.http4sClient.map(_ % Test)
-      ++ deps.pureConfig ++ deps.circe ++ deps.http4sServer ++ deps.logging ++ deps.testing
+      ++ deps.pureConfig ++ deps.circe ++ deps.http4sServer ++ deps.logging
   )
-  .dependsOn(commonModel, commonEmail, commonDb, commonOwncloud, commonTestutils % "test->compile")
+  .dependsOn(
+    commonModel,
+    commonEmail,
+    commonDb,
+    commonOwncloud,
+    commonTestutils
+  )
 
-lazy val commonModel = (project in file("common/model")).settings(
-  libraryDependencies := Seq(
-    deps.catsEffect,
-    deps.scalaUri
-  ) ++ deps.circe ++ deps.logging ++ deps.testing
-)
+lazy val commonModel = (project in file("common/model"))
+  .settings(
+    libraryDependencies := Seq(
+      deps.catsEffect,
+      deps.scalaUri
+    ) ++ deps.circe ++ deps.logging
+  )
+  .dependsOn(commonTestutils)
 
 lazy val commonDb = (project in file("common/db"))
   .settings(
@@ -85,16 +93,18 @@ lazy val commonEmail = (project in file("common/email"))
     libraryDependencies := Seq(
       deps.catsEffect,
       deps.pencil
-    ) ++ deps.logging ++ deps.pureConfig ++ deps.testing
+    ) ++ deps.logging ++ deps.pureConfig
   )
-  .dependsOn(commonModel, commonTestutils % "test->compile")
+  .dependsOn(commonModel, commonTestutils)
 
 lazy val commonTestutils = (project in file("common/testutils"))
   .settings(
-    libraryDependencies := Seq(
-      deps.catsEffect
-    )
-      ++ deps.logging
+    libraryDependencies := {
+      val mockitoScala = "org.mockito" %% "mockito-scala" % "1.16.39"
+      val catsTestkit = "com.codecommit" %% "cats-effect-testing-scalatest" % "0.5.4"
+      val scalaTest = "org.scalatest" %% "scalatest" % "3.2.9"
+      Seq(catsTestkit, scalaTest, mockitoScala)
+    } ++ deps.logging :+ deps.catsEffect
   )
 
 lazy val deps = new {
@@ -124,9 +134,6 @@ lazy val deps = new {
   val betterFiles = "com.github.pathikrit" %% "better-files" % "3.9.1"
   val scalaUri = "io.lemonlabs" %% "scala-uri" % "3.5.0"
 
-  val artc = "io.github.mkotsur" %% "artc" % V.artc
-//  val tapir = "com.softwaremill.sttp.tapir" %% "tapir-core" % V.tapir
-//  val tapirHttps = "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % V.tapir
   val pureConfig = Seq(
     "com.github.pureconfig" %% "pureconfig" % V.pureConf,
     "com.github.pureconfig" %% "pureconfig-cats-effect2" % V.pureConf
@@ -165,11 +172,4 @@ lazy val deps = new {
   val flyway =
     Seq("org.postgresql" % "postgresql" % "42.2.23", "org.flywaydb" % "flyway-core" % "7.11.4")
 
-  val testing = {
-    val mockitoScala = "org.mockito" %% "mockito-scala" % "1.16.39"
-    val catsTestkit = "com.codecommit" %% "cats-effect-testing-scalatest" % "0.5.4"
-    val scalaTest = "org.scalatest" %% "scalatest" % "3.2.9"
-
-    Seq(catsTestkit, scalaTest, mockitoScala).map(_ % Test)
-  }
 }
