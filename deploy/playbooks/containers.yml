@@ -4,6 +4,13 @@
     - vars/backend.yml
 
   tasks:
+    - name: Log into private registry and force re-authorization
+      become: true
+      community.general.docker_login:
+        registry: "{{ docker_registry_url }}"
+        username: "{{ lookup('env', 'DOCKER_USERNAME') }}"
+        password: "{{ lookup('env', 'DOCKER_PASSWORD') }}"
+        reauthorize: yes
     - name: Update backend and DB containers
       become: true
       tags: [docker]
@@ -19,7 +26,7 @@
               environment:
                 POSTGRES_HOST_AUTH_METHOD: trust
             backend:
-              image: git.ia.surfsara.nl:5050/soil/rdx/backend:{{ lookup('env', 'DOCKER_IMAGE_TAG') }}
+              image: "{{ docker_registry_url }}/backend:{{ lookup('env', 'DOCKER_IMAGE_TAG') }}"
               restart: "always"
               depends_on: [postgres]
               environment:
@@ -39,7 +46,7 @@
                 LOG_LEVEL: "info"
                 RDX_APP_NAME: "sharer"
             librarian:
-              image: git.ia.surfsara.nl:5050/soil/rdx/backend:{{ lookup('env', 'DOCKER_IMAGE_TAG') }}
+              image: "{{ docker_registry_url }}/backend:{{ lookup('env', 'DOCKER_IMAGE_TAG') }}"
               restart: "always"
               depends_on: [postgres]
               ports:
@@ -58,9 +65,13 @@
                 RDX_WEBDAV_USER: "{{ lookup('env', 'RDX_WEBDAV_USER') }}"
                 RDX_WEBDAV_PASSWORD: "{{ lookup('env', 'RDX_WEBDAV_PASSWORD') }}"
             frontend:
-              image: git.ia.surfsara.nl:5050/soil/rdx/frontend:{{ lookup('env', 'DOCKER_IMAGE_TAG') }}
+              image: "{{ docker_registry_url }}/frontend:{{ lookup('env', 'DOCKER_IMAGE_TAG') }}"
               depends_on: [librarian]
               ports:
                 - 3000:3000
               environment:
                 RDX_BACKEND_URL: http://librarian:8081
+    - name: Log out of docker registry
+      become: true
+      community.docker.docker_login:
+        state: absent

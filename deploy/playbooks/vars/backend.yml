@@ -1,4 +1,4 @@
 ---
 ansible_python_interpreter: /usr/bin/python3
 
-backend_image: git.ia.surfsara.nl:5050/soil/rdx/backend
+docker_registry_url: "git.ia.surfsara.nl:5050/soil/rdx"
