@@ -31,7 +31,7 @@ object DatasetAccessOwnerEml {
           Subject(s"Dataset '${vars.ds.owncloudShare.path}' was requested"),
           Body.Html(s"""
             |${`<BODY>`}
-            |<p>Dear User,</p>
+            |<p>Dear Data Owner,</p>
             |
             |<p>For your information, we received an access request for your dataset '${vars.ds.owncloudShare.path}' from ${vars.requester} &lt;${vars.requesterEmail}&gt;.</p>
             |<p> This is an informational email, no action is required.
