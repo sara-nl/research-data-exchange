@@ -133,4 +133,4 @@ deploy_prod:
     - apt -y install openssh-client
     - pip install ansible
     - cd deploy/
-    - ansible-playbook -u ubuntu -i inventory-prod.yml playbooks/containers.yml --key-file "$RDX_TEST1_SSH_KEY"
+    - ansible-playbook -u ubuntu -i inventory-prod.yml playbooks/containers.yml --key-file "$RDX_PROD_SSH_KEY"
