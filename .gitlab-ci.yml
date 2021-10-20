@@ -103,16 +103,34 @@ frontend_docker:
     - echo "$KANIKO_CONFIG" > /kaniko/.docker/config.json
     - find . -name ".next"
     - /kaniko/executor --build-arg RDX_PDF_HEADERS_PROXY_URL="$RDX_PDF_HEADERS_PROXY_URL" --build-arg RDX_BACKEND_URL="$RDX_BACKEND_URL" --cache=false --context $CI_PROJECT_DIR/frontend/ --dockerfile $CI_PROJECT_DIR/frontend/Dockerfile --destination "$DOCKER_REGISTRY_PATH:$DOCKER_IMAGE_TAG" --destination "$DOCKER_REGISTRY_PATH:$CI_COMMIT_REF_NAME" --destination "$DOCKER_REGISTRY_PATH:latest"
-deploy_test1:
+
+# deploy_test1:
+#   stage: deploy
+#   image: python:3.9-slim
+#   cache:
+#     paths:
+#       - .cache/pip
+#   script:
+#     - chmod 0600 "${RDX_TEST1_SSH_KEY}"
+#     - apt-get update
+#     - apt -y install openssh-client
+#     - pip install ansible
+#     - cd deploy/
+#     - ansible-playbook -u ubuntu -i inventory.yml playbooks/containers.yml --key-file "$RDX_TEST1_SSH_KEY"
+
+deploy_prod:
   stage: deploy
   image: python:3.9-slim
+  only:
+    variables:
+      - $CI_COMMIT_TAG =~ /^prod\-.*/i
   cache:
     paths:
       - .cache/pip
   script:
-    - chmod 0600 "${RDX_TEST1_SSH_KEY}"
+    - chmod 0600 "${RDX_PROD_SSH_KEY}"
     - apt-get update
     - apt -y install openssh-client
     - pip install ansible
     - cd deploy/
-    - ansible-playbook -u ubuntu -i inventory.yml playbooks/containers.yml --key-file "$RDX_TEST1_SSH_KEY"
+    - ansible-playbook -u ubuntu -i inventory-prod.yml playbooks/containers.yml --key-file "$RDX_TEST1_SSH_KEY"
