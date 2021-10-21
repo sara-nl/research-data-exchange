@@ -128,9 +128,9 @@ deploy_prod:
     paths:
       - .cache/pip
   script:
-    - chmod 0600 "${RDX_PROD_SSH_KEY}"
+    - chmod 0600 "${RDX_TEST1_SSH_KEY}"
     - apt-get update
     - apt -y install openssh-client
     - pip install ansible
     - cd deploy/
-    - ansible-playbook -u ubuntu -i inventory-prod.yml playbooks/containers.yml --key-file "$RDX_PROD_SSH_KEY"
+    - ansible-playbook -u ubuntu -i inventory-prod.yml playbooks/containers.yml --key-file "$RDX_TEST1_SSH_KEY"
