@@ -107,6 +107,9 @@ frontend_docker:
 # deploy_test1:
 #   stage: deploy
 #   image: python:3.9-slim
+#   variables:
+#     RDX_WEBDAV_USER: $WEBDAV_USER_TEST2
+#     RDX_WEBDAV_PASSWORD: $WEBDAV_PASSWORD_TEST2
 #   cache:
 #     paths:
 #       - .cache/pip
@@ -121,6 +124,9 @@ frontend_docker:
 deploy_prod:
   stage: deploy
   image: python:3.9-slim
+  variables:
+    RDX_WEBDAV_USER: $WEBDAV_USER_PROD
+    RDX_WEBDAV_PASSWORD: $WEBDAV_PASSWORD_PROD
   # only:
   #   variables:
   #     - $CI_COMMIT_TAG =~ /^prod\-.*/i
