@@ -2,13 +2,13 @@ package nl.surf.rdx.common.email
 
 import cats.effect.{IO, Resource, Sync, Timer}
 import cats.effect.testing.scalatest.{AsyncIOSpec, EffectTestSupport}
-import com.minosiants.pencil.Client
 import com.minosiants.pencil.data.{Body, Email, Mailbox, Subject, To}
 import com.minosiants.pencil.protocol.{Code, Replies, Reply}
 import nl.surf.rdx.common.email.conf.EmailConf
 import nl.surf.rdx.common.testutils.Fixtures
 import org.mockito.{MockitoSugar, ArgumentMatchers => mm}
 import cats.implicits._
+import nl.surf.rdx.common.email.pencil.Client
 
 import scala.concurrent.duration.FiniteDuration
 

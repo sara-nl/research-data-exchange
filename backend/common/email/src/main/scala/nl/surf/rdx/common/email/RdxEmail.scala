@@ -52,7 +52,7 @@ object RdxEmail {
 
     val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("EEE, d MMM yyyy HH:mm Z")
     val `<BODY>` = """<body style="font-size: 16px; font-family: Arial, sans-serif, 'Open Sans'">"""
-    val `</BODY>` = """</body>"""
+    val `</BODY>` = """<br/></body>"""
   }
 
 }

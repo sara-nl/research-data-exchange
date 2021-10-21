@@ -3,7 +3,8 @@ package nl.surf.rdx.common.email
 import cats.Parallel
 import cats.data.Kleisli
 import cats.effect.{Blocker, Concurrent, ContextShift, Resource, Sync}
-import com.minosiants.pencil.Client
+import nl.surf.rdx.common.email.pencil.Client
+//import com.minosiants.pencil.Client
 import com.minosiants.pencil.data._
 import fs2.io.tcp.SocketGroup
 import fs2.io.tls.TLSContext
