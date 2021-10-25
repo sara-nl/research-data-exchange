@@ -108,12 +108,11 @@ frontend_docker:
     - find . -name ".next"
     - /kaniko/executor --build-arg RDX_PDF_HEADERS_PROXY_URL="$RDX_PDF_HEADERS_PROXY_URL" --build-arg RDX_BACKEND_URL="$RDX_BACKEND_URL" --cache=false --context $CI_PROJECT_DIR/frontend/ --dockerfile $CI_PROJECT_DIR/frontend/Dockerfile --destination "$DOCKER_REGISTRY_PATH:$DOCKER_IMAGE_TAG" --destination "$DOCKER_REGISTRY_PATH:$CI_COMMIT_REF_NAME" --destination "$DOCKER_REGISTRY_PATH:latest"
 
-
 # 🚀 DEPLOYMENT JOBS
 
-# This is a job template. 
+# This is a job template.
 # See: https://docs.gitlab.com/ee/ci/yaml/#extends
-.deploy_tpl
+.deploy_tpl:
   stage: deploy
   image: python:3.9-slim
   cache:
@@ -125,7 +124,7 @@ frontend_docker:
     - apt -y install openssh-client
     - pip install ansible
     - cd deploy/
-    - ansible-playbook -u ubuntu -i $ANSIBLE_INVENTORY playbooks/containers.yml --key-file "$RDX_GITLAB_SSH_KEY"      
+    - ansible-playbook -u ubuntu -i $ANSIBLE_INVENTORY playbooks/containers.yml --key-file "$RDX_GITLAB_SSH_KEY"
 
 deploy_test1:
   extends: .deploy_tpl
@@ -137,11 +136,9 @@ deploy_test1:
 deploy_prod:
   extends: .deploy_tpl
   only:
-    "deploy-prod" # Change to master
     variables:
       - $CI_COMMIT_TAG =~ /^prod\-.*/i
   variables:
     RDX_WEBDAV_USER: $WEBDAV_USER_PROD
     RDX_WEBDAV_PASSWORD: $WEBDAV_PASSWORD_PROD
     ANSIBLE_INVENTORY: "inventory-prod.yml"
-
