@@ -3,7 +3,7 @@ FROM node:14-alpine AS deps
 ENV NEXT_TELEMETRY_DISABLED 1
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
 RUN apk --no-cache --virtual build-dependencies add \
-    python \
+    python3 \
     make \
     g++
 RUN apk add --update --no-cache libc6-compat 
