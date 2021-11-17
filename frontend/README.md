@@ -5,7 +5,7 @@
 ### Install tools
 
 - `brew install nvm`
-- `nvm install lts`
+- `nvm install --lts=fermium`
 
 ### VScode
 
