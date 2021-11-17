@@ -67,13 +67,16 @@ const Home: React.FC = () => (
         <Row>
           <Col></Col>
           <Col className="text-center">
-            <img className="home-logo" src="/images/logos/eu.png" />
+            <img className="home-logo" src="/images/logos/uva.png" />
           </Col>
           <Col className="text-center">
             <img className="home-logo" src="/images/logos/surf.png" />
           </Col>
           <Col className="text-center">
             <img className="home-logo" src="/images/logos/amdex.svg" />
+          </Col>          
+          <Col className="text-center">
+            <img className="home-logo" src="/images/logos/eu.png" />
           </Col>
           <Col></Col>
         </Row>
