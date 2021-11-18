@@ -25,8 +25,8 @@ const Home: React.FC = () => (
             <img
               className="d-block w-100 rounded mt-3"
               style={{ minWidth: '300px' }}
-              src="https://amsterdameconomicboard.com/app/uploads/2021/02/amdex-header.jpg"
-              alt="First slide"
+              src="/images/amdex-header.jpg"
+              alt="AMDEX header image"
             />
           </Col>
         </Row>
