@@ -13,7 +13,7 @@ const Home: React.FC = () => (
       />
       <title>Research Data Exchange MVP</title>
     </Head>
-    <section className="mt-5">
+    <section>
       <Container>
         <Row>
           <Col>
@@ -30,7 +30,7 @@ const Home: React.FC = () => (
             />
           </Col>
         </Row>
-        <Row className="mt-5">
+        <Row className="top-buffer">
           <Col>
             <h2 className="display-4 text-center">
               For researchers and institutions who want to share data as much as
@@ -39,7 +39,7 @@ const Home: React.FC = () => (
             </h2>
           </Col>
         </Row>
-        <Row className="mt-5">
+        <Row className="top-buffer">
           <Col>
             <p className="lead">
               Enforces the data sharing conditions and does not require blind
@@ -62,9 +62,41 @@ const Home: React.FC = () => (
         </Row>
       </Container>
     </section>
+    <section className="top-buffer">
+      <Container>
+        <Row>
+          <Col>
+            <h1 className="lead text-uppercase">
+              <b>Publications</b>
+            </h1>
+          </Col>
+        </Row>
+        <Row className="mt-3">
+          <Col>
+            <ul className="lead disc">
+              <li>
+                <a
+                  className="text-info"
+                  href="https://www.surf.nl/surf-magazine/belemmeringen-wegnemen-om-data-te-delen"
+                >
+                  Belemmeringen wegnemen om data te delen (SURF Magazine 2021)
+                </a>
+              </li>
+            </ul>
+          </Col>
+        </Row>
+      </Container>
+    </section>
     <section className="mt-5">
       <Container>
         <Row>
+          <Col>
+            <h1 className="lead text-uppercase text-center">
+              <b>This project is a collaboration between</b>
+            </h1>
+          </Col>
+        </Row>
+        <Row className="mt-3 ">
           <Col></Col>
           <Col className="text-center">
             <img className="home-logo" src="/images/logos/uva.png" />
@@ -74,7 +106,7 @@ const Home: React.FC = () => (
           </Col>
           <Col className="text-center">
             <img className="home-logo" src="/images/logos/amdex.svg" />
-          </Col>          
+          </Col>
           <Col className="text-center">
             <img className="home-logo" src="/images/logos/eu.png" />
           </Col>

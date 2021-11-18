@@ -73,6 +73,14 @@ $theme-colors: (
   }
 }
 
+.top-buffer {
+  margin-top: 5rem;
+}
+
+ul.disc > li {
+  list-style: disc;
+}
+
 .footer {
   margin-top: 50px;
 
