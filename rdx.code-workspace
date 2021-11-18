@@ -13,6 +13,7 @@
 	"settings": {
 		"files.watcherExclude": {
 			"**/target": true
-		}
+		},
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	}
 }
