@@ -82,6 +82,15 @@ const Home: React.FC = () => (
                   Belemmeringen wegnemen om data te delen (SURF Magazine 2021)
                 </a>
               </li>
+              <li>
+                <a
+                  className="text-info"
+                  href="http://github.com/sara-nl/research-data-exchange"
+                >
+                  Source code of Research Data Exchange prototype (Github,
+                  Apache 2.0 License)
+                </a>
+              </li>
             </ul>
           </Col>
         </Row>
