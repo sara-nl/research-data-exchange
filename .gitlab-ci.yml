@@ -12,7 +12,7 @@ variables:
   DOCKER_IMAGE_TAG: "$CI_COMMIT_SHORT_SHA"
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   RDX_BACKEND_URL: "http://librarian:8081"
-  RDX_PDF_HEADERS_PROXY_URL: "http://rdx.lab.surf.nl/conditions"
+  RDX_PDF_HEADERS_PROXY_URL: "https://rdx.lab.surf.nl/conditions"
   RDX_WEB_URL_PROD: "http://rdx.lab.surf.nl"
   RDX_WEB_URL_TEST2: "https://rdx-test-1.dataex-sara.surf-hosted.nl"
 
