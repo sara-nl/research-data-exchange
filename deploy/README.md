@@ -14,16 +14,6 @@ $ pipenv run ansible-playbook -i inventory.yml -u ubuntu <playbook_you_want_to_r
 
 See: [.gitlab-ci.yml](../.gitlab-ci.yml)
 
-# How to run development server
-
-- Install `docker` locally.
-
-```
-$ cd backend && sbt assembly && docker build . -t backend:latest
-$ echo .env > "<environment variables and their values>"
-$ cd deploy && docker-compose up --remove-orphans
-```
-
 # How to setup brand new server
 
 ## Pre-requisites

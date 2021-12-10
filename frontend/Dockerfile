@@ -14,12 +14,10 @@ RUN npm install --frozen-lockfile
 # Rebuild the source code only when needed
 FROM node:14-alpine AS builder
 ENV NEXT_TELEMETRY_DISABLED 1
+
 # This env variable will be overriden when starting app
 ARG RDX_BACKEND_URL
-ENV RDX_BACKEND_URL=$RDX_BACKEND_URL
-
 ARG RDX_PDF_HEADERS_PROXY_URL
-ENV RDX_PDF_HEADERS_PROXY_URL=$RDX_PDF_HEADERS_PROXY_URL
 
 WORKDIR .
 COPY . .

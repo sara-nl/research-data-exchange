@@ -1,17 +1,22 @@
-# frontend
+# RDX Frontend
 
-## Development
+## Software Requirements
 
-### Requirements
-
-- NodeJS 14.x LTS
-
-### Install tools
+### NodeJS 14.x LTS
 
 - `brew install nvm`
 - `nvm install --lts=fermium`
 
-### Build and Run
+## Environment Variables
+
+⚠️ Pay attention: URLs should NOT contain trailing slashes!
+
+```
+RDX_BACKEND_URL=http://localhost:8081
+RDX_PDF_HEADERS_PROXY_URL=http://some.rdx.host/conditions
+```
+
+## Build and Run
 
 There are some environment variables required for startup. For local development use `.env.local` (_NOTE_ this file shouldn't be commited to git) to override `RDX_BACKEND_URL` and `RDX_PDF_HEADERS_PROXY_URL` f.e. :
 

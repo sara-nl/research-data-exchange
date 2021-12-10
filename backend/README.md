@@ -1,6 +1,6 @@
 # RDX Backend
 
-## Requirements
+## Software Requirements
 
 * Java 16
 * SBT 1.5+

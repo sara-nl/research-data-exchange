@@ -10,6 +10,7 @@ services:
     depends_on: [postgres]
     environment:
       RDX_APP_NAME: "sharer"
+      LOG_LEVEL: "info"
       RDX_SMTP_HOST: ${RDX_SMTP_HOST}
       RDX_SMTP_PORT: ${RDX_SMTP_PORT}
       RDX_SMTP_USER: ${RDX_SMTP_USER}
@@ -21,11 +22,11 @@ services:
       DB_NAME: "postgres"
       DB_USER: "postgres"
       DB_PORT: 5432
-      LOG_LEVEL: "info"
   librarian:
     # image: git.ia.surfsara.nl:5050/soil/rdx/backend:${DOCKER_IMAGE_TAG}
     image: rdx-backend:latest
     restart: "always"
+    depends_on: [postgres]
     ports:
       - 8081:8081
     environment:
@@ -37,9 +38,15 @@ services:
       RDX_SMTP_PORT: ${RDX_SMTP_PORT}
       RDX_SMTP_USER: ${RDX_SMTP_USER}
       RDX_SMTP_PASSWORD: ${RDX_SMTP_PASSWORD}
+      DB_HOST: "postgres"
+      DB_NAME: "postgres"
+      DB_USER: "postgres"
+      DB_PORT: 5432
 
   frontend:
     image: rdx-frontend:latest
+    restart: "always"
+    depends_on: [librarian]
     ports:
       - 3000:3000
     environment:
@@ -48,5 +55,7 @@ services:
   postgres:
     image: postgres:13-alpine
     restart: "always"
+    ports:
+      - 5432:5432
     environment:
       POSTGRES_HOST_AUTH_METHOD: trust
