@@ -1,7 +1,8 @@
 .metals
-.DS_Store
+**/.DS_Store
 */project/metals*
 */target
 */.bloop
-*/.vscode
+**/.vscode
 .idea/
+*.code-workspace

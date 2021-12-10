@@ -8,7 +8,8 @@
 
 ## Documentation for developers
 
-- Backend [README](./backend/README.md)
-- Frontend [README](./frontend/README.md)
-- Deployment scripts [README](./deploy/README.md)
-- CI/CD [.gitlab-ci](./.gitlab-ci)
+- Backend [README](./backend/README.md);
+- Frontend [README](./frontend/README.md);
+- Deployment scripts [README](./deploy/README.md);
+- CI/CD [.gitlab-ci](./.gitlab-ci);
+- [Source code editors configuration example](./docs/developers/source-code-editors.md).
