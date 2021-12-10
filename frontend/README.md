@@ -55,7 +55,7 @@ We use Cypress for end to end tests to verify that our pages do what we need the
 Start the server for cypress tests:
 
 ```
-RDX_BACKEND_URL="http://127.0.0.1:8081" RDX_PDF_HEADERS_PROXY_URL=https://rdx-test-1.dataex-sara.surf-hosted.nl/conditions npm run start
+RDX_BACKEND_URL="http://127.0.0.1:8081" RDX_PDF_HEADERS_PROXY_URL=https://rdx.lab.surf.nl/conditions npm run start
 ```
 
 Run cypress tests:
