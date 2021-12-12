@@ -68,13 +68,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     title: response.title,
     description: response.description,
     files: response.files,
-    conditionsUrl: transformDownloadLink(response.conditionsUrl),
+    conditionsUrlProxy: transformDownloadLink(response.conditionsUrl),
+    conditionsUrl: response.conditionsUrl + '/download',
   };
 
   return {
     props: {
       dataset: dataset,
-      submitUrl: '/api/access/' + encodeURIComponent(doi.join("/")),
+      submitUrl: '/api/access/' + encodeURIComponent(doi.join('/')),
     },
   };
 };

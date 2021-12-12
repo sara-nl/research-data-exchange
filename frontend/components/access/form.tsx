@@ -1,11 +1,18 @@
-import { Button, Col, Form as RForm, Alert } from 'react-bootstrap';
-import { Formik, Field } from 'formik';
+import {
+  Button,
+  Col,
+  Form as RForm,
+  FormGroup as RFormGroup,
+  Alert,
+} from 'react-bootstrap';
+import { Formik, Field, FieldProps } from 'formik';
 import { Dataset } from '../../types';
 import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
 import FieldFeedback from '../form/fieldFeedback';
 import { Tooltip } from 'react-bootstrap';
 import { OverlayTrigger } from 'react-bootstrap';
+import AgreeToConditions from './form/AgreeToConditions';
 
 const PDFViewer = dynamic(() => import('../pdf-view'), {
   ssr: false,
@@ -29,6 +36,7 @@ const AccessForm: React.FC<Props> = ({
   onSuccessSubmission,
 }) => {
   const [scrollBottom, setScrollBottom] = useState(0);
+  const [downloadedConditions, setDownloadedConditions] = useState(false);
 
   const handleScroll = (e) => {
     const { target } = e;
@@ -43,6 +51,8 @@ const AccessForm: React.FC<Props> = ({
     undefined,
   );
 
+  const canAgree = scrollBottom >= 1 || downloadedConditions;
+
   if (outOfService) {
     return (
       <Alert variant="danger" className="mb-5">
@@ -53,6 +63,7 @@ const AccessForm: React.FC<Props> = ({
       </Alert>
     );
   }
+
   return (
     <Formik
       initialValues={{ agree: false, name: '', email: '' }}
@@ -103,68 +114,50 @@ const AccessForm: React.FC<Props> = ({
               appropriately.
             </Alert>
           </div>
-          <div className="pdf-view mb-5" onScroll={handleScroll}>
-            <PDFViewer conditionsUrl={dataset.conditionsUrl} />
+          <div className="pdf-view" onScroll={handleScroll}>
+            <PDFViewer conditionsUrl={dataset.conditionsUrlProxy} />
           </div>
 
           <RForm noValidate validated={!errors} onSubmit={handleSubmit}>
-            <RForm.Row>
+            <p className="text-center">
+              <a
+                className="badge badge-secondary"
+                download="Research_Data_Exchange_Conditions"
+                href={dataset.conditionsUrl}
+                onClick={() => setDownloadedConditions(true)}
+              >
+                Download PDF
+              </a>
+            </p>
+
+            <RForm.Row className="mt-2">
               <Field name="agree">
-                {(fp) => (
+                {(fp: FieldProps) => (
                   <RForm.Group
                     as={Col}
                     controlId="agree"
                     className="text-center"
                   >
-                    {Boolean(!scrollBottom) ? (
+                    {!canAgree ? (
                       <OverlayTrigger
                         placement="bottom-start"
                         overlay={
                           <Tooltip id="tooltip-disabled">
-                            To agree you must read the conditions first
+                            To agree you must fully read or download the
+                            conditions first
                           </Tooltip>
                         }
                       >
-                        <span className="d-inline-block">
-                          <RForm.Check
-                            type="checkbox"
-                            required
-                            label={
-                              <React.Fragment>
-                                <span className="lead">
-                                  I hereby agree to the terms and conditions{' '}
-                                </span>
-                                <sup className="font-weight-light">
-                                  required
-                                </sup>
-                              </React.Fragment>
-                            }
-                            disabled={scrollBottom >= 1 ? false : true}
-                            value={fp.field.value}
-                            onBlur={fp.field.onBlur}
-                            onChange={fp.field.onChange}
-                          />
-                        </span>
+                        <AgreeToConditions
+                          disabled={!canAgree}
+                          formikFieldProps={fp}
+                        />
                       </OverlayTrigger>
                     ) : (
-                      <span className="d-inline-block">
-                        <RForm.Check
-                          type="checkbox"
-                          required
-                          label={
-                            <React.Fragment>
-                              <span className="lead">
-                                I hereby agree to the terms and conditions{' '}
-                              </span>
-                              <sup className="font-weight-light">required</sup>
-                            </React.Fragment>
-                          }
-                          disabled={scrollBottom >= 1 ? false : true}
-                          value={fp.field.value}
-                          onBlur={fp.field.onBlur}
-                          onChange={fp.field.onChange}
-                        />
-                      </span>
+                      <AgreeToConditions
+                        disabled={!canAgree}
+                        formikFieldProps={fp}
+                      />
                     )}
                   </RForm.Group>
                 )}

@@ -64,15 +64,6 @@ $theme-colors: (
   color: $white;
 }
 
-.btn {
-  @extend %title;
-  color: $white;
-
-  &:hover {
-    opacity: 0.8;
-  }
-}
-
 .top-buffer {
   margin-top: 5rem;
 }
@@ -89,12 +80,6 @@ ul.disc > li {
     // position: fixed;
     // width: 100%;
     // margin-top: 0;
-  }
-}
-
-.footer a {
-  &:hover {
-    text-decoration: underline;
   }
 }
 
