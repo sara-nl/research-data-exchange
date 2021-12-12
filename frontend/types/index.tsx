@@ -10,5 +10,6 @@ export type Dataset = {
   title: string;
   description: string;
   conditionsUrl: string;
+  conditionsUrlProxy: string;
   files: Array<string>;
 };
