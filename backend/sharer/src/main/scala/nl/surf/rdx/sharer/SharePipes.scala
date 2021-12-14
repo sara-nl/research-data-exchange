@@ -80,7 +80,7 @@ object SharePipes {
         .use(session => {
           for {
             storedShares <- session.execute(Shares.listOC)
-            _ <- Logger[F].info(
+            _ <- Logger[F].debug(
               s"Observed ${observedDexShares.size} shares, found ${storedShares.size} stored shares"
             )
             compared = SharePipes.diff(storedShares.toSet, observedDexShares.toSet)
@@ -93,11 +93,25 @@ object SharePipes {
                   ShareEventHandlers
                     .handleShareRemoved[F](compared.removed.toList)
                     .local[Deps[F]](dd => ShareEventHandlers.Deps(session, dd.conf, dd.ocConf))
-                _ <- Kleisli.liftF(
-                  Logger[F].info(
-                    s"Update finished. +${compared.added.size} shares / -${compared.removed.size} shares"
-                  )
-                )
+                _ <- Kleisli.liftF {
+                  compared match {
+                    case Result(removed, added) if removed.nonEmpty || added.nonEmpty =>
+                      Logger[F]
+                        .info(
+                          s"Update finished. +${compared.added.size} shares / -${compared.removed.size} shares"
+                        ) >>
+                        Logger[F].info(
+                          s"Added: (${compared.added.map(i => s"${i.share.id}:`${i.share.path}`").mkString(",")}), Deleted: (${compared.removed
+                            .map(r => s"${r.id}:`${r.path}`")
+                            .mkString(",")})"
+                        )
+                    case _ =>
+                      Logger[F].debug(
+                        s"Update finished. No changes found"
+                      )
+                  }
+
+                }
               } yield newShares).run(deps)
           } yield newShares
         })
