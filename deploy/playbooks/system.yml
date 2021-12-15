@@ -130,3 +130,19 @@
         certbot --nginx --agree-tos -n \
         -m mike.kotsur@surf.nl \
         -d "{{inventory_hostname}}" --redirect
+
+    - name: Copy DB backup script config
+      tags: [backup]
+      template:
+        src: ../files/db-backup.sh
+        dest: /home/ubuntu/db-backup.sh
+        mode: "0755"
+
+    - name: Creates daily psql backup cronjob
+      tags: [cron, backup]
+      become: true
+      ansible.builtin.cron:
+        special_time: daily
+        name: "Backup psql database (daily)"
+        user: root
+        job: /home/ubuntu/db-backup.sh
