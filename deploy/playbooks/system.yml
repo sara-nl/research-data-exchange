@@ -144,5 +144,5 @@
       ansible.builtin.cron:
         special_time: daily
         name: "Backup psql database (daily)"
-        user: root
+        user: ubuntu
         job: /home/ubuntu/db-backup.sh
