@@ -14,7 +14,7 @@ variables:
   RDX_BACKEND_URL: "http://librarian:8081"
   RDX_PDF_HEADERS_PROXY_URL: "https://rdx.lab.surf.nl/conditions"
   RDX_WEB_URL_PROD: "http://rdx.lab.surf.nl"
-  RDX_WEB_URL_TEST2: "https://rdx-test-1.dataex-sara.surf-hosted.nl"
+  RDX_WEB_URL_TEST: "https://rdx-test.lab.surf.nl"
 
 after_script:
   - date
@@ -127,13 +127,13 @@ frontend_docker:
     - cd deploy/
     - ansible-playbook -u ubuntu -i $ANSIBLE_INVENTORY playbooks/containers.yml --key-file "$RDX_GITLAB_SSH_KEY"
 
-deploy_test1:
+deploy_test:
   extends: .deploy_tpl
   variables:
-    RDX_WEBDAV_USER: $WEBDAV_USER_TEST2
-    RDX_WEBDAV_PASSWORD: $WEBDAV_PASSWORD_TEST2
+    RDX_WEBDAV_USER: $WEBDAV_USER_TEST
+    RDX_WEBDAV_PASSWORD: $WEBDAV_PASSWORD_TEST
     ANSIBLE_INVENTORY: "inventory.yml"
-    RDX_WEB_URL: $RDX_WEB_URL_TEST2
+    RDX_WEB_URL: $RDX_WEB_URL_TEST
 
 deploy_prod:
   extends: .deploy_tpl

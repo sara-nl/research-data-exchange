@@ -1,8 +1,13 @@
-# How to provision VM
+# Deployment scripts
 
-See `.gitlab-ci` to know the order of applying playbooks.
+This folder contains Ansible scripts and other artifacts needed for deploying RDX to a VM. There are two playbooks:
 
-Applying a playbook:
+- `system.yml` that installs necessary packages, sets up cron schedule and [let's encrypt](https://letsencrypt.org) certificates. Normally, you need to run it only once;
+- and `containers.yml` that uses `docker-compose` and takes care of (re-)deploying all Docker containers that run RDX and accompanying services. You can run it manually or configure a CI system to do it (e.g. GitLab). See: [.gitlab-ci.yml](../.gitlab-ci.yml).
+
+## Applying a playbook:
+
+To apply playbooks on a server, you will need Python's `pipenv` (tested on version 2021.11.23).
 
 ```
 $ cd deploy
@@ -10,24 +15,20 @@ $ pipenv install
 $ pipenv run ansible-playbook -i inventory.yml -u ubuntu <playbook_you_want_to_run>
 ```
 
-# How to deploy
-
-See: [.gitlab-ci.yml](../.gitlab-ci.yml)
-
-# How to setup brand new server
+# How to setup a brand new server
 
 ## Pre-requisites
 
 1. Server with Ubuntu 18.04.X:
 
-- with fully qualified domain name
-- with user `ubuntu`
-- with your public ssh key in `ubuntu`'s authorised keys
+- with a fully qualified domain name;
+- with user `ubuntu`;
+- with your public ssh key in `ubuntu`'s authorised keys;
 - with access to `git.ia.surfsara.nl`.
 
 2. Generated [access token](https://git.ia.surfsara.nl/SOIL/RDX/-/settings/access_tokens) for Docker registry.
 
-3. Webdav username and password.
+3. Research Drive's Webdav username and password.
 
 4. Mail server configuration.
 
@@ -68,13 +69,13 @@ All these variables must be set on the machine that runs Ansible. They will be p
 
 ```
 DOCKER_IMAGE_TAG = "latest"
-DOCKER_USERNAME = "<configure in GitLab>"
-DOCKER_PASSWORD = "<configure in GitLab>"
+DOCKER_USERNAME = "<configure in GitLab>. See https://docs.gitlab.com/ee/user/packages/container_registry/"
+DOCKER_PASSWORD = "<configure in GitLab>. See https://docs.gitlab.com/ee/user/packages/container_registry/"
 RDX_SMTP_HOST = "<e.g. smtp.mailtrap.io>"
 RDX_SMTP_PORT = 2525
 RDX_SMTP_USER = "<e.g. make a free account on mailtrap.io>"
 RDX_SMTP_PASSWORD = "<e.g. make a free account on mailtrap.io>"
-RDX_WEB_URL="https://rdx.lab.surf.nl"  # Public web URL starting with protocol
+RDX_WEB_URL="https://rdx.lab.surf.nl"  # Public web URL starting with protocol.
 RDX_WEBDAV_PASSWORD = "<configure in Research Drive>"
 RDX_WEBDAV_USER = "<configure in Research Drive>"
 DB_USER = "postgres"
