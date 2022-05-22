@@ -3,11 +3,11 @@
 ## Documentation for end users
 
 - [How to register a dataset in RDX](./docs/register-dataset.md);
-- How to publsh a dataset: TBD;
 - [How to publish a dataset from Figshare (for Data Stewards)](./docs/publish-dataset-figshare-as-data-steward.md);
-- How to track usage of a dataset: TBD.
 
 ## Documentation for developers
+
+<img src="./docs/img/mvp1-services.png" alt="MVP1 service communication" title="MVP1 service communication">
 
 - [Running RDX on your machine](./docs/developers/running-rdx-on-your-machine.md);
 - Backend [README](./backend/README.md);
