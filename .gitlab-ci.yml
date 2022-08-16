@@ -16,6 +16,12 @@ variables:
   RDX_WEB_URL_PROD: "http://rdx.lab.surf.nl"
   RDX_WEB_URL_TEST: "https://rdx-test.lab.surf.nl"
 
+# TODO: Remove tag after 1 September 2022
+# https://surf.sharepoint.com/SitePages/Vervanging-gitlab-runners.aspx
+default:
+  tags:
+    - ops-test
+
 after_script:
   - date
 
