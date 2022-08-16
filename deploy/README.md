@@ -80,3 +80,9 @@ RDX_WEBDAV_PASSWORD = "<configure in Research Drive>"
 RDX_WEBDAV_USER = "<configure in Research Drive>"
 DB_USER = "postgres"
 ```
+
+Use the `SSH_ADDITIONAL_SOURCES` variable to add additional SSH sources.
+
+```
+SSH_ADDITIONAL_SOURCES = '[{ "src": "1.2.3.4/32", "comment": "Additional ssh source" }]'
+```

@@ -6,8 +6,8 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-ansible = "*"
-passlib = "*"
+ansible = "6.1.0"
+passlib = "1.7.4"
 
 [requires]
 python_version = "3.9"

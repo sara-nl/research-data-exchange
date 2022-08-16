@@ -8,6 +8,26 @@
       tags: [system]
       apt: upgrade=dist update_cache=yes
 
+    - name: Turn UFW logging on
+      become: true
+      community.general.ufw:
+        logging: on
+
+    - name: Allow SSH from limited number of sources
+      become: true
+      community.general.ufw:
+        rule: allow
+        port: ssh
+        proto: tcp
+        src: "{{ item.src }}"
+        comment: "{{ item.comment }}"
+      loop: "{{ ssh_remote_sources + ssh_additional_remote_sources }}"
+
+    - name: Enable UFW
+      become: true
+      community.general.ufw:
+        state: enabled
+
     - name: Install aptitude using apt
       become: true
       tags: [system]
@@ -114,14 +134,15 @@
       apt: name="{{item}}" state=latest
       loop: ["certbot", "python-certbot-nginx"]
 
-    - name: Allow all access to tcp ports 80 and 443
+    - name: Allow Nginx in UFW
       become: true
       tags: [nginx, system]
-      ufw:
+      community.general.ufw:
         rule: allow
-        port: "{{item}}"
-        proto: tcp
-      loop: ["80", "443"]
+        name: "{{ item }}"
+      loop:
+        - Nginx HTTP
+        - Nginx HTTPS
 
     - name: Install certificates
       become: true
