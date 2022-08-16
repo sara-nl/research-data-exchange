@@ -66,6 +66,7 @@
                 RDX_WEBDAV_PASSWORD: "{{ lookup('env', 'RDX_WEBDAV_PASSWORD') }}"
             frontend:
               image: "{{ docker_registry_url }}/frontend:{{ lookup('env', 'DOCKER_IMAGE_TAG') }}"
+              restart: "always"
               depends_on: [librarian]
               ports:
                 - 3000:3000
