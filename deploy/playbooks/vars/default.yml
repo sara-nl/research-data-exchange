@@ -3,3 +3,21 @@ ansible_python_interpreter: /usr/bin/python3
 
 docker_images:
   - nginx
+
+ssh_remote_sources:
+  # https://confluence.ia.surf.nl/display/ISOPS/SURF+EduVPN+Network+information
+  - { src: 145.90.232.0/23, comment: EduVPN Medewerkers (Alle verkeer) IPV4 }
+  - {
+      src: 2001:610:450:b0::/64,
+      comment: EduVPN Medewerkers (Alle verkeer) IPV6,
+    }
+  - { src: 145.90.234.0/24, comment: EduVPN Medewerkers (Gedeeltelijk verkeer) IPV4 }
+  - {
+      src: 2001:610:450:b1::/64,
+      comment: EduVPN Medewerkers (Gedeeltelijk verkeer) IPV6,
+    }
+  # https://confluence.ia.surf.nl/display/~paulus.smit@surf.nl/Paulus+FAQ+VPN#PaulusFAQVPN-VPNranges
+  - { src: 2001:610:108:203c::/63, comment: SURFsara/net VPN}
+  - { src: 145.100.0.0/18, comment: SURF datacenter }
+
+ssh_additional_remote_sources: "{{ lookup('env', 'SSH_ADDITIONAL_SOURCES', default=[]) }}"
