@@ -59,7 +59,7 @@ class OwnCloudClient(BaseModel):
             return self.oc.list(path)
         except Exception as error:
             print(f"Error listing contents in dir {path}: {error}")
-            raise
+            raise error
 
     def dir_has_file(self, path: str, filename: str) -> bool:
         print(f"Checking directory {path} for {filename}")
