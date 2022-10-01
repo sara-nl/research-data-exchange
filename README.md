@@ -10,7 +10,8 @@
 <img src="./docs/img/mvp1-services.png" alt="MVP1 service communication" title="MVP1 service communication">
 
 - [Running RDX on your machine](./docs/developers/running-rdx-on-your-machine.md);
-- Scala Backend [README](./backend/v1/README.md);
+- Backend v1 (Scala) [README](./backend/v1/README.md);
+- Backend v2 (Python) [README](./backend/v2/README.md);
 - Frontend [README](./frontend/README.md);
 - Deployment scripts [README](./deploy/README.md);
 - CI/CD [.gitlab-ci](./.gitlab-ci);
