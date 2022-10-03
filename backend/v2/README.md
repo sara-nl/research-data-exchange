@@ -33,3 +33,8 @@ These are libraries with shared utilities.
 #### Owncloud
 
 The owncloud library provides common ownCloud and WebDAV actions, see [README](./common/owncloud/README.md) for more details.
+
+
+#### Email
+
+The email library provides email functionality, see [README](./common/email/README.md) for more details.
