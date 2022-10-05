@@ -1,4 +1,4 @@
-# Email common library
+# Email
 
 The email library implements a mail client that can be used in other components to send emails. It expects the mail server to use TLS.
 It uses the credentials and settings specified in the `.env` file.

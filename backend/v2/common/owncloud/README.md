@@ -1,4 +1,4 @@
-# Owncloud common library
+# Owncloud
 
 The owncloud library implements an ownCloud client that can be used in other components to interact with ownCloud.
 It uses the credentials and settings specified in the `.env` file.
