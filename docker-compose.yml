@@ -53,9 +53,11 @@ services:
       RDX_BACKEND_URL: http://librarian:8081
       RDX_PDF_HEADERS_PROXY_URL: ${RDX_PDF_HEADERS_PROXY_URL}
   postgres:
-    image: postgres:13-alpine
+    image: postgres:14-alpine
     restart: "always"
     ports:
       - 5432:5432
     environment:
-      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_DB: ${DB_NAME:-postgres}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}

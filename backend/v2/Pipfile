@@ -9,6 +9,9 @@ uvicorn = {extras = ["standard"], version = "0.18.3"}
 python-dotenv = "0.21.0"
 pyocclient = "0.6"
 html2text = "2020.1.16"
+sqlmodel = "0.0.8"
+alembic = "1.8.1"
+psycopg2 = "2.9.3"
 
 [dev-packages]
 black = "*"
