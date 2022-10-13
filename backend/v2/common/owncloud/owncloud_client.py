@@ -9,6 +9,10 @@ from .settings import own_cloud_settings
 class OwnCloudClient(BaseModel):
     oc: typing.Any
 
+    MINIMUM_PERMISSION_LEVEL: typing.ClassVar = (
+        own_cloud_settings.minimum_permission_level
+    )
+
     @classmethod
     @validator("oc")
     def oc_must_be_oc_client_instance(cls, val):
@@ -30,33 +34,27 @@ class OwnCloudClient(BaseModel):
             raise error
 
     def __enter__(self):
-        print("entering")
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        print("exiting")
         self.oc.logout()
 
-    def get_shares(self, path: str = "") -> list[owncloud.ShareInfo]:
-        print(f"Getting shares from owncloud for path { path or '/'}")
+    def get_shares(self, path: str = "/") -> list[owncloud.ShareInfo]:
+        print(f"Getting shares from owncloud for path {path}")
         try:
             return self.oc.get_shares(path=path, shared_with_me=True)
         except Exception as error:
             print(f"Error getting shares: {error}")
             raise error
 
-    def get_shared_dirs(self) -> list[str]:
+    def get_shared_dirs(self) -> list[owncloud.ShareInfo]:
         shares = self.get_shares()
-        return [
-            s.get_path()
-            for s in shares
-            if s.share_info["mimetype"] == "httpd/unix-directory"
-        ]
+        return [s for s in shares if s.share_info["mimetype"] == "httpd/unix-directory"]
 
-    def list_dir_contents(self, path: str = "") -> list[owncloud.FileInfo]:
-        print(f"Listing contents for directory { path or '/'}")
+    def list_dir_contents(self, path: str = "/") -> list[owncloud.FileInfo]:
+        print(f"Listing contents for directory {path}")
         try:
-            return self.oc.list(path)
+            return self.oc.list(path, depth="infinity")
         except Exception as error:
             print(f"Error listing contents in dir {path}: {error}")
             raise error
@@ -69,15 +67,15 @@ class OwnCloudClient(BaseModel):
                 return True
         return False
 
-    def make_public_link(self, file_path: str) -> str:
+    def make_public_link(self, file_path: str) -> tuple[int, str]:
         print(f"Creating public link for {file_path}")
         try:
-            link_info = self.oc.share_file_with_link(file_path)
+            link_info: owncloud.ShareInfo = self.oc.share_file_with_link(file_path)
         except Exception as error:
             print(f"Failed to create download link {error}")
             raise error
         print("link_info", link_info)
-        return link_info.get_link()
+        return (link_info.get_id(), link_info.get_link())
 
     def delete_share(self, share_id: int) -> bool:
         print(f"Deleting share with ID {share_id}")
@@ -86,6 +84,14 @@ class OwnCloudClient(BaseModel):
             return result
         except Exception as error:
             print(f"Failed to delete share with ID {share_id}: {error}")
+            raise error
+
+    def get_file_contents(self, file_path: str) -> bytes:
+        print(f"Getting file contents for {file_path}")
+        try:
+            return self.oc.get_file_contents(file_path)
+        except Exception as error:
+            print(f"Failed to get contents for {file_path}: {error}")
             raise error
 
     def download_conditions(self, src_dir: str, target_dir: str) -> str:
