@@ -53,6 +53,8 @@ def create_dataset(db: DBClient, new_share: RdxShare) -> RdxDataset:
                 files=new_share.files,
                 conditions_url=conditions_url,
                 condtions_share_id=conditions_share_id,
+                data_steward_id=new_share.data_steward_id,
+                researcher_id=new_share.researcher_id,
             )
             if new_share.dataset_config.metadata:
                 metadata = new_share.dataset_config.metadata

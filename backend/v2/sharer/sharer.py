@@ -1,7 +1,7 @@
 import time
 
 from fastapi import FastAPI
-from pipeline import discovery, synchronize
+from pipeline import discovery, synchronize, users
 
 from common.db.db_client import DBClient
 
@@ -29,6 +29,7 @@ def run_sharer():
     print(
         f"Found {len(new_shares)} new share(s) and {len(deleted_shares)} deleted share(s)"
     )
+    new_shares = users.create_users(db, new_shares)
     synchronize.add_new_shares(db, new_shares)
     synchronize.remove_deleted_shares(db, deleted_shares)
 
@@ -37,8 +38,8 @@ def run_sharer():
 
 def determine_interval(current_interval: int, found_changes: bool) -> int:
     if not found_changes:
-        # Return double the current interval or 4 minutes, whichever is lower
-        return min(current_interval * 2, 4 * 60)
+        # Return double the current interval or 5 minutes, whichever is lower
+        return min(current_interval * 2, 5 * 60)
     return 30
 
 
