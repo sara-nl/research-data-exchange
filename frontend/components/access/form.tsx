@@ -2,6 +2,7 @@ import {
   Button,
   Col,
   Form as RForm,
+  Row,
   FormGroup as RFormGroup,
   Alert,
 } from 'react-bootstrap';
@@ -130,7 +131,7 @@ const AccessForm: React.FC<Props> = ({
               </a>
             </p>
 
-            <RForm.Row className="mt-2">
+            <Row className="mt-2">
               <Field name="agree">
                 {(fp: FieldProps) => (
                   <RForm.Group
@@ -162,10 +163,10 @@ const AccessForm: React.FC<Props> = ({
                   </RForm.Group>
                 )}
               </Field>
-            </RForm.Row>
-            <RForm.Row>
+            </Row>
+            <Row>
               <Field name="name">
-                {(fp) => (
+                {(fp) =>
                   <RForm.Group as={Col} controlId="name">
                     <RForm.Label>
                       <span className="lead">Name</span>{' '}
@@ -184,10 +185,10 @@ const AccessForm: React.FC<Props> = ({
                     />
                     <FieldFeedback {...fp} />
                   </RForm.Group>
-                )}
+                }
               </Field>
-            </RForm.Row>
-            <RForm.Row>
+            </Row>
+            <Row>
               <Field name="email">
                 {(fp) => (
                   <RForm.Group as={Col} controlId="email">
@@ -210,7 +211,7 @@ const AccessForm: React.FC<Props> = ({
                   </RForm.Group>
                 )}
               </Field>
-            </RForm.Row>
+            </Row>
 
             <Button
               disabled={!dirty || !isValid || isSubmitting}

@@ -73,7 +73,7 @@ const Access: React.FC<Props> = ({ dataset, submitUrl }) => {
                           width="25px"
                           height="25px"
                         />
-                        <span className="ml-2">{file}</span>
+                        <span className="dataset-file ml-2">{file}</span>
                       </div>
                     ))}
                   </div>
