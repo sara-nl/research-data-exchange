@@ -98,7 +98,7 @@ const PublicationForm: React.FC<Props> = ({
           dirty,
         }) => (
           <RForm noValidate validated={!errors} onSubmit={handleSubmit}>
-            <RForm.Row>
+            <Row>
               <Field name="doi">
                 {(fp) => (
                   <RForm.Group as={Col} controlId="doi">
@@ -122,8 +122,8 @@ const PublicationForm: React.FC<Props> = ({
                   </RForm.Group>
                 )}
               </Field>
-            </RForm.Row>
-            <RForm.Row>
+            </Row>
+            <Row>
               <Field name="title">
                 {(fp) => (
                   <RForm.Group as={Col} controlId="title">
@@ -143,8 +143,8 @@ const PublicationForm: React.FC<Props> = ({
                   </RForm.Group>
                 )}
               </Field>
-            </RForm.Row>
-            <RForm.Row>
+            </Row>
+            <Row>
               <Field name="authors">
                 {(fp) => (
                   <RForm.Group as={Col} controlId="authors">
@@ -164,8 +164,8 @@ const PublicationForm: React.FC<Props> = ({
                   </RForm.Group>
                 )}
               </Field>
-            </RForm.Row>
-            <RForm.Row>
+            </Row>
+            <Row>
               <Field name="description">
                 {(fp) => (
                   <RForm.Group as={Col} controlId="description">
@@ -187,7 +187,7 @@ const PublicationForm: React.FC<Props> = ({
                   </RForm.Group>
                 )}
               </Field>
-            </RForm.Row>
+            </Row>
             <Button
               disabled={!dirty || !isValid}
               type="submit"

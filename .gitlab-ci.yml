@@ -32,10 +32,10 @@ stages:
 
 frontend_e2e:
   stage: check
-  image: cypress/base
+  image: cypress/base:16.17.1
   variables:
     RDX_BACKEND_URL: "http://localhost:8081"
-    CYPRESS_RDX_BACKEND_URL: $RDX_BACKEND_URL
+    CYPRESS_RDX_BACKEND_URL: "http://localhost:8081"
   artifacts:
     paths:
       - frontend/cypress/screenshots
