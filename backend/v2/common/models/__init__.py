@@ -1,1 +1,1 @@
-__all__ = ["rdx_share", "rdx_dataset"]
+__all__ = ["rdx_share", "rdx_dataset", "rdx_user"]
