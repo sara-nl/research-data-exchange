@@ -5,14 +5,14 @@ from email.mime.text import MIMEText
 from typing import ClassVar
 
 import html2text
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 from .settings import email_settings
 
 
 class MailClient(BaseModel):
 
-    receiver: str
+    receiver: EmailStr
     subject: str
     message: str
 
@@ -22,6 +22,7 @@ class MailClient(BaseModel):
         sans-serif, 'Open Sans'">
     """
     BODY_CLOSE: ClassVar = "</body>"
+    SENDER: ClassVar = email_settings.sender
 
     def mail(self):
         print("Preparing email")
