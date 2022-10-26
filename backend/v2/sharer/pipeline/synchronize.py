@@ -29,6 +29,8 @@ def create_new_share(db: DBClient, new_share: owncloud.ShareInfo):
 
         session.add(rdx_share)
         session.commit()
+        session.refresh(rdx_share)
+    setattr(new_share, "rdx_share", rdx_share)
     f"Finished adding share ({new_share.get_id()}: {new_share.get_path()}) to the database"
 
 
@@ -53,8 +55,8 @@ def create_dataset(db: DBClient, new_share: RdxShare) -> RdxDataset:
                 files=new_share.files,
                 conditions_url=conditions_url,
                 condtions_share_id=conditions_share_id,
-                data_steward_id=new_share.data_steward_id,
-                researcher_id=new_share.researcher_id,
+                data_steward_id=new_share.data_steward.id,
+                researcher_id=new_share.researcher.id,
             )
             if new_share.dataset_config.metadata:
                 metadata = new_share.dataset_config.metadata

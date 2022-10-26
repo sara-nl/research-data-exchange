@@ -26,7 +26,7 @@ class RdxDatasetBase(SQLModel):
     researcher_id: int | None = Field(
         index=True, default=None, foreign_key="rdx_user.id"
     )
-    rdx_dataset: RdxUser | None = Relationship(back_populates="rdx_user")
+    researcher: RdxUser | None = Relationship(back_populates="rdx_user")
 
 
 class RdxDataset(RdxDatasetBase, table=True):

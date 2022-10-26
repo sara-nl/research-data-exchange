@@ -32,7 +32,7 @@ def run_sharer():
     new_shares = users.create_users(db, new_shares)
     synchronize.add_new_shares(db, new_shares)
     synchronize.remove_deleted_shares(db, deleted_shares)
-
+    users.notify(new_shares)
     return len(new_shares) or len(deleted_shares)
 
 
