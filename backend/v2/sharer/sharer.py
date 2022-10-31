@@ -1,9 +1,8 @@
 import time
 
+from common.db.db_client import DBClient
 from fastapi import FastAPI
 from pipeline import discovery, synchronize, users
-
-from common.db.db_client import DBClient
 
 app = FastAPI()
 

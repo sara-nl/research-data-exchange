@@ -25,5 +25,9 @@ class DBClient(BaseModel):
         engine = create_engine(conn_string)
         super().__init__(engine=engine, **kwargs)
 
-    def get_session(self):
+    def get_session(self) -> Session:
         return Session(self.engine)
+
+    def get_session_dependency(self) -> Session:
+        with self.get_session() as session:
+            yield session

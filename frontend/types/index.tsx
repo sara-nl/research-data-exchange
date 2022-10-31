@@ -1,15 +1,21 @@
-export type Share = {
-  owner: string;
-  path?: string;
-  createdAt?: string;
-  conditionsDocument: string;
+export type Dataset = {
+  rdx_share: Share;
+  conditions_url: string;
+  // TODO: figure out why proxy is needed
+  conditionsUrlProxy?: string;
   files: Array<string>;
+  doi?: string;
+  title?: string;
+  authors?: string;
+  description?: string;
+  published: boolean;
+  published_at?: Date;
 };
 
-export type Dataset = {
-  title: string;
-  description: string;
-  conditionsUrl: string;
-  conditionsUrlProxy: string;
-  files: Array<string>;
+export type Share = {
+  // TODO: get owner variable from dataset.yml config
+  uid_owner?: string;
+  additional_info_owner?: string
+  path?: string;
+  share_time: Date;
 };
