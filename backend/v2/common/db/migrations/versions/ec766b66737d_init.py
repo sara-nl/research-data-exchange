@@ -1,7 +1,7 @@
 """Init
 
 Revision ID: ec766b66737d
-Revises: 
+Revises:
 Create Date: 2022-10-27 18:41:52.266789
 
 """
