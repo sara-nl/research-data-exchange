@@ -9,7 +9,7 @@ import {
 import { Formik, Field } from 'formik';
 import FieldFeedback from './../form/fieldFeedback';
 import { useState } from 'react';
-import { Dataset } from '../../types';
+import { AccessLicense, Dataset } from '../../types';
 
 type Props = {
   storeValues: (values: Values) => Promise<Dataset>;
@@ -59,6 +59,7 @@ const PublicationForm: React.FC<Props> = ({
           title: dataset.title || '',
           authors: dataset.authors || '',
           description: dataset.description || '',
+          access_license: dataset.access_license || '',
           published: true
         }}
         validateOnMount={true}
@@ -193,13 +194,42 @@ const PublicationForm: React.FC<Props> = ({
                 )}
               </Field>
             </Row>
-            <Button
-              disabled={!isValid}
-              type="submit"
-              variant="primary"
-            >
-              Publish
-            </Button>
+            <Row>
+            <Field name="access_license">
+                {(fp) => (
+                  <RForm.Group as={Col} controlId="access_license">
+                    <RForm.Label>
+                      <span className="lead">Access License</span> <sup>required</sup>
+                    </RForm.Label>
+                    <RForm.Control
+                      required
+                      as="select"
+                      value={fp.field.value}
+                      onBlur={fp.field.onBlur}
+                      onChange={fp.field.onChange}
+                      isValid={fp.meta.touched && !fp.meta.error}
+                      isInvalid={fp.meta.touched && fp.meta.error}
+                    >
+                        {Object.values(AccessLicense).map((val) => (
+                            <option value={val}>{val}</option>
+                        ))}
+                    </RForm.Control>
+                  </RForm.Group>
+                )}
+              </Field>
+            </Row>
+            <Row>
+              <Col >
+                <Button
+                  className="submit-button"
+                  disabled={!isValid}
+                  type="submit"
+                  variant="primary"
+                >
+                  Publish
+                </Button>
+              </Col>
+            </Row>
           </RForm>
         )}
       </Formik>

@@ -1,8 +1,8 @@
 """Init
 
-Revision ID: ec766b66737d
+Revision ID: 8c341f56dcc1
 Revises:
-Create Date: 2022-10-27 18:41:52.266789
+Create Date: 2022-10-31 11:16:17.356239
 
 """
 import sqlalchemy as sa
@@ -10,7 +10,7 @@ import sqlmodel
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "ec766b66737d"
+revision = "8c341f56dcc1"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -45,6 +45,11 @@ def upgrade() -> None:
     op.create_table(
         "rdx_dataset",
         sa.Column("files", sa.JSON(), nullable=True),
+        sa.Column(
+            "access_license",
+            sa.Enum("download", "analyze", name="accesslicense"),
+            nullable=True,
+        ),
         sa.Column("share_id", sa.Integer(), nullable=False),
         sa.Column("doi", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.Column("title", sqlmodel.sql.sqltypes.AutoString(), nullable=True),

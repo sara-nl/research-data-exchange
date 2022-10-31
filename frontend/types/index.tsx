@@ -10,7 +10,13 @@ export type Dataset = {
   description?: string;
   published: boolean;
   published_at?: Date;
+  access_license: AccessLicense;
 };
+
+export enum AccessLicense {
+  download = "sign+download",
+  analyze = "sign+analyze",
+}
 
 export type Share = {
   // TODO: get owner variable from dataset.yml config
