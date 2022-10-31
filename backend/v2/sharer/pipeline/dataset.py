@@ -1,4 +1,7 @@
+import enum
 from pydantic import BaseModel, EmailStr
+
+from common.models.rdx_models import AccessLicense
 
 
 class Metadata(BaseModel):
@@ -11,5 +14,5 @@ class Metadata(BaseModel):
 class DatasetConfig(BaseModel):
     data_steward_email: EmailStr
     researcher_email: EmailStr
-    access_license: str
+    access_license: AccessLicense
     metadata: Metadata = None

@@ -1,3 +1,4 @@
+import enum
 import json
 import secrets
 from datetime import datetime, timedelta
@@ -5,7 +6,13 @@ from typing import Optional
 
 from pydantic import EmailStr, HttpUrl, validator
 from sqlalchemy import JSON
-from sqlmodel import Column, Field, Relationship, SQLModel
+
+from sqlmodel import Column, Enum, Field, Relationship, SQLModel
+
+
+class AccessLicense(str, enum.Enum):
+    download = "sign+download"
+    analyze = "sign+analyze"
 
 
 class RdxDatasetBase(SQLModel):
@@ -27,6 +34,7 @@ class RdxDatasetBase(SQLModel):
     researcher_id: int | None = Field(
         index=True, default=None, foreign_key="rdx_user.id"
     )
+    access_license: AccessLicense = Field(sa_column=Column(Enum(AccessLicense)))
 
     @validator("files", pre=True)
     def name_must_contain_space(cls, v):
@@ -55,6 +63,7 @@ class RdxDatasetUpdate(SQLModel):
     description: str | None = None
     published: bool | None = None
     published_at: datetime | None = None
+    access_license: AccessLicense | None = None
 
 
 class RdxShareBase(SQLModel):
