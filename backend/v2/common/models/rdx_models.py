@@ -1,7 +1,7 @@
 import json
 import secrets
 from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import EmailStr, HttpUrl, validator
 from sqlalchemy import JSON

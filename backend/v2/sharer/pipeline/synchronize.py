@@ -1,8 +1,9 @@
 import owncloud
+from sqlmodel import select
+
 from common.db.db_client import DBClient
 from common.models.rdx_models import RdxDataset, RdxShare
 from common.owncloud.owncloud_client import OwnCloudClient
-from sqlmodel import select
 
 
 def add_new_shares(db: DBClient, new_shares: list[owncloud.ShareInfo]):
