@@ -1,6 +1,5 @@
 from common.email.mail_client import MailClient
-from common.models.rdx_share import RdxShare
-from common.models.rdx_user import RdxUser
+from common.models.rdx_models import RdxShare, RdxUser
 from common.settings.app_settings import app_settings
 
 

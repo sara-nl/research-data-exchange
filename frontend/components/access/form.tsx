@@ -124,7 +124,7 @@ const AccessForm: React.FC<Props> = ({
               <a
                 className="badge badge-secondary"
                 download="Research_Data_Exchange_Conditions"
-                href={dataset.conditionsUrl}
+                href={dataset.conditions_url}
                 onClick={() => setDownloadedConditions(true)}
               >
                 Download PDF

@@ -1,11 +1,8 @@
 import owncloud
-from sqlmodel import select
-
 from common.db.db_client import DBClient
 from common.email.mail_client import MailClient
-from common.models.rdx_dataset import RdxDataset
-from common.models.rdx_share import RdxShare
-from common.models.rdx_user import RdxUser
+from common.models.rdx_models import RdxDataset, RdxShare, RdxUser
+from sqlmodel import select
 
 from .email import get_message
 

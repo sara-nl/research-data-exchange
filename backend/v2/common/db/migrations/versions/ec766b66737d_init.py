@@ -1,8 +1,8 @@
 """Init
 
-Revision ID: ea49068cde9e
+Revision ID: ec766b66737d
 Revises: 
-Create Date: 2022-10-19 12:35:22.760357
+Create Date: 2022-10-27 18:41:52.266789
 
 """
 import sqlalchemy as sa
@@ -10,7 +10,7 @@ import sqlmodel
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "ea49068cde9e"
+revision = "ec766b66737d"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -44,12 +44,12 @@ def upgrade() -> None:
     op.create_index(op.f("ix_rdx_user_token"), "rdx_user", ["token"], unique=False)
     op.create_table(
         "rdx_dataset",
+        sa.Column("files", sa.JSON(), nullable=True),
         sa.Column("share_id", sa.Integer(), nullable=False),
         sa.Column("doi", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.Column("title", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.Column("authors", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.Column("description", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
-        sa.Column("files", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("conditions_url", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("condtions_share_id", sa.Integer(), nullable=False),
         sa.Column("published", sa.Boolean(), nullable=False),
@@ -99,6 +99,7 @@ def upgrade() -> None:
         ),
         sa.Column("permissions", sa.Integer(), nullable=False),
         sa.Column("rdx_dataset_id", sa.Integer(), nullable=True),
+        sa.Column("share_time", sa.DateTime(), nullable=False),
         sa.Column("id", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(
             ["rdx_dataset_id"],

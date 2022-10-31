@@ -1,22 +1,21 @@
 import * as React from 'react';
 import {
-  Container,
   Row,
   Button,
   Col,
   Form as RForm,
-  InputGroup,
   Alert,
 } from 'react-bootstrap';
 import { Formik, Field } from 'formik';
 import FieldFeedback from './../form/fieldFeedback';
 import { useState } from 'react';
-import Error, { ErrorProps } from 'next/error';
+import { Dataset } from '../../types';
 
 type Props = {
-  storeValues: (values: Values) => Promise<Values>;
-  onSuccessSubmission: (values: Values) => Promise<void> | void;
+  storeValues: (values: Values) => Promise<Dataset>;
+  onSuccessSubmission: (dataset: Dataset) => Promise<void> | void;
   header: string;
+  dataset: Dataset;
 };
 
 export type Values = {
@@ -24,10 +23,12 @@ export type Values = {
   title: string;
   authors: string;
   description: string;
+  published?: boolean;
 };
 
 const PublicationForm: React.FC<Props> = ({
   header,
+  dataset,
   storeValues,
   onSuccessSubmission,
 }) => {
@@ -53,7 +54,16 @@ const PublicationForm: React.FC<Props> = ({
       </Alert>
 
       <Formik
-        initialValues={{ doi: '', title: '', authors: '', description: '' }}
+        initialValues={{
+          doi: dataset.doi || '',
+          title: dataset.title || '',
+          authors: dataset.authors || '',
+          description: dataset.description || '',
+          published: true
+        }}
+        validateOnMount={true}
+        validateOnChange={true}
+        validateOnBlur={false}
         validate={(values) => {
           const errors: {} = {};
 
@@ -88,16 +98,11 @@ const PublicationForm: React.FC<Props> = ({
         }}
       >
         {({
-          handleChange,
           handleSubmit,
-          handleBlur,
-          values,
           errors,
-          isValidating,
           isValid,
-          dirty,
         }) => (
-          <RForm noValidate validated={!errors} onSubmit={handleSubmit}>
+          <RForm validated={!errors} onSubmit={handleSubmit}>
             <Row>
               <Field name="doi">
                 {(fp) => (
@@ -189,7 +194,7 @@ const PublicationForm: React.FC<Props> = ({
               </Field>
             </Row>
             <Button
-              disabled={!dirty || !isValid}
+              disabled={!isValid}
               type="submit"
               variant="primary"
             >

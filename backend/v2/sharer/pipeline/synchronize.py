@@ -1,10 +1,8 @@
 import owncloud
-from sqlmodel import select
-
 from common.db.db_client import DBClient
-from common.models.rdx_dataset import RdxDataset
-from common.models.rdx_share import RdxShare
+from common.models.rdx_models import RdxDataset, RdxShare
 from common.owncloud.owncloud_client import OwnCloudClient
+from sqlmodel import select
 
 
 def add_new_shares(db: DBClient, new_shares: list[owncloud.ShareInfo]):
@@ -25,6 +23,7 @@ def create_new_share(db: DBClient, new_share: owncloud.ShareInfo):
             additional_info_owner=new_share.share_info["additional_info_owner"],
             permissions=new_share.get_permissions(),
             rdx_dataset_id=rdx_dataset.id,
+            share_time=new_share.get_share_time(),
         )
 
         session.add(rdx_share)
