@@ -29,14 +29,14 @@ def run_sharer():
         deleted_shares,
     ) = discovery.compare_shared_dirs_with_stored_dirs(db, shared_dirs)
     print(
-        f"Found {len(new_shares)} new share(s), {len(ineligble_shared_dirs)} ineligible shares, and {len(deleted_shares)} deleted share(s)"
+        f"Found {len(eligible_shares)} new share(s), {len(ineligble_shared_dirs)} ineligible shares, and {len(deleted_shares)} deleted share(s)"
     )
-    new_shares = users.create_users(db, eligible_shares)
+    eligible_shares = users.create_users(db, eligible_shares)
     synchronize.update_eligible_shares(db, eligible_shares)
     synchronize.remove_deleted_shares(db, deleted_shares)
     users.notify(db, eligible_shares)
     users.notify(db, ineligble_shared_dirs)
-    return len(new_shares) or len(deleted_shares)
+    return len(eligible_shares) or len(deleted_shares)
 
 
 def determine_interval(current_interval: int, found_changes: bool) -> int:
