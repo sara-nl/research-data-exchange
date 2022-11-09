@@ -199,7 +199,7 @@ const PublicationForm: React.FC<Props> = ({
                 {(fp) => (
                   <RForm.Group as={Col} controlId="access_license">
                     <RForm.Label>
-                      <span className="lead">Access License</span> <sup>required</sup>
+                      <span className="lead">Access License</span>
                     </RForm.Label>
                     <RForm.Control
                       required
@@ -209,6 +209,7 @@ const PublicationForm: React.FC<Props> = ({
                       onChange={fp.field.onChange}
                       isValid={fp.meta.touched && !fp.meta.error}
                       isInvalid={fp.meta.touched && fp.meta.error}
+                      disabled={true}
                     >
                         {Object.values(AccessLicense).map((val) => (
                             <option value={val}>{val}</option>

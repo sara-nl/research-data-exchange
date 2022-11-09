@@ -62,7 +62,6 @@ class RdxDatasetUpdate(SQLModel):
     description: str | None = None
     published: bool | None = None
     published_at: datetime | None = None
-    access_license: AccessLicense | None = None
 
 
 class ShareStatus(enum.IntEnum):
