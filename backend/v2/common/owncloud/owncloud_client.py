@@ -3,7 +3,14 @@ import typing
 import owncloud
 from pydantic import BaseModel, validator
 
+from common.models.rdx_models import RdxShare
+
 from .settings import own_cloud_settings
+
+
+class ShareInfo(owncloud.ShareInfo):
+    rdx_share: RdxShare
+    files: list[str] = []
 
 
 class OwnCloudClient(BaseModel):
