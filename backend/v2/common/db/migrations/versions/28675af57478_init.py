@@ -1,8 +1,8 @@
 """Init
 
-Revision ID: 8c341f56dcc1
-Revises:
-Create Date: 2022-10-31 11:16:17.356239
+Revision ID: 28675af57478
+Revises: 
+Create Date: 2022-11-02 11:28:00.870691
 
 """
 import sqlalchemy as sa
@@ -10,7 +10,7 @@ import sqlmodel
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "8c341f56dcc1"
+revision = "28675af57478"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -96,6 +96,24 @@ def upgrade() -> None:
     )
     op.create_table(
         "rdx_share",
+        sa.Column(
+            "share_status",
+            sa.Enum(
+                "share_discovered",
+                "invalid_permissions",
+                "invalid_permissions_notified",
+                "missing_conditions",
+                "missing_conditions_notified",
+                "missing_dataset_config",
+                "missing_dataset_config_notified",
+                "invalid_dataset_config",
+                "invalid_dataset_config_notified",
+                "dataset_accepted",
+                "dataset_accepted_notified",
+                name="sharestatus",
+            ),
+            nullable=True,
+        ),
         sa.Column("share_id", sa.Integer(), nullable=False),
         sa.Column("path", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("uid_owner", sqlmodel.sql.sqltypes.AutoString(), nullable=True),

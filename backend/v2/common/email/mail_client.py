@@ -38,7 +38,9 @@ class MailClient(BaseModel):
         message.attach(html_part)
         message = message.as_string()
 
-        with smtplib.SMTP(email_settings.host, email_settings.port) as server:
+        with smtplib.SMTP(
+            email_settings.host, email_settings.port, timeout=60
+        ) as server:
             try:
                 print("Setting up TLS with mail server")
                 context = ssl.create_default_context()

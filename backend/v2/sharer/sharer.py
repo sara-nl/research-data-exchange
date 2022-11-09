@@ -22,17 +22,20 @@ def start_sharer():
 
 
 def run_sharer():
-    eligible_shared_dirs = discovery.get_eligible_shared_dirs()
-    new_shares, deleted_shares = discovery.compare_shared_dirs_with_stored_dirs(
-        db, eligible_shared_dirs
-    )
+    shared_dirs = discovery.get_eligible_shared_dirs(db)
+    (
+        eligible_shares,
+        ineligble_shared_dirs,
+        deleted_shares,
+    ) = discovery.compare_shared_dirs_with_stored_dirs(db, shared_dirs)
     print(
-        f"Found {len(new_shares)} new share(s) and {len(deleted_shares)} deleted share(s)"
+        f"Found {len(new_shares)} new share(s), {len(ineligble_shared_dirs)} ineligible shares, and {len(deleted_shares)} deleted share(s)"
     )
-    new_shares = users.create_users(db, new_shares)
-    synchronize.add_new_shares(db, new_shares)
+    new_shares = users.create_users(db, eligible_shares)
+    synchronize.update_eligible_shares(db, eligible_shares)
     synchronize.remove_deleted_shares(db, deleted_shares)
-    users.notify(new_shares)
+    users.notify(db, eligible_shares)
+    users.notify(db, ineligble_shared_dirs)
     return len(new_shares) or len(deleted_shares)
 
 

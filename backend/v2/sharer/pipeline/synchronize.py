@@ -1,37 +1,32 @@
-import owncloud
 from sqlmodel import select
 
 from common.db.db_client import DBClient
-from common.models.rdx_models import RdxDataset, RdxShare
-from common.owncloud.owncloud_client import OwnCloudClient
+from common.models.rdx_models import RdxDataset, RdxShare, ShareStatus
+from common.owncloud.owncloud_client import OwnCloudClient, ShareInfo
 
 
-def add_new_shares(db: DBClient, new_shares: list[owncloud.ShareInfo]):
-    for new_share in new_shares:
-        create_new_share(db, new_share)
+def update_eligible_shares(db: DBClient, shared_dirs: list[ShareInfo]):
+    for shared_dir in shared_dirs:
+        if (
+            shared_dir.rdx_share.is_eligible()
+            and not shared_dir.rdx_share.is_accepted()
+        ):
+            update_eligible_share(db, shared_dir)
 
 
-def create_new_share(db: DBClient, new_share: owncloud.ShareInfo):
-    f"Adding share ({new_share.get_id()}: {new_share.get_path()}) to the database"
+def update_eligible_share(db: DBClient, new_share: ShareInfo):
+    f"Updating share ({new_share.get_id()}: {new_share.get_path()}) to the database"
 
     rdx_dataset = create_dataset(db, new_share)
+    new_share.rdx_share.rdx_dataset_id = rdx_dataset.id
+    new_share.rdx_share.set_new_share_status(ShareStatus.dataset_accepted)
+    new_share.rdx_share.update_share_status()
 
     with db.get_session() as session:
-        rdx_share = RdxShare(
-            share_id=new_share.get_id(),
-            path=new_share.get_path(),
-            uid_owner=new_share.get_uid_owner(),
-            additional_info_owner=new_share.share_info["additional_info_owner"],
-            permissions=new_share.get_permissions(),
-            rdx_dataset_id=rdx_dataset.id,
-            share_time=new_share.get_share_time(),
-        )
-
-        session.add(rdx_share)
+        session.add(new_share.rdx_share)
         session.commit()
-        session.refresh(rdx_share)
-    setattr(new_share, "rdx_share", rdx_share)
-    f"Finished adding share ({new_share.get_id()}: {new_share.get_path()}) to the database"
+        session.refresh(new_share.rdx_share)
+    f"Finished updating share ({new_share.get_id()}: {new_share.get_path()})"
 
 
 def create_dataset(db: DBClient, new_share: RdxShare) -> RdxDataset:
@@ -59,6 +54,7 @@ def create_dataset(db: DBClient, new_share: RdxShare) -> RdxDataset:
                 researcher_id=new_share.researcher.id,
                 access_license=new_share.dataset_config.access_license,
             )
+
             if new_share.dataset_config.metadata:
                 metadata = new_share.dataset_config.metadata
                 rdx_dataset.doi = metadata.doi

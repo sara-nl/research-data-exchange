@@ -1,4 +1,5 @@
 import enum
+
 from pydantic import BaseModel, EmailStr
 
 from common.models.rdx_models import AccessLicense
