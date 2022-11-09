@@ -23,7 +23,7 @@ Note: the metadata section is optional, but if it is included all four fields ne
 """
 
 
-def get_message(user: RdxUser, rdx_share: RdxShare) -> str:
+def get_publication_message_researcher(user: RdxUser, rdx_share: RdxShare) -> str:
     return f"""
     {MailClient.BODY_OPEN}
     <p>Dear {user.email},</p>
@@ -39,6 +39,21 @@ def get_message(user: RdxUser, rdx_share: RdxShare) -> str:
     {user.token_expires_at.strftime("%c")}</span>. If you need more time, unshare the dataset, wait for a confirmation email and share it again.
     </p>
     <p>If you want to make changes to metadata after publication or need any other kind of support, please get in touch with the RDX support team: <a href="mailto:{MailClient.SENDER}">{MailClient.SENDER}</a>
+    </p>
+    {MailClient.BODY_CLOSE}
+    """
+
+
+def get_publication_message_share_owner(rdx_share: RdxShare) -> str:
+    return f"""
+    {MailClient.BODY_OPEN}
+    <p>Dear {rdx_share.additional_info_owner},</p>
+
+    <p>A new dataset, "{rdx_share.path}", has just been successfully shared with RDX.</p>
+
+    <p>An email has been sent to the researcher to add/review the metadata and publish the dataset.</p>
+
+    <p>If you need any other kind of support, please get in touch with the RDX support team: <a href="mailto:{MailClient.SENDER}">{MailClient.SENDER}</a>
     </p>
     {MailClient.BODY_CLOSE}
     """
