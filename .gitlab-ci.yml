@@ -94,8 +94,9 @@ backend_docker:
   script:
     - export DOCKER_REGISTRY_PATH="$CI_REGISTRY_IMAGE/backend/v2"
     - echo "$KANIKO_CONFIG" > /kaniko/.docker/config.json
-    - /kaniko/executor --cache=true --context $CI_PROJECT_DIR/backend/v2/ \
-      --dockerfile $CI_PROJECT_DIR/backend/v2/Dockerfile --destination "$DOCKER_REGISTRY_PATH:$DOCKER_IMAGE_TAG" \
+    - >
+      /kaniko/executor --cache=true --context $CI_PROJECT_DIR/backend/v2/
+      --dockerfile $CI_PROJECT_DIR/backend/v2/Dockerfile --destination "$DOCKER_REGISTRY_PATH:$DOCKER_IMAGE_TAG"
       --destination "$DOCKER_REGISTRY_PATH:$CI_COMMIT_REF_NAME" --destination "$DOCKER_REGISTRY_PATH:latest"
 
 frontend_docker:
@@ -108,9 +109,10 @@ frontend_docker:
     - export DOCKER_REGISTRY_PATH="$CI_REGISTRY_IMAGE/frontend"
     - echo "$KANIKO_CONFIG" > /kaniko/.docker/config.json
     - find . -name ".next"
-    - /kaniko/executor --build-arg RDX_PDF_HEADERS_PROXY_URL="$RDX_PDF_HEADERS_PROXY_URL" \
-      --build-arg RDX_BACKEND_URL="$RDX_BACKEND_URL" --cache=false --context $CI_PROJECT_DIR/frontend/ \
-      --dockerfile $CI_PROJECT_DIR/frontend/Dockerfile --destination "$DOCKER_REGISTRY_PATH:$DOCKER_IMAGE_TAG" \
+    - >
+      /kaniko/executor --build-arg RDX_PDF_HEADERS_PROXY_URL="$RDX_PDF_HEADERS_PROXY_URL"
+      --build-arg RDX_BACKEND_URL="$RDX_BACKEND_URL" --cache=false --context $CI_PROJECT_DIR/frontend/
+      --dockerfile $CI_PROJECT_DIR/frontend/Dockerfile --destination "$DOCKER_REGISTRY_PATH:$DOCKER_IMAGE_TAG"
       --destination "$DOCKER_REGISTRY_PATH:$CI_COMMIT_REF_NAME" --destination "$DOCKER_REGISTRY_PATH:latest"
 
 # # 🚀 DEPLOYMENT JOBS
