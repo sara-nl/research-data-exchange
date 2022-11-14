@@ -1,8 +1,8 @@
 from sqlmodel import select
-from common.models.rdx_models import RdxShare, RdxUser, ShareStatus
 
 from common.db.db_client import DBClient
 from common.email.mail_client import MailClient
+from common.models.rdx_models import RdxShare, RdxUser, ShareStatus
 from common.owncloud.owncloud_client import ShareInfo
 
 from .email import (
