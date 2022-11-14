@@ -58,6 +58,8 @@ backend_linting:
   stage: check
   image: python:3.10-alpine
   script:
+    - pip install pipenv
+    - cd backend/v2
     - pipenv install --dev
     # pylint and flake8 not yet fixed
     - pipenv run pylint --recursive=yes common sharer librarian || true
