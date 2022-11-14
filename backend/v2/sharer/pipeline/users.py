@@ -1,13 +1,15 @@
 from sqlmodel import select
+from common.models.rdx_models import RdxShare, RdxUser, ShareStatus
 
 from common.db.db_client import DBClient
 from common.email.mail_client import MailClient
-from common.models.rdx_models import RdxShare, RdxUser, ShareStatus
 from common.owncloud.owncloud_client import ShareInfo
 
-from .email import (get_misconfiguration_message,
-                    get_publication_message_researcher,
-                    get_publication_message_share_owner)
+from .email import (
+    get_misconfiguration_message,
+    get_publication_message_researcher,
+    get_publication_message_share_owner,
+)
 
 
 def create_users(db: DBClient, new_shares: list[ShareInfo]) -> list[ShareInfo]:

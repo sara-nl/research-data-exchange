@@ -6,8 +6,12 @@ from sqlmodel import Session
 
 from common.api.dependencies import get_rdx_user
 from common.db.db_client import DBClient
-from common.models.rdx_models import (RdxDataset, RdxDatasetReadWithShare,
-                                      RdxDatasetUpdate, RdxUser)
+from common.models.rdx_models import (
+    RdxDataset,
+    RdxDatasetReadWithShare,
+    RdxDatasetUpdate,
+    RdxUser,
+)
 
 from .email import send_publication_email
 

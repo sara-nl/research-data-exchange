@@ -5,8 +5,7 @@
 # - https://docs.gitlab.com/ee/ci/yaml/
 
 variables:
-  SBT_DOCKER_IMAGE: "hseeberger/scala-sbt:16.0.1_1.5.4_2.13.6"
-  NODE_DOCKER_IMAGE: "node:14-alpine"
+  NODE_DOCKER_IMAGE: "node:19-alpine"
   NODE_ENV: "test"
   KANIKO_CONFIG: '{"auths":{"$CI_REGISTRY":{"username":"$CI_REGISTRY_USER","password":"$CI_REGISTRY_PASSWORD"}}}'
   DOCKER_IMAGE_TAG: "$CI_COMMIT_SHORT_SHA"
@@ -23,12 +22,26 @@ before_script:
   - date
 
 stages:
+  - build-dev
   - check
   - build
   - package
   - deploy
 
 # 🔬 TEST JOBS
+backend_dev:
+  stage: build-dev
+  image:
+    # See: https://docs.gitlab.com/ee/ci/docker/using_kaniko.html
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  script:
+    - export DOCKER_REGISTRY_PATH="$CI_REGISTRY_IMAGE/backend/v2/dev"
+    - echo "$KANIKO_CONFIG" > /kaniko/.docker/config.json
+    - /kaniko/executor --cache=true --context $CI_PROJECT_DIR/backend/v2/dev/ \
+      --build-arg=PIPENV_DEPLOYMENT=dev \
+      --dockerfile $CI_PROJECT_DIR/backend/v2/Dockerfile --destination "$DOCKER_REGISTRY_PATH:$DOCKER_IMAGE_TAG" \
+      --destination "$DOCKER_REGISTRY_PATH:$CI_COMMIT_REF_NAME" --destination "$DOCKER_REGISTRY_PATH:latest"
 
 frontend_e2e:
   stage: check
@@ -56,46 +69,42 @@ frontend_e2e:
       - .npm/
       - .next/cache
 
-backend_v1_test:
+backend_test:
   stage: check
-  image: $SBT_DOCKER_IMAGE
-  script:
-    - cd backend/v1
-    - sbt "test"
-  cache:
-    paths:
-      - ~/.ivy2/
+  image: $CI_REGISTRY_IMAGE/backend/v2/dev/$DOCKER_IMAGE_TAG
+  variables:
+    APPLICATION: linting
 
 # 📦 BUILD AND PACKAGE JOBS
 
-backend_v1_build:
-  stage: build
-  image: $SBT_DOCKER_IMAGE
-  script:
-    - cd backend/v1
-    - sbt "assembly"
-  artifacts:
-    expire_in: 1 week
-    paths:
-      - backend/v1/sharer/target/scala-2.13/sharer-assembly-*.jar
-      - backend/v1/librarian/target/scala-2.13/librarian-assembly-*.jar
-  cache:
-    paths:
-      - ~/.ivy2/
+# backend_v1_build:
+#   stage: build
+#   image: $SBT_DOCKER_IMAGE
+#   script:
+#     - cd backend/v1
+#     - sbt "assembly"
+#   artifacts:
+#     expire_in: 1 week
+#     paths:
+#       - backend/v1/sharer/target/scala-2.13/sharer-assembly-*.jar
+#       - backend/v1/librarian/target/scala-2.13/librarian-assembly-*.jar
+#   cache:
+#     paths:
+#       - ~/.ivy2/
 
-backend_v1_docker:
-  stage: package
-  dependencies:
-    - backend_v1_build
-  image:
-    # See: https://docs.gitlab.com/ee/ci/docker/using_kaniko.html
-    name: gcr.io/kaniko-project/executor:debug
-    entrypoint: [""]
-  script:
-    - export DOCKER_REGISTRY_PATH="$CI_REGISTRY_IMAGE/backend/v1"
-    - echo "$KANIKO_CONFIG" > /kaniko/.docker/config.json
-    - find . -name "backend-assembly-0.1.jar"
-    - /kaniko/executor --cache=true --context $CI_PROJECT_DIR/backend/v1/ --dockerfile $CI_PROJECT_DIR/backend/v1/Dockerfile --destination "$DOCKER_REGISTRY_PATH:$DOCKER_IMAGE_TAG" --destination "$DOCKER_REGISTRY_PATH:$CI_COMMIT_REF_NAME" --destination "$DOCKER_REGISTRY_PATH:latest"
+# backend_v1_docker:
+#   stage: package
+#   dependencies:
+#     - backend_v1_build
+#   image:
+#     # See: https://docs.gitlab.com/ee/ci/docker/using_kaniko.html
+#     name: gcr.io/kaniko-project/executor:debug
+#     entrypoint: [""]
+#   script:
+#     - export DOCKER_REGISTRY_PATH="$CI_REGISTRY_IMAGE/backend/v1"
+#     - echo "$KANIKO_CONFIG" > /kaniko/.docker/config.json
+#     - find . -name "backend-assembly-0.1.jar"
+#     - /kaniko/executor --cache=true --context $CI_PROJECT_DIR/backend/v1/ --dockerfile $CI_PROJECT_DIR/backend/v1/Dockerfile --destination "$DOCKER_REGISTRY_PATH:$DOCKER_IMAGE_TAG" --destination "$DOCKER_REGISTRY_PATH:$CI_COMMIT_REF_NAME" --destination "$DOCKER_REGISTRY_PATH:latest"
 
 frontend_docker:
   stage: package
