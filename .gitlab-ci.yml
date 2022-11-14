@@ -68,22 +68,7 @@ backend_linting:
     - pipenv run black --check .
     - pipenv run bandit .
 
-# 📦 BUILD AND PACKAGE JOBS
-
-# backend_v1_build:
-#   stage: build
-#   image: $SBT_DOCKER_IMAGE
-#   script:
-#     - cd backend/v1
-#     - sbt "assembly"
-#   artifacts:
-#     expire_in: 1 week
-#     paths:
-#       - backend/v1/sharer/target/scala-2.13/sharer-assembly-*.jar
-#       - backend/v1/librarian/target/scala-2.13/librarian-assembly-*.jar
-#   cache:
-#     paths:
-#       - ~/.ivy2/
+# 📦 BUILD JOBS
 
 backend_docker:
   stage: package

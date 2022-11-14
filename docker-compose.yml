@@ -4,7 +4,6 @@
 
 services:
   sharer:
-    # image: git.ia.surfsara.nl:5050/soil/rdx/backend:${DOCKER_IMAGE_TAG}
     build: backend/v2/
     restart: "always"
     depends_on:
@@ -19,7 +18,6 @@ services:
       - "mh.surfsara.nl:192.168.65.2"
 
   librarian:
-    # image: git.ia.surfsara.nl:5050/soil/rdx/backend:${DOCKER_IMAGE_TAG}
     build: backend/v2/
     restart: "always"
     depends_on:
