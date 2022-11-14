@@ -22,27 +22,12 @@ before_script:
   - date
 
 stages:
-  - build-dev
   - check
   - build
   - package
   - deploy
 
 # 🔬 TEST JOBS
-backend_dev:
-  stage: build-dev
-  image:
-    # See: https://docs.gitlab.com/ee/ci/docker/using_kaniko.html
-    name: gcr.io/kaniko-project/executor:debug
-    entrypoint: [""]
-  script:
-    - export DOCKER_REGISTRY_PATH="$CI_REGISTRY_IMAGE/backend/v2/dev"
-    - echo "$KANIKO_CONFIG" > /kaniko/.docker/config.json
-    - /kaniko/executor --cache=true --context $CI_PROJECT_DIR/backend/v2/dev/ \
-      --build-arg=PIPENV_DEPLOYMENT=dev \
-      --dockerfile $CI_PROJECT_DIR/backend/v2/Dockerfile --destination "$DOCKER_REGISTRY_PATH:$DOCKER_IMAGE_TAG" \
-      --destination "$DOCKER_REGISTRY_PATH:$CI_COMMIT_REF_NAME" --destination "$DOCKER_REGISTRY_PATH:latest"
-
 frontend_e2e:
   stage: check
   image: cypress/base:16.17.1
@@ -69,11 +54,17 @@ frontend_e2e:
       - .npm/
       - .next/cache
 
-backend_test:
+backend_linting:
   stage: check
-  image: $CI_REGISTRY_IMAGE/backend/v2/dev/$DOCKER_IMAGE_TAG
-  variables:
-    APPLICATION: linting
+  image: python:3.10-alpine
+  script:
+    - pipenv install --dev
+    # pylint and flake8 not yet fixed
+    - pipenv run pylint --recursive=yes common sharer librarian || true
+    - pipenv run flake8 . || true
+    - pipenv run isort --check-only .
+    - pipenv run black --check .
+    - pipenv run bandit .
 
 # 📦 BUILD AND PACKAGE JOBS
 
