@@ -5,8 +5,7 @@
 # - https://docs.gitlab.com/ee/ci/yaml/
 
 variables:
-  SBT_DOCKER_IMAGE: "hseeberger/scala-sbt:16.0.1_1.5.4_2.13.6"
-  NODE_DOCKER_IMAGE: "node:14-alpine"
+  NODE_DOCKER_IMAGE: "node:19-alpine"
   NODE_ENV: "test"
   KANIKO_CONFIG: '{"auths":{"$CI_REGISTRY":{"username":"$CI_REGISTRY_USER","password":"$CI_REGISTRY_PASSWORD"}}}'
   DOCKER_IMAGE_TAG: "$CI_COMMIT_SHORT_SHA"
@@ -29,7 +28,6 @@ stages:
   - deploy
 
 # 🔬 TEST JOBS
-
 frontend_e2e:
   stage: check
   image: cypress/base:16.17.1
@@ -56,46 +54,35 @@ frontend_e2e:
       - .npm/
       - .next/cache
 
-backend_v1_test:
+backend_linting:
   stage: check
-  image: $SBT_DOCKER_IMAGE
+  image: python:3.10-alpine
   script:
-    - cd backend/v1
-    - sbt "test"
-  cache:
-    paths:
-      - ~/.ivy2/
+    - pip install pipenv
+    - cd backend/v2
+    - pipenv install --dev
+    # pylint and flake8 not yet fixed
+    - pipenv run pylint --recursive=yes common sharer librarian || true
+    - pipenv run flake8 . || true
+    - pipenv run isort --check-only .
+    - pipenv run black --check .
+    - pipenv run bandit .
 
-# 📦 BUILD AND PACKAGE JOBS
+# 📦 BUILD JOBS
 
-backend_v1_build:
-  stage: build
-  image: $SBT_DOCKER_IMAGE
-  script:
-    - cd backend/v1
-    - sbt "assembly"
-  artifacts:
-    expire_in: 1 week
-    paths:
-      - backend/v1/sharer/target/scala-2.13/sharer-assembly-*.jar
-      - backend/v1/librarian/target/scala-2.13/librarian-assembly-*.jar
-  cache:
-    paths:
-      - ~/.ivy2/
-
-backend_v1_docker:
+backend_docker:
   stage: package
-  dependencies:
-    - backend_v1_build
   image:
     # See: https://docs.gitlab.com/ee/ci/docker/using_kaniko.html
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
   script:
-    - export DOCKER_REGISTRY_PATH="$CI_REGISTRY_IMAGE/backend/v1"
+    - export DOCKER_REGISTRY_PATH="$CI_REGISTRY_IMAGE/backend/v2"
     - echo "$KANIKO_CONFIG" > /kaniko/.docker/config.json
-    - find . -name "backend-assembly-0.1.jar"
-    - /kaniko/executor --cache=true --context $CI_PROJECT_DIR/backend/v1/ --dockerfile $CI_PROJECT_DIR/backend/v1/Dockerfile --destination "$DOCKER_REGISTRY_PATH:$DOCKER_IMAGE_TAG" --destination "$DOCKER_REGISTRY_PATH:$CI_COMMIT_REF_NAME" --destination "$DOCKER_REGISTRY_PATH:latest"
+    - >
+      /kaniko/executor --cache=true --context $CI_PROJECT_DIR/backend/v2/
+      --dockerfile $CI_PROJECT_DIR/backend/v2/Dockerfile --destination "$DOCKER_REGISTRY_PATH:$DOCKER_IMAGE_TAG"
+      --destination "$DOCKER_REGISTRY_PATH:$CI_COMMIT_REF_NAME" --destination "$DOCKER_REGISTRY_PATH:latest"
 
 frontend_docker:
   stage: package
@@ -107,7 +94,11 @@ frontend_docker:
     - export DOCKER_REGISTRY_PATH="$CI_REGISTRY_IMAGE/frontend"
     - echo "$KANIKO_CONFIG" > /kaniko/.docker/config.json
     - find . -name ".next"
-    - /kaniko/executor --build-arg RDX_PDF_HEADERS_PROXY_URL="$RDX_PDF_HEADERS_PROXY_URL" --build-arg RDX_BACKEND_URL="$RDX_BACKEND_URL" --cache=false --context $CI_PROJECT_DIR/frontend/ --dockerfile $CI_PROJECT_DIR/frontend/Dockerfile --destination "$DOCKER_REGISTRY_PATH:$DOCKER_IMAGE_TAG" --destination "$DOCKER_REGISTRY_PATH:$CI_COMMIT_REF_NAME" --destination "$DOCKER_REGISTRY_PATH:latest"
+    - >
+      /kaniko/executor --build-arg RDX_PDF_HEADERS_PROXY_URL="$RDX_PDF_HEADERS_PROXY_URL"
+      --build-arg RDX_BACKEND_URL="$RDX_BACKEND_URL" --cache=false --context $CI_PROJECT_DIR/frontend/
+      --dockerfile $CI_PROJECT_DIR/frontend/Dockerfile --destination "$DOCKER_REGISTRY_PATH:$DOCKER_IMAGE_TAG"
+      --destination "$DOCKER_REGISTRY_PATH:$CI_COMMIT_REF_NAME" --destination "$DOCKER_REGISTRY_PATH:latest"
 
 # # 🚀 DEPLOYMENT JOBS
 
