@@ -120,15 +120,17 @@ frontend_docker:
 
 deploy_test:
   extends: .deploy_tpl
-  only:
-    variables:
-      - $CI_COMMIT_BRANCH == "development"
-      - $CI_COMMIT_BRANCH == "master"
+  # TODO: uncomment code after testing deployment
+  # only:
+  #   variables:
+  #     - $CI_COMMIT_BRANCH == "develop"
+  #     - $CI_COMMIT_BRANCH == "master"
   variables:
-    RDX_WEBDAV_USER: $WEBDAV_USER_TEST
-    RDX_WEBDAV_PASSWORD: $WEBDAV_PASSWORD_TEST
+    # RDX_WEBDAV_USER: $WEBDAV_USER_TEST
+    # RDX_WEBDAV_PASSWORD: $WEBDAV_PASSWORD_TEST
     ANSIBLE_INVENTORY: "inventory.yml"
-    RDX_WEB_URL: $RDX_WEB_URL_TEST
+    # RDX_WEB_URL: $RDX_WEB_URL_TEST
+    ENV_FILE: $CI_PROJECT_DIR/../$CI_PROJECT_NAME.tmp/ENV_FILE_TEST
 
 deploy_prod:
   extends: .deploy_tpl

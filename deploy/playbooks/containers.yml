@@ -4,6 +4,20 @@
     - vars/backend.yml
 
   tasks:
+    - name: Create /etc/rdx directory
+      become: true
+      ansible.builtin.file:
+        path: /etc/rdx
+        state: directory
+        mode: '0755'
+
+    - name: Create /etc/rdx/.env file
+      become: true
+      ansible.builtin.copy:
+        src: "{{ lookup('env', 'ENV_FILE') }}"
+        dest: /etc/rdx/.env
+        mode: '0644'
+
     - name: Log into private registry and force re-authorization
       become: true
       community.general.docker_login:
@@ -11,6 +25,7 @@
         username: "{{ lookup('env', 'DOCKER_USERNAME') }}"
         password: "{{ lookup('env', 'DOCKER_PASSWORD') }}"
         reauthorize: yes
+
     - name: Update backend and DB containers
       become: true
       tags: [docker]
@@ -25,45 +40,41 @@
               restart: "always"
               environment:
                 POSTGRES_HOST_AUTH_METHOD: trust
+
+            db-migrations:
+              image: "{{ docker_registry_url }}/backend/v2:{{ lookup('env', 'DOCKER_IMAGE_TAG') }}"
+              env_file:
+                - /etc/rdx/.env
+              environment:
+                  APPLICATION: "database-migrations"
+              depends_on:
+                  postgres:
+                      condition: service_started
+
             sharer:
-              image: "{{ docker_registry_url }}/backend:{{ lookup('env', 'DOCKER_IMAGE_TAG') }}"
+              image: "{{ docker_registry_url }}/backend/v2:{{ lookup('env', 'DOCKER_IMAGE_TAG') }}"
               restart: "always"
-              depends_on: [postgres]
+              depends_on:
+                db-migrations:
+                  condition: service_completed_successfully
+              env_file:
+                - /etc/rdx/.env
               environment:
-                # Tip: this list should be in sync with the env variables in all
-                # `application.conf` and `reference.conf` files of the project.
-                RDX_SMTP_HOST: "{{ lookup('env', 'RDX_SMTP_HOST') }}"
-                RDX_SMTP_PORT: "{{ lookup('env', 'RDX_SMTP_PORT') }}"
-                RDX_SMTP_USER: "{{ lookup('env', 'RDX_SMTP_USER') }}"
-                RDX_SMTP_PASSWORD: "{{ lookup('env', 'RDX_SMTP_PASSWORD') }}"
-                RDX_WEB_URL: "{{ lookup('env', 'RDX_WEB_URL') }}"
-                RDX_WEBDAV_USER: "{{ lookup('env', 'RDX_WEBDAV_USER') }}"
-                RDX_WEBDAV_PASSWORD: "{{ lookup('env', 'RDX_WEBDAV_PASSWORD') }}"
-                DB_HOST: "postgres"
-                DB_NAME: "postgres"
-                DB_USER: "postgres"
-                DB_PORT: 5432
-                LOG_LEVEL: "info"
-                RDX_APP_NAME: "sharer"
+                APPLICATION: "sharer"
+
             librarian:
-              image: "{{ docker_registry_url }}/backend:{{ lookup('env', 'DOCKER_IMAGE_TAG') }}"
+              image: "{{ docker_registry_url }}/backend/v2:{{ lookup('env', 'DOCKER_IMAGE_TAG') }}"
               restart: "always"
-              depends_on: [postgres]
+              depends_on:
+                db-migrations:
+                  condition: service_completed_successfully
               ports:
-                - 8081:8081
+                - 8000:8000
+              env_file:
+                - /etc/rdx/.env
               environment:
-                RDX_SMTP_HOST: "{{ lookup('env', 'RDX_SMTP_HOST') }}"
-                RDX_SMTP_PORT: "{{ lookup('env', 'RDX_SMTP_PORT') }}"
-                RDX_SMTP_USER: "{{ lookup('env', 'RDX_SMTP_USER') }}"
-                RDX_SMTP_PASSWORD: "{{ lookup('env', 'RDX_SMTP_PASSWORD') }}"
-                DB_HOST: "postgres"
-                DB_NAME: "postgres"
-                DB_USER: "postgres"
-                DB_PORT: 5432
-                RDX_APP_NAME: "librarian"
-                LOG_LEVEL: "info"
-                RDX_WEBDAV_USER: "{{ lookup('env', 'RDX_WEBDAV_USER') }}"
-                RDX_WEBDAV_PASSWORD: "{{ lookup('env', 'RDX_WEBDAV_PASSWORD') }}"
+                APPLICATION: "librarian"
+
             frontend:
               image: "{{ docker_registry_url }}/frontend:{{ lookup('env', 'DOCKER_IMAGE_TAG') }}"
               restart: "always"
@@ -71,7 +82,8 @@
               ports:
                 - 3000:3000
               environment:
-                RDX_BACKEND_URL: http://librarian:8081
+                RDX_BACKEND_URL: http://librarian:8000
+
     - name: Log out of docker registry
       become: true
       community.docker.docker_login:
