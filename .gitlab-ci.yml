@@ -120,11 +120,10 @@ frontend_docker:
 
 deploy_test:
   extends: .deploy_tpl
-  # TODO: uncomment code after testing deployment
-  # only:
-  #   variables:
-  #     - $CI_COMMIT_BRANCH == "develop"
-  #     - $CI_COMMIT_BRANCH == "master"
+  only:
+    variables:
+      - $CI_COMMIT_BRANCH == "develop"
+      - $CI_COMMIT_BRANCH == "master"
   variables:
     ANSIBLE_INVENTORY: "inventory.yml"
     RDX_WEB_URL: $RDX_WEB_URL_TEST
