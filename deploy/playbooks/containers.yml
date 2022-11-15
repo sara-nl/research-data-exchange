@@ -82,7 +82,7 @@
               ports:
                 - 3000:3000
               environment:
-                RDX_BACKEND_URL: http://librarian:8000
+                RDX_BACKEND_URL: "{{ lookup('env', 'RDX_WEB_URL') }}"
 
     - name: Log out of docker registry
       become: true

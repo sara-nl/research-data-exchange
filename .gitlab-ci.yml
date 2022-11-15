@@ -126,10 +126,8 @@ deploy_test:
   #     - $CI_COMMIT_BRANCH == "develop"
   #     - $CI_COMMIT_BRANCH == "master"
   variables:
-    # RDX_WEBDAV_USER: $WEBDAV_USER_TEST
-    # RDX_WEBDAV_PASSWORD: $WEBDAV_PASSWORD_TEST
     ANSIBLE_INVENTORY: "inventory.yml"
-    # RDX_WEB_URL: $RDX_WEB_URL_TEST
+    RDX_WEB_URL: $RDX_WEB_URL_TEST
     ENV_FILE: $CI_PROJECT_DIR/../$CI_PROJECT_NAME.tmp/ENV_FILE_TEST
 
 deploy_prod:
@@ -138,7 +136,6 @@ deploy_prod:
     variables:
       - $CI_COMMIT_TAG =~ /^prod\-.*/i
   variables:
-    RDX_WEBDAV_USER: $WEBDAV_USER_PROD
-    RDX_WEBDAV_PASSWORD: $WEBDAV_PASSWORD_PROD
     ANSIBLE_INVENTORY: "inventory-prod.yml"
     RDX_WEB_URL: $RDX_WEB_URL_PROD
+    ENV_FILE: $CI_PROJECT_DIR/../$CI_PROJECT_NAME.tmp/ENV_FILE_TEST
