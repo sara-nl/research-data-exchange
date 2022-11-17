@@ -15,7 +15,9 @@ from common.models.rdx_models import (
 
 from .email import send_publication_email
 
-app = FastAPI()
+app = FastAPI(
+    openapi_url="/api/openapi.json", docs_url="/api/docs", redoc_url="/api/redoc"
+)
 
 db = DBClient()
 
