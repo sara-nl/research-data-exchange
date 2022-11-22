@@ -120,7 +120,8 @@ def request_access_to_dataset(
 ):
     if not analyst_data.agree:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Terms and conditions need to be agreed to"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Terms and conditions need to be agreed to",
         )
 
     rdx_dataset = get_public_dataset_by_doi(session, dataset_doi)

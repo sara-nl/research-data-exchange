@@ -51,9 +51,8 @@ function transformDownloadLink(conditionsUrl: string) {
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const doi = (context.query.doi as string[]) || [];
-
   const res = await fetch(
-     `${process.env.BACKEND_URL}/api/dataset/${encodeURIComponent(doi.join('/'))}/access`
+     `${process.env.RDX_BACKEND_URL}/api/dataset/${encodeURIComponent(doi.join('/'))}/access`
   );
 
   if (!res.ok) {
@@ -65,7 +64,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   var response = await res.json();
 
   const dataset : Dataset = {
-    id: response.id,
     title: response.title,
     description: response.description,
     files: response.files,
@@ -76,7 +74,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {
       dataset: dataset,
-      submitUrl: `${process.env.BACKEND_URL}/api/dataset/${encodeURIComponent(doi.join('/'))}/access`,
+      submitUrl: `${process.env.RDX_BACKEND_URL}/api/dataset/${encodeURIComponent(doi.join('/'))}/access`,
     },
   };
 };

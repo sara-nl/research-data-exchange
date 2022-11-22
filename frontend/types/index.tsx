@@ -1,7 +1,7 @@
 import internal from "stream";
 
 export type Dataset = {
-  id: number,
+  id?: number,
   rdx_share?: Share;
   conditions_url: string;
   // TODO: figure out why proxy is needed
