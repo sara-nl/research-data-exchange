@@ -2,12 +2,12 @@ from datetime import datetime
 
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import selectinload
-from sqlmodel import Session, select
+from sqlmodel import Session
 
 from common.api.dependencies import get_rdx_user
 from common.db.db_client import DBClient
 from common.models.rdx_models import (
+    PublicRdxDatasetRead,
     RdxAnalystUpdate,
     RdxDataset,
     RdxDatasetReadWithShare,
@@ -96,10 +96,7 @@ def publish_dataset(
     return rdx_dataset
 
 
-# TODO: change response model to only provide limited information
-@app.get(
-    "/api/dataset/{dataset_doi:path}/access", response_model=RdxDatasetReadWithShare
-)
+@app.get("/api/dataset/{dataset_doi:path}/access", response_model=PublicRdxDatasetRead)
 def get_public_dataset(
     *,
     session: Session = Depends(db.get_session_dependency),
@@ -108,8 +105,6 @@ def get_public_dataset(
     return get_public_dataset_by_doi(session, dataset_doi)
 
 
-# TODO: change response model to only provide limited information
-# TODO: add steps into functions in access.py file
 @app.post("/api/dataset/{dataset_doi:path}/access", status_code=201)
 def request_access_to_dataset(
     *,

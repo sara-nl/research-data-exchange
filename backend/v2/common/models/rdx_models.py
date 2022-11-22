@@ -194,6 +194,15 @@ class RdxDatasetReadWithShare(RdxDatasetRead):
     rdx_share: RdxShareRead | None = None
 
 
+class PublicRdxDatasetRead(SQLModel):
+    doi: str
+    title: str
+    authors: str
+    description: str
+    files: list[str]
+    conditions_url: HttpUrl
+
+
 class RdxShareReadWithDataset(RdxShareRead):
     rdx_dataset: RdxDatasetRead | None = None
 

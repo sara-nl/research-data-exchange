@@ -67,7 +67,10 @@ def give_access_to_dataset(
         print("Processing access license sign+analyze")
     if rdx_dataset.access_license == AccessLicense.download:
         print("Processing access license sign+download")
-        create_public_link_to_dataset(session, rdx_dataset, rdx_dataset_analyst_link)
+        if rdx_dataset_analyst_link.download_url == None:
+            create_public_link_to_dataset(
+                session, rdx_dataset, rdx_dataset_analyst_link
+            )
 
     send_email_to_analyst(rdx_analyst, rdx_dataset, rdx_dataset_analyst_link)
     send_email_to_researcher(session, rdx_analyst, rdx_dataset)
