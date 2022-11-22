@@ -1,5 +1,8 @@
+import os
 import smtplib
 import ssl
+from email import encoders
+from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from typing import ClassVar
@@ -15,6 +18,7 @@ class MailClient(BaseModel):
     receiver: EmailStr
     subject: str
     message: str
+    attachment: str | None = None
 
     BODY_OPEN: ClassVar = """
         <body style="font-size: 16px;
@@ -36,6 +40,10 @@ class MailClient(BaseModel):
 
         message.attach(text_part)
         message.attach(html_part)
+
+        if self.attachment:
+            self.add_attachment(message)
+
         message = message.as_string()
 
         with smtplib.SMTP(
@@ -54,3 +62,22 @@ class MailClient(BaseModel):
             except Exception as error:
                 print(f"Failed to send mail: {error}")
                 raise error
+
+    def add_attachment(self, message: MIMEMultipart):
+        print(f"Adding attachment {self.attachment} to email")
+        with open(self.attachment, "rb") as attachment:
+            # Add file as application/octet-stream
+            # Email client can usually download this automatically as attachment
+            part = MIMEBase("application", "octet-stream")
+            part.set_payload(attachment.read())
+
+        # Encode file in ASCII characters to send by email
+        encoders.encode_base64(part)
+
+        part.add_header(
+            "Content-Disposition",
+            f"attachment; filename={os.path.basename(self.attachment)}",
+        )
+
+        # Add attachment to message
+        message.attach(part)

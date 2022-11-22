@@ -1,5 +1,8 @@
+import internal from "stream";
+
 export type Dataset = {
-  rdx_share: Share;
+  id: number,
+  rdx_share?: Share;
   conditions_url: string;
   // TODO: figure out why proxy is needed
   conditionsUrlProxy?: string;
@@ -8,9 +11,9 @@ export type Dataset = {
   title?: string;
   authors?: string;
   description?: string;
-  published: boolean;
+  published?: boolean;
   published_at?: Date;
-  access_license: AccessLicense;
+  access_license?: AccessLicense;
 };
 
 export enum AccessLicense {

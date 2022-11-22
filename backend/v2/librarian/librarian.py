@@ -2,17 +2,20 @@ from datetime import datetime
 
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from sqlmodel import Session
+from sqlalchemy.orm import selectinload
+from sqlmodel import Session, select
 
 from common.api.dependencies import get_rdx_user
 from common.db.db_client import DBClient
 from common.models.rdx_models import (
+    RdxAnalystUpdate,
     RdxDataset,
     RdxDatasetReadWithShare,
     RdxDatasetUpdate,
     RdxUser,
 )
 
+from .access import get_analyst, get_public_dataset_by_doi, give_access_to_dataset
 from .email import send_publication_email
 
 app = FastAPI(
@@ -91,3 +94,43 @@ def publish_dataset(
         background_tasks.add_task(send_publication_email, rdx_user, rdx_dataset)
 
     return rdx_dataset
+
+
+# TODO: change response model to only provide limited information
+@app.get(
+    "/api/dataset/{dataset_doi:path}/access", response_model=RdxDatasetReadWithShare
+)
+def get_public_dataset(
+    *,
+    session: Session = Depends(db.get_session_dependency),
+    dataset_doi: str,
+):
+    return get_public_dataset_by_doi(session, dataset_doi)
+
+
+# TODO: change response model to only provide limited information
+# TODO: add steps into functions in access.py file
+@app.post("/api/dataset/{dataset_doi:path}/access", status_code=201)
+def request_access_to_dataset(
+    *,
+    session: Session = Depends(db.get_session_dependency),
+    background_tasks: BackgroundTasks,
+    dataset_doi: str,
+    analyst_data: RdxAnalystUpdate,
+):
+    if not analyst_data.agree:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Terms and conditions need to be agreed to"
+        )
+
+    rdx_dataset = get_public_dataset_by_doi(session, dataset_doi)
+    rdx_analyst = get_analyst(session, analyst_data)
+
+    print(f"Linking {rdx_analyst.email} to dataset {rdx_dataset.id}")
+    rdx_analyst.datasets.append(rdx_dataset)
+    session.add(rdx_analyst)
+    session.commit()
+    session.refresh(rdx_analyst)
+    session.refresh(rdx_dataset)
+
+    background_tasks.add_task(give_access_to_dataset, session, rdx_dataset, rdx_analyst)

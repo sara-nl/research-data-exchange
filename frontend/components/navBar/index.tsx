@@ -19,7 +19,7 @@ const NavBarComponent: React.FC<Props> = (props) => {
   return (
     <header>
       <Navbar bg="light" collapseOnSelect expand="lg">
-        <Navbar.Brand>SURF Research Data Exchange</Navbar.Brand>
+        <Navbar.Brand><img className="home-logo" src="/images/logos/surf.png" />Research Data Exchange</Navbar.Brand>
         <Navbar.Toggle />
         {props.email && (
           <Navbar.Collapse className="justify-content-end">
