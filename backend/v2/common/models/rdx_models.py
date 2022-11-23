@@ -24,8 +24,8 @@ class RdxAnalystDatasetLink(SQLModel, table=True):
     download_share_id: int | None = Field(index=True, default=None)
     shared_at: datetime | None = None
 
-    dataset: "RdxDataset" = Relationship(back_populates="analyst_links")
-    analyst: "RdxAnalyst" = Relationship(back_populates="dataset_links")
+    dataset: "RdxDataset" = Relationship(sa_relationship_kwargs={"viewonly": True})
+    analyst: "RdxAnalyst" = Relationship(sa_relationship_kwargs={"viewonly": True})
 
 
 class AccessLicense(str, enum.Enum):
