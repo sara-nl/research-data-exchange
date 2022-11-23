@@ -11,9 +11,11 @@ import { Dataset } from '../../types';
 import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
 import FieldFeedback from '../form/fieldFeedback';
-import { Tooltip } from 'react-bootstrap';
-import { OverlayTrigger } from 'react-bootstrap';
-import AgreeToConditions from './form/AgreeToConditions';
+import {
+  OverlayTrigger,
+  Tooltip,
+} from 'react-bootstrap';
+
 
 const PDFViewer = dynamic(() => import('../pdf-view'), {
   ssr: false,
@@ -135,27 +137,33 @@ const AccessForm: React.FC<Props> = ({
                     controlId="agree"
                     className="text-center"
                   >
-                    {!canAgree ? (
                       <OverlayTrigger
                         placement="bottom-start"
                         overlay={
-                          <Tooltip id="tooltip-disabled">
-                            To agree you must fully read or download the
-                            conditions first
+                          <Tooltip hidden={canAgree} id="tooltip-disabled">
+                            To agree you must first fully read the conditions or download them
                           </Tooltip>
                         }
                       >
-                        <AgreeToConditions
-                          disabled={!canAgree}
-                          formikFieldProps={fp}
-                        />
+                        <span className="d-inline-block">
+                          <RForm.Check
+                            type="checkbox"
+                            required
+                            label={
+                              <React.Fragment>
+                                <span className="lead">
+                                  I hereby agree to the terms and conditions{' '}
+                                </span>
+                                <sup className="font-weight-light">required</sup>
+                              </React.Fragment>
+                            }
+                            disabled={!canAgree}
+                            value={fp.field.value}
+                            onBlur={fp.field.onBlur}
+                            onChange={fp.field.onChange}
+                          />
+                        </span>
                       </OverlayTrigger>
-                    ) : (
-                      <AgreeToConditions
-                        disabled={!canAgree}
-                        formikFieldProps={fp}
-                      />
-                    )}
                   </RForm.Group>
                 )}
               </Field>
