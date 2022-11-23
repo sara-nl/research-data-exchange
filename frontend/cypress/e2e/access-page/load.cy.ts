@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 describe('RDX access page', () => {
   beforeEach(() => {
-    cy.intercept('GET', '**/api/dataset/10.21942/uva.14680362.v3', {
+    cy.intercept('GET', '**/api/dataset/10.21942/uva.14680362.v3/access', {
       fixture: '10.21942%2Fuva.14680362.v3.json',
     }).as('getDataset');
 
@@ -9,7 +9,7 @@ describe('RDX access page', () => {
     cy.task('mockServer', {
       interceptUrl: `${Cypress.env(
         'RDX_BACKEND_URL',
-      )}/dataset/10.21942%2Fuva.14680362.v3`,
+      )}/api/dataset/10.21942%2Fuva.14680362.v3/access`,
       fixture: '10.21942%2Fuva.14680362.v3.json',
     });
 
