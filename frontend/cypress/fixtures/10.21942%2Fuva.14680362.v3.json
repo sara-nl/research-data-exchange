@@ -2,6 +2,6 @@
   "owner": "Alibaba",
   "title": "My Dataset",
   "description": "Foo",
-  "conditionsUrl": "http://google.com",
+  "conditions_url": "http://google.com",
   "files": ["conditions.pdf", "1.csv"]
 }

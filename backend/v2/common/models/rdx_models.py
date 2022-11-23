@@ -5,8 +5,27 @@ from datetime import datetime, timedelta
 from typing import Any, Optional
 
 from pydantic import EmailStr, HttpUrl, PrivateAttr, validator
-from sqlalchemy import JSON
+from sqlalchemy import JSON, Integer, Sequence
 from sqlmodel import Column, Enum, Field, Relationship, SQLModel
+
+
+class RdxAnalystDatasetLink(SQLModel, table=True):
+    __tablename__ = "rdx_analyst_dataset"
+    id: int | None = Field(
+        sa_column=Column("id", Integer, primary_key=True, autoincrement=True)
+    )
+    dataset_id: Optional[int] = Field(
+        default=None, foreign_key="rdx_dataset.id", primary_key=True
+    )
+    analyst_id: Optional[int] = Field(
+        default=None, foreign_key="rdx_analyst.id", primary_key=True
+    )
+    download_url: HttpUrl | None = None
+    download_share_id: int | None = Field(index=True, default=None)
+    shared_at: datetime | None = None
+
+    dataset: "RdxDataset" = Relationship(back_populates="analyst_links")
+    analyst: "RdxAnalyst" = Relationship(back_populates="dataset_links")
 
 
 class AccessLicense(str, enum.Enum):
@@ -49,6 +68,10 @@ class RdxDataset(RdxDatasetBase, table=True):
     rdx_share: Optional["RdxShare"] = Relationship(
         back_populates="rdx_dataset", sa_relationship_kwargs={"uselist": False}
     )
+    analysts: list["RdxAnalyst"] = Relationship(
+        back_populates="datasets", link_model=RdxAnalystDatasetLink
+    )
+    analyst_links: list[RdxAnalystDatasetLink] = Relationship(back_populates="dataset")
 
 
 class RdxDatasetRead(RdxDatasetBase):
@@ -171,6 +194,15 @@ class RdxDatasetReadWithShare(RdxDatasetRead):
     rdx_share: RdxShareRead | None = None
 
 
+class PublicRdxDatasetRead(SQLModel):
+    doi: str
+    title: str
+    authors: str
+    description: str
+    files: list[str]
+    conditions_url: HttpUrl
+
+
 class RdxShareReadWithDataset(RdxShareRead):
     rdx_dataset: RdxDatasetRead | None = None
 
@@ -199,3 +231,15 @@ class RdxUser(RdxUserBase, table=True):
 
 class RdxAnalyst(RdxUserBase, table=True):
     __tablename__ = "rdx_analyst"
+    name: str | None
+    datasets: list["RdxDataset"] = Relationship(
+        back_populates="analysts",
+        link_model=RdxAnalystDatasetLink,
+    )
+    dataset_links: list[RdxAnalystDatasetLink] = Relationship(back_populates="analyst")
+
+
+class RdxAnalystUpdate(SQLModel):
+    email: EmailStr
+    name: str
+    agree: bool | None = None

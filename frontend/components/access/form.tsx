@@ -106,13 +106,13 @@ const AccessForm: React.FC<Props> = ({
       }) => (
         <React.Fragment>
           <div>
-            <Alert variant="info" className="px-5">
+            <Alert key="info" variant="info">
               <h4>You are about to request access to a dataset</h4>
               Please read the following use conditions carefully. You can
               download the dataset only if you fully agree to them. Your name
               and email address along with the fact of agreement will be stored
-              in our system in order to ensure that the data is used
-              appropriately.
+              in our system and shared with the data owner to ensure that the data is used
+              appropriately and to generate usage statistics.
             </Alert>
           </div>
           <div className="pdf-view" onScroll={handleScroll}>
@@ -121,16 +121,12 @@ const AccessForm: React.FC<Props> = ({
 
           <RForm noValidate validated={!errors} onSubmit={handleSubmit}>
             <p className="text-center">
-              <a
-                className="badge badge-secondary"
-                download="Research_Data_Exchange_Conditions"
+              <Button
                 href={dataset.conditions_url}
+                color="transparent"
                 onClick={() => setDownloadedConditions(true)}
-              >
-                Download PDF
-              </a>
+              >Download PDF</Button>
             </p>
-
             <Row className="mt-2">
               <Field name="agree">
                 {(fp: FieldProps) => (
