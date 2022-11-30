@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title />
+    <g fill="none" fill-rule="evenodd"  stroke="none" stroke-width="1">
+        <g transform="translate(-327.000000, -207.000000)">
+            <g transform="translate(327.000000, 207.000000)">
+                <g transform="translate(1.000000, 1.000000)">
+                    <rect fill="#379cea" fill-opacity="0.01" fill-rule="nonzero" height="22" width="22" x="0" y="0" />
+                    <polygon points="20.1666667 2.29166667 1.83333333 2.29166667 1.83333333 7.79166667 20.1666667 7.79166667" stroke="#379cea" stroke-linejoin="round" stroke-width="1.5" />
+                    <polyline points="1.83333333 18.8054625 7.41381667 13.1675958 10.4293292 16.0554625 14.1158417 12.375 16.1694042 14.377" stroke="#379cea" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" />
+                    <line stroke="#379cea" stroke-linecap="round" stroke-width="1.5" x1="20.1666667" x2="20.1666667" y1="7.41212083" y2="19.3287875" />
+                    <line stroke="#379cea" stroke-linecap="round" stroke-width="1.5" x1="1.83333333" x2="1.83333333" y1="7.41212083" y2="13.8287875" />
+                    <line stroke="#379cea" stroke-linecap="round" stroke-width="1.5" x1="5.96548333" x2="20.1667125" y1="19.7083333" y2="19.7083333" />
+                    <line stroke="#379cea" stroke-linecap="round" stroke-width="1.5" x1="7.79166667" x2="17.4166667" y1="5.04166667" y2="5.04166667" />
+                    <line stroke="#379cea" stroke-linecap="round" stroke-width="1.5" x1="4.58333333" x2="5.04166667" y1="5.04010833" y2="5.04010833" />
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

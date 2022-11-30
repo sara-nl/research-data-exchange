@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useEffect } from 'react';
 
 type Props = {
-  email: string;
+  email?: string;
 };
 
 const NavBarComponent: React.FC<Props> = (props) => {

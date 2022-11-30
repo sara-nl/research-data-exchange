@@ -6,6 +6,7 @@ import {
   Form as RForm,
   Alert,
 } from 'react-bootstrap';
+import { InfoCircle } from 'react-bootstrap-icons';
 import { Formik, Field } from 'formik';
 import FieldFeedback from './../form/fieldFeedback';
 import { useState } from 'react';
@@ -199,7 +200,7 @@ const PublicationForm: React.FC<Props> = ({
                 {(fp) => (
                   <RForm.Group as={Col} controlId="access_license">
                     <RForm.Label>
-                      <span className="lead">Access License</span>
+                      <span className="lead">Access License <sup><a href="/policies" target="_blank"><InfoCircle /></a></sup></span>
                     </RForm.Label>
                     <RForm.Control
                       required
