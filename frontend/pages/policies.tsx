@@ -48,7 +48,7 @@ const Home: React.FC = () => (
                 <ListGroup.Item>To access a dataset with a <em>sign + analyze</em> access policy, a data consumer is required to digitally sign the conditions specified by the data provider.</ListGroup.Item>
                 <ListGroup.Item>After agreeing to the conditions, the data consumer will receive a link to analyze the dataset within a secure analysis environment. This analysis environment runs on the infrastructure of a trusted third party, and the data consumer will not be able to download the dataset to their own device.</ListGroup.Item>
                 <ListGroup.Item>The RDX notifies the data provider when someone has requested access to their dataset.</ListGroup.Item>
-                <ListGroup.Item>The RDX provides the data provider with an overview of which algorithms are run on their dataset by which analyst and what the output of the analysis was.</ListGroup.Item>
+                <ListGroup.Item>The RDX provides the data provider with an overview of which algorithms are run on their dataset and what the output of the analysis was.</ListGroup.Item>
               </ListGroup>
             </Card>
           </Col>
