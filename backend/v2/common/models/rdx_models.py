@@ -52,7 +52,7 @@ class RdxDatasetBase(SQLModel):
     researcher_id: int | None = Field(
         index=True, default=None, foreign_key="rdx_user.id"
     )
-    access_license: AccessLicense = Field(sa_column=Column(Enum(AccessLicense)))
+    access_license: AccessLicense | None = Field(sa_column=Column(Enum(AccessLicense)))
 
     @validator("files", pre=True)
     def name_must_contain_space(cls, v):
@@ -93,11 +93,11 @@ class ShareStatus(enum.IntEnum):
     invalid_permissions_notified = 2
     missing_conditions = 3
     missing_conditions_notified = 4
-    missing_dataset_config = 5
-    missing_dataset_config_notified = 6
-    invalid_dataset_config = 7
-    invalid_dataset_config_notified = 8
-    dataset_accepted = 9
+    missing_dataset_config = 5  # deprecated
+    missing_dataset_config_notified = 6  # deprecated
+    invalid_dataset_config = 7  # deprecated
+    invalid_dataset_config_notified = 8  # deprecated
+    dataset_accepted = 9  # deprecated
     dataset_accepted_notified = 10
 
 

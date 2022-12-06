@@ -1,13 +1,9 @@
 import owncloud
-import yaml
-from pydantic import ValidationError, parse_obj_as
 from sqlmodel import select
 
 from common.db.db_client import DBClient
 from common.models.rdx_models import RdxShare, ShareStatus
 from common.owncloud.owncloud_client import OwnCloudClient, ShareInfo
-
-from .dataset import DatasetConfig
 
 
 def get_eligible_shared_dirs(db: DBClient) -> list[ShareInfo]:
@@ -17,11 +13,10 @@ def get_eligible_shared_dirs(db: DBClient) -> list[ShareInfo]:
     print(f"Found shared dirs: {shared_dirs}")
 
     shared_dirs = add_rdx_models(db, shared_dirs)
+    shared_dirs = filter(check_if_email_is_set, shared_dirs)
     shared_dirs = map(check_resharing_permissions, shared_dirs)
     shared_dirs = map(add_files, shared_dirs)
     shared_dirs = map(check_for_conditions_file, shared_dirs)
-    shared_dirs = map(check_for_dataset_config_file, shared_dirs)
-    shared_dirs = map(add_dataset_config, shared_dirs)
     shared_dirs = list(shared_dirs)
     save_rdx_models(db, shared_dirs)
 
@@ -32,6 +27,12 @@ def add_rdx_models(
     db: DBClient, shared_dirs: list[owncloud.ShareInfo]
 ) -> list[ShareInfo]:
     for shared_dir in shared_dirs:
+        if not shared_dir.share_info["additional_info_owner"]:
+            print(
+                f"Share ({shared_dir.get_id()}: {shared_dir.get_path()}) has no email associated with it... ignoring"
+            )
+            continue
+
         with db.get_session() as session:
             statement = select(RdxShare).where(RdxShare.share_id == shared_dir.get_id())
             rdx_share = session.exec(statement).first()
@@ -52,6 +53,15 @@ def add_rdx_models(
             rdx_share.permissions = shared_dir.get_permissions()
         setattr(shared_dir, "rdx_share", rdx_share)
     return shared_dirs
+
+
+def check_if_email_is_set(directory: ShareInfo) -> bool:
+    if not directory.share_info["additional_info_owner"]:
+        print(
+            f"Share ({directory.get_id()}: {directory.get_path()}) has no email associated with it"
+        )
+        return False
+    return True
 
 
 def check_resharing_permissions(directory: ShareInfo) -> ShareInfo:
@@ -88,46 +98,6 @@ def check_for_conditions_file(directory: ShareInfo) -> ShareInfo:
             f"Share ({directory.get_id()}: {directory.get_path()}) does not have a conditions.pdf"
         )
         directory.rdx_share.set_new_share_status(ShareStatus.missing_conditions)
-    return directory
-
-
-def check_for_dataset_config_file(directory: ShareInfo) -> ShareInfo:
-    # TODO: get dataset.yml from config settings?
-    if "dataset.yml" not in directory.files:
-        print(
-            f"Share ({directory.get_id()}: {directory.get_path()}) does not have a dataset.yml"
-        )
-        directory.rdx_share.set_new_share_status(ShareStatus.missing_dataset_config)
-    return directory
-
-
-def add_dataset_config(directory: ShareInfo) -> ShareInfo:
-    if "dataset.yml" not in directory.files:
-        return directory
-
-    # TODO: get dataset.yml from config settings?
-    with OwnCloudClient() as oc_client:
-        dataset_config = oc_client.get_file_contents(
-            f"{directory.get_path()}/dataset.yml"
-        )
-
-    try:
-        print(f"Parsing {directory.get_path()}/dataset.yml as yaml")
-        dataset_config = yaml.safe_load(dataset_config)
-    except yaml.YAMLError as error:
-        print(f"Failed to parse yaml for {directory.get_path()}/dataset.yml: {error}")
-        directory.rdx_share.set_new_share_status(ShareStatus.invalid_dataset_config)
-        return directory
-
-    try:
-        print(f"Validating {directory.get_path()}/dataset.yml")
-        dataset_config = parse_obj_as(DatasetConfig, dataset_config)
-    except ValidationError as error:
-        print(f"Validation of {directory.get_path()}/dataset.yml failed: {error}")
-        directory.rdx_share.set_new_share_status(ShareStatus.invalid_dataset_config)
-        return directory
-
-    setattr(directory, "dataset_config", dataset_config)
     return directory
 
 

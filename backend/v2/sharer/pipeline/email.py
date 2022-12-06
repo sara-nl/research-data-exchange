@@ -2,26 +2,6 @@ from common.email.mail_client import MailClient
 from common.models.rdx_models import RdxShare, RdxUser
 from common.settings.app_settings import app_settings
 
-DATASET_CONFIG_EXAMPLE = """
-<p>
-The dataset.yml file should have the following structure:
-</p>
-<pre>
----
-data_steward_email: alice@example.nl
-researcher_email: bill@example.nl
-access_license: sign+analyze
-metadata:
-  doi: 10.1000/182
-  title: Test title
-  description: Test description
-  authors: Author 1, Author 2, Author 3
-</pre>
-<p>
-Note: the metadata section is optional, but if it is included all four fields need to be entered.
-</p>
-"""
-
 
 def get_publication_message_researcher(user: RdxUser, rdx_share: RdxShare) -> str:
     return f"""
@@ -63,12 +43,7 @@ def get_misconfiguration_message(
     rdx_share: RdxShare,
     problem: str,
     solution: str,
-    show_dataset_config_example: bool = False,
 ) -> str:
-    if show_dataset_config_example:
-        example = DATASET_CONFIG_EXAMPLE
-    else:
-        example = ""
 
     return f"""
     {MailClient.BODY_OPEN}
@@ -79,8 +54,6 @@ def get_misconfiguration_message(
     <p>Unfortunately the dataset is not yet ready for publication because {problem}.</p>
 
     <p>To fix this issue, you will need to {solution}.</p>
-
-    {example}
 
     <p>If you need support, please get in touch with the RDX team: <a href="mailto:{MailClient.SENDER}">{MailClient.SENDER}</a>
     </p>
