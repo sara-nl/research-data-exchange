@@ -14,6 +14,7 @@ from common.models.rdx_models import (
     RdxDatasetUpdate,
     RdxUser,
 )
+from common.models.utils import create_rdx_user
 
 from .access import get_analyst, get_public_dataset_by_doi, give_access_to_dataset
 from .email import send_publication_email
@@ -73,7 +74,7 @@ def publish_dataset(
     if not rdx_dataset:
         raise HTTPException(status=404, detail="Dataset not found")
 
-    if rdx_user.id != rdx_dataset.researcher_id:
+    if rdx_user.id != rdx_dataset.data_steward_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden resource"
         )
@@ -83,6 +84,11 @@ def publish_dataset(
         rdx_dataset.published_at = datetime.now()
         new_publication = True
 
+    research_email = dataset.researcher_email
+    del dataset.researcher_email
+    researcher = create_rdx_user(db, research_email)
+    rdx_dataset.researcher_id = researcher.id
+
     for key, value in dataset.dict(exclude_unset=True).items():
         setattr(rdx_dataset, key, value)
 
@@ -91,7 +97,7 @@ def publish_dataset(
     session.refresh(rdx_dataset)
 
     if new_publication:
-        background_tasks.add_task(send_publication_email, rdx_user, rdx_dataset)
+        background_tasks.add_task(send_publication_email, researcher, rdx_dataset)
 
     return rdx_dataset
 

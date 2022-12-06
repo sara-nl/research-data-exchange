@@ -60,7 +60,8 @@ const PublicationForm: React.FC<Props> = ({
           title: dataset.title || '',
           authors: dataset.authors || '',
           description: dataset.description || '',
-          access_license: dataset.access_license || '',
+          access_license: dataset.access_license || AccessLicense.download,
+          researcher_email: '',
           published: true
         }}
         validateOnMount={true}
@@ -86,6 +87,12 @@ const PublicationForm: React.FC<Props> = ({
 
           if (!values.description) {
             errors['description'] = 'Please enter publication description.';
+          }
+
+          if (!values.researcher_email) {
+            errors['researcher_email'] = 'Please enter the researcher\'s email address.';
+          } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.researcher_email)) {
+            errors['researcher_email'] = 'Please enter a valid email address';
           }
 
           return errors;
@@ -196,6 +203,27 @@ const PublicationForm: React.FC<Props> = ({
               </Field>
             </Row>
             <Row>
+              <Field name="researcher_email">
+                {(fp) => (
+                  <RForm.Group as={Col} controlId="researcher_email">
+                    <RForm.Label>
+                      <span className="lead">Researcher's email</span> <sup>required</sup>
+                    </RForm.Label>
+                    <RForm.Control
+                      required
+                      type="email"
+                      value={fp.field.value}
+                      onBlur={fp.field.onBlur}
+                      onChange={fp.field.onChange}
+                      isValid={fp.meta.touched && !fp.meta.error}
+                      isInvalid={fp.meta.touched && fp.meta.error}
+                    />
+                    <FieldFeedback {...fp} />
+                  </RForm.Group>
+                )}
+              </Field>
+            </Row>
+            <Row>
               <Field name="access_license">
                 {(fp) => (
                   <RForm.Group as={Col} controlId="access_license">
@@ -210,7 +238,6 @@ const PublicationForm: React.FC<Props> = ({
                       onChange={fp.field.onChange}
                       isValid={fp.meta.touched && !fp.meta.error}
                       isInvalid={fp.meta.touched && fp.meta.error}
-                      disabled={true}
                     >
                       {Object.values(AccessLicense).map((val) => (
                         <option key={val} value={val}>{val}</option>
