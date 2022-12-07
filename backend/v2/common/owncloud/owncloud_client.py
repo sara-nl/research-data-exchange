@@ -61,7 +61,7 @@ class OwnCloudClient(BaseModel):
     def list_dir_contents(self, path: str = "/") -> list[owncloud.FileInfo]:
         print(f"Listing contents for directory {path}")
         try:
-            return self.oc.list(path, depth="infinity")
+            return self.oc.list(path, depth=own_cloud_settings.max_folder_depth)
         except Exception as error:
             print(f"Error listing contents in dir {path}: {error}")
             raise error
