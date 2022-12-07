@@ -71,7 +71,9 @@ class RdxDataset(RdxDatasetBase, table=True):
     analysts: list["RdxAnalyst"] = Relationship(
         back_populates="datasets", link_model=RdxAnalystDatasetLink
     )
-    analyst_links: list[RdxAnalystDatasetLink] = Relationship(back_populates="dataset")
+    analyst_links: list[RdxAnalystDatasetLink] = Relationship(
+        sa_relationship_kwargs={"viewonly": True}
+    )
 
 
 class RdxDatasetRead(RdxDatasetBase):
@@ -236,7 +238,9 @@ class RdxAnalyst(RdxUserBase, table=True):
         back_populates="analysts",
         link_model=RdxAnalystDatasetLink,
     )
-    dataset_links: list[RdxAnalystDatasetLink] = Relationship(back_populates="analyst")
+    dataset_links: list[RdxAnalystDatasetLink] = Relationship(
+        sa_relationship_kwargs={"viewonly": True}
+    )
 
 
 class RdxAnalystUpdate(SQLModel):
