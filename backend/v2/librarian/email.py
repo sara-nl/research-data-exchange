@@ -11,12 +11,22 @@ from common.settings.app_settings import app_settings
 
 def get_publication_message(rdx_user: RdxUser, rdx_dataset: RdxDataset) -> str:
     access_url = f"{app_settings.web_url}/access/{rdx_dataset.doi}"
+    policies_url = f"{app_settings.web_url}/policies"
 
     return f"""
     {MailClient.BODY_OPEN}
     <p>Dear {rdx_user.email},</p>
 
-    <p>Your dataset has been published on RDX with a {rdx_dataset.access_license} access license.</p>
+    <p>Your dataset {rdx_dataset.title} has been published on RDX.</p>
+    
+    <p>The dataset has the following metadata associated with it:</p>
+    <p style="margin-left:2em">Title: {rdx_dataset.title}</p>
+    <p style="margin-left:2em">Author(s): {rdx_dataset.authors}</p>
+    <p style="margin-left:2em">Description: {rdx_dataset.description}</p>
+    <p style="margin-left:2em">DOI: {rdx_dataset.doi}</p>
+    <p style="margin-left:2em">Access license: {rdx_dataset.access_license}. (You can learn more about the access license <a href="{policies_url}">here</a>.)</p>
+
+    <p>What happens next?</p>
 
     <p>1. Your dataset is published</p>
     <p>The access page to your dataset: <samp>{access_url}</samp></p>
