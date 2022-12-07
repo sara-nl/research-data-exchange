@@ -1,7 +1,12 @@
 from sqlmodel import select
 
 from common.db.db_client import DBClient
-from common.models.rdx_models import RdxDataset, RdxShare, ShareStatus
+from common.models.rdx_models import (
+    RdxAnalystDatasetLink,
+    RdxDataset,
+    RdxShare,
+    ShareStatus,
+)
 from common.owncloud.owncloud_client import OwnCloudClient, ShareInfo
 
 
@@ -51,16 +56,7 @@ def create_dataset(db: DBClient, new_share: RdxShare) -> RdxDataset:
                 conditions_url=conditions_url,
                 condtions_share_id=conditions_share_id,
                 data_steward_id=new_share.data_steward.id,
-                researcher_id=new_share.researcher.id,
-                access_license=new_share.dataset_config.access_license,
             )
-
-            if new_share.dataset_config.metadata:
-                metadata = new_share.dataset_config.metadata
-                rdx_dataset.doi = metadata.doi
-                rdx_dataset.title = metadata.title
-                rdx_dataset.description = metadata.description
-                rdx_dataset.authors = metadata.authors
 
             session.add(rdx_dataset)
             session.commit()
@@ -90,6 +86,15 @@ def remove_dataset(db: DBClient, rdx_share: RdxShare):
         oc_client.delete_share(rdx_dataset.condtions_share_id)
 
     with db.get_session() as session:
+        print(f"Deleting links between dataset {rdx_dataset.id} and analysts")
+        analyst_dataset_links = session.exec(
+            select(RdxAnalystDatasetLink).where(
+                RdxAnalystDatasetLink.dataset_id == rdx_dataset.id
+            )
+        )
+        for link in analyst_dataset_links.all():
+            session.delete(link)
+        session.commit()
         print(f"Deleting dataset {rdx_dataset.id}")
         session.delete(rdx_dataset)
         session.commit()
