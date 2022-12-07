@@ -81,12 +81,14 @@ class RdxDatasetRead(RdxDatasetBase):
 
 
 class RdxDatasetUpdate(SQLModel):
-    doi: str | None = None
-    title: str | None = None
-    authors: str | None = None
-    description: str | None = None
+    doi: str
+    title: str
+    authors: str
+    description: str
     published: bool | None = None
     published_at: datetime | None = None
+    access_license: AccessLicense
+    researcher_email: EmailStr
 
 
 class ShareStatus(enum.IntEnum):
