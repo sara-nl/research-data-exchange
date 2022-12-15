@@ -50,7 +50,7 @@ const PublicationForm: React.FC<Props> = ({
 
   return (
     <React.Fragment>
-      <Alert variant="secondary" className="mb-5">
+      <Alert variant="info" className="mb-5">
         <p className="mb-0">{header}</p>
       </Alert>
 
@@ -64,6 +64,7 @@ const PublicationForm: React.FC<Props> = ({
           researcher_email: '',
           published: true
         }}
+        enableReinitialize
         validateOnMount={true}
         validateOnChange={true}
         validateOnBlur={false}
@@ -112,7 +113,52 @@ const PublicationForm: React.FC<Props> = ({
           isValid,
         }) => (
           <RForm validated={!errors} onSubmit={handleSubmit}>
-            <Row>
+            <Row className='mb-1'>
+              <Field name="researcher_email">
+                {(fp) => (
+                  <RForm.Group as={Col} controlId="researcher_email">
+                    <RForm.Label>
+                      <span className="lead">Researcher's email</span> <sup>required</sup>
+                    </RForm.Label>
+                    <RForm.Control
+                      required
+                      type="email"
+                      value={fp.field.value}
+                      onBlur={fp.field.onBlur}
+                      onChange={fp.field.onChange}
+                      isValid={fp.meta.touched && !fp.meta.error}
+                      isInvalid={fp.meta.touched && fp.meta.error}
+                    />
+                    <FieldFeedback {...fp} />
+                  </RForm.Group>
+                )}
+              </Field>
+            </Row>
+            <Row className='mb-1'>
+              <Field name="access_license">
+                {(fp) => (
+                  <RForm.Group as={Col} controlId="access_license">
+                    <RForm.Label>
+                      <span className="lead">Access License <sup><a href="/policies" target="_blank"><InfoCircle /></a></sup></span>
+                    </RForm.Label>
+                    <RForm.Control
+                      required
+                      as="select"
+                      value={fp.field.value}
+                      onBlur={fp.field.onBlur}
+                      onChange={fp.field.onChange}
+                      isValid={fp.meta.touched && !fp.meta.error}
+                      isInvalid={fp.meta.touched && fp.meta.error}
+                    >
+                      {Object.values(AccessLicense).map((val) => (
+                        <option key={val} value={val}>{val}</option>
+                      ))}
+                    </RForm.Control>
+                  </RForm.Group>
+                )}
+              </Field>
+            </Row>
+            <Row className='mb-1'>
               <Field name="doi">
                 {(fp) => (
                   <RForm.Group as={Col} controlId="doi">
@@ -137,7 +183,7 @@ const PublicationForm: React.FC<Props> = ({
                 )}
               </Field>
             </Row>
-            <Row>
+            <Row className='mb-1'>
               <Field name="title">
                 {(fp) => (
                   <RForm.Group as={Col} controlId="title">
@@ -158,7 +204,7 @@ const PublicationForm: React.FC<Props> = ({
                 )}
               </Field>
             </Row>
-            <Row>
+            <Row className='mb-1'>
               <Field name="authors">
                 {(fp) => (
                   <RForm.Group as={Col} controlId="authors">
@@ -179,7 +225,7 @@ const PublicationForm: React.FC<Props> = ({
                 )}
               </Field>
             </Row>
-            <Row>
+            <Row className='mb-1'>
               <Field name="description">
                 {(fp) => (
                   <RForm.Group as={Col} controlId="description">
@@ -198,51 +244,6 @@ const PublicationForm: React.FC<Props> = ({
                       isInvalid={fp.meta.touched && fp.meta.error}
                     />
                     <FieldFeedback {...fp} />
-                  </RForm.Group>
-                )}
-              </Field>
-            </Row>
-            <Row>
-              <Field name="researcher_email">
-                {(fp) => (
-                  <RForm.Group as={Col} controlId="researcher_email">
-                    <RForm.Label>
-                      <span className="lead">Researcher's email</span> <sup>required</sup>
-                    </RForm.Label>
-                    <RForm.Control
-                      required
-                      type="email"
-                      value={fp.field.value}
-                      onBlur={fp.field.onBlur}
-                      onChange={fp.field.onChange}
-                      isValid={fp.meta.touched && !fp.meta.error}
-                      isInvalid={fp.meta.touched && fp.meta.error}
-                    />
-                    <FieldFeedback {...fp} />
-                  </RForm.Group>
-                )}
-              </Field>
-            </Row>
-            <Row>
-              <Field name="access_license">
-                {(fp) => (
-                  <RForm.Group as={Col} controlId="access_license">
-                    <RForm.Label>
-                      <span className="lead">Access License <sup><a href="/policies" target="_blank"><InfoCircle /></a></sup></span>
-                    </RForm.Label>
-                    <RForm.Control
-                      required
-                      as="select"
-                      value={fp.field.value}
-                      onBlur={fp.field.onBlur}
-                      onChange={fp.field.onChange}
-                      isValid={fp.meta.touched && !fp.meta.error}
-                      isInvalid={fp.meta.touched && fp.meta.error}
-                    >
-                      {Object.values(AccessLicense).map((val) => (
-                        <option key={val} value={val}>{val}</option>
-                      ))}
-                    </RForm.Control>
                   </RForm.Group>
                 )}
               </Field>

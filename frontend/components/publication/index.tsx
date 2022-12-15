@@ -1,26 +1,27 @@
 import { Fragment } from 'react';
 import Image from 'next/image';
 import { Container, Row, Col } from 'react-bootstrap';
-import { Dataset } from '../../types';
+import { Dataset, Metadata } from '../../types';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import PublicationForm, { Values as FormValues } from './form';
+import MetadataForm, { Values as MetadataFormValues } from './metadata';
 import PublicationConfirmation from './confirmation';
 
 type Props = {
   dataset: Dataset;
   baseUrl: string;
   submitUrl: string;
+  metadataUrl: string;
   token: string;
   updateDataset: (dataset: Dataset) => void
 };
 
 dayjs.extend(relativeTime);
 
-const Publication: React.FC<Props> = ({ dataset, baseUrl, submitUrl, token, updateDataset }) => {
+const Publication: React.FC<Props> = ({ dataset, baseUrl, submitUrl, metadataUrl, token, updateDataset }) => {
 
   type StoreValues = (values: FormValues) => Promise<Dataset>;
-
   const storeValues: StoreValues = async (values) =>
     fetch(submitUrl, {
       body: JSON.stringify(values),
@@ -34,6 +35,26 @@ const Publication: React.FC<Props> = ({ dataset, baseUrl, submitUrl, token, upda
         ? Promise.resolve(res.json())
         : res.text().then(Promise.reject.bind(Promise)),
     );
+
+  type StoreMetadataValues = (values: MetadataFormValues) => Promise<Metadata>;
+  const storeMetadata: StoreMetadataValues = async (values) => {
+    const url = `${metadataUrl}?${new URLSearchParams(values)}`
+    return fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token,
+      },
+      method: 'GET',
+    }).then((res) =>
+      res.ok
+        ? Promise.resolve(res.json())
+        : res.text().then(Promise.reject.bind(Promise))
+    );
+  }
+
+  const addMetadatToDatatset = (metadata: Metadata) => {
+    updateDataset({ ...dataset, ...metadata })
+  }
 
   const timeSince = dayjs().from(dayjs(dataset.rdx_share.share_time), true);
   const pulicationTime = dayjs(dataset.published_at);
@@ -54,6 +75,10 @@ const Publication: React.FC<Props> = ({ dataset, baseUrl, submitUrl, token, upda
               />
             ) : (
               <Fragment>
+                <MetadataForm
+                  storeValues={storeMetadata}
+                  onSuccessSubmission={(metadata) => addMetadatToDatatset(metadata)}
+                />
                 <PublicationForm
                   header={`Please fill in some details about the dataset. Once you hit
                 "Publish", it will become possible for anyone to see the use
