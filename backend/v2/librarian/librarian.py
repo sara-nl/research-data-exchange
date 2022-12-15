@@ -2,10 +2,12 @@ from datetime import datetime
 
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import HttpUrl
 from sqlmodel import Session
 
 from common.api.dependencies import get_rdx_user
 from common.db.db_client import DBClient
+from common.metadata.metadata_client import DataPortalMetadata, MetaDataClient
 from common.models.rdx_models import (
     PublicRdxDatasetRead,
     RdxAnalystUpdate,
@@ -136,3 +138,19 @@ def request_access_to_dataset(
     session.refresh(rdx_dataset)
 
     background_tasks.add_task(give_access_to_dataset, session, rdx_dataset, rdx_analyst)
+
+
+@app.get("/api/metadata", response_model=DataPortalMetadata)
+def get_public_dataset(
+    *,
+    _: RdxUser = Depends(get_rdx_user),
+    url: HttpUrl,
+):
+    try:
+        print("URL", url)
+        return MetaDataClient.get_metadata(url)
+    except Exception as error:
+        print(f"Error getting metadata for url {url}: {error}")
+        raise HTTPException(
+            status_code=404, detail=f"Could not retrieve metadata for {url}"
+        )

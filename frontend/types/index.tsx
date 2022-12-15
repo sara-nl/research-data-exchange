@@ -16,6 +16,13 @@ export type Dataset = {
   access_license?: AccessLicense;
 };
 
+export type Metadata = {
+  doi?: string;
+  title?: string;
+  authors?: string;
+  description?: string;
+}
+
 export enum AccessLicense {
   download = "sign+download",
   analyze = "sign+analyze",

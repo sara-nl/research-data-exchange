@@ -11,13 +11,14 @@ import { useState } from 'react';
 type Props = {
   rdxDataset?: Dataset;
   submitUrl: string;
+  metadataUrl: string;
   baseUrl?: string;
   token: string;
   error?: ErrorProps;
 };
 
 
-const Publish: React.FC<Props> = ({ rdxDataset, baseUrl, submitUrl, token, error }) => {
+const Publish: React.FC<Props> = ({ rdxDataset, baseUrl, submitUrl, metadataUrl, token, error }) => {
   const [dataset, setDataset] = useState<Dataset>(rdxDataset)
   const updateDataset = (dataset: Dataset) => setDataset(dataset)
 
@@ -38,7 +39,7 @@ const Publish: React.FC<Props> = ({ rdxDataset, baseUrl, submitUrl, token, error
         <title>RDX</title>
       </Head>
       <NavBarComponent email={userEmail} />
-      <Publication dataset={dataset} submitUrl={submitUrl} baseUrl={baseUrl} token={token} updateDataset={updateDataset} />
+      <Publication dataset={dataset} submitUrl={submitUrl} metadataUrl={metadataUrl} baseUrl={baseUrl} token={token} updateDataset={updateDataset} />
       <Footer />
     </main>
   );
@@ -73,6 +74,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       rdxDataset: await res.json(),
       baseUrl: origin,
       submitUrl: `${process.env.RDX_BACKEND_URL}/api/dataset/${id}`,
+      metadataUrl: `${process.env.RDX_BACKEND_URL}/api/metadata`,
       token: token
     },
   };

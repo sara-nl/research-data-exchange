@@ -1,4 +1,4 @@
-FROM python:3.10-alpine as base
+FROM python:3.10.8-bullseye as base
 
 # Setup env
 ENV LANG C.UTF-8
@@ -9,12 +9,10 @@ ENV PYTHONFAULTHANDLER 1
 
 FROM base AS python-deps
 
-# Install pipenv and compilation dependencies
 RUN \
- apk update && \
- apk add --no-cache postgresql-libs && \
- apk add --no-cache --virtual .build-deps gcc musl-dev postgresql-dev && \
- apk --purge del .build-deps
+ apt-get update && \
+ apt-get install postgresql -y && \
+ apt-get install gcc musl-dev -y
 
 RUN pip install pipenv
 

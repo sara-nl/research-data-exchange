@@ -56,7 +56,7 @@ frontend_e2e:
 
 backend_linting:
   stage: check
-  image: python:3.10-alpine
+  image: python:3.10.8-bullseye
   script:
     - pip install pipenv
     - cd backend/v2
