@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/bash -e
 
 if [[ -z "${APPLICATION}" ]]; then
     echo "No APPLICATION environment variable set... exiting"
