@@ -13,7 +13,7 @@ export type Dataset = {
   description?: string;
   published?: boolean;
   published_at?: Date;
-  access_license?: AccessLicense;
+  access_license_id?: number;
 };
 
 export type Metadata = {
@@ -24,8 +24,25 @@ export type Metadata = {
 }
 
 export enum AccessLicense {
-  download = "sign+download",
-  analyze = "sign+analyze",
+  download = 1,
+  analyze_blind_with_output_check = 2,
+  analyze_blind_no_output_check = 3,
+}
+
+export namespace AccessLicenseUtil {
+  export function toString(accessLicense: number): string {
+    switch(accessLicense) {
+      case AccessLicense.download: {
+        return "sign+download";
+      }
+      case AccessLicense.analyze_blind_with_output_check: {
+        return "sign+analyze (blind, with output check)";
+      }
+      case AccessLicense.analyze_blind_no_output_check: {
+        return "sign+analyze (blind, without output check)";
+      }
+    }
+  }
 }
 
 export type Share = {

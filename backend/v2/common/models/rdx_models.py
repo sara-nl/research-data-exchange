@@ -28,9 +28,19 @@ class RdxAnalystDatasetLink(SQLModel, table=True):
     analyst: "RdxAnalyst" = Relationship(sa_relationship_kwargs={"viewonly": True})
 
 
-class AccessLicense(str, enum.Enum):
-    download = "sign+download"
-    analyze = "sign+analyze"
+class AccessLicense(enum.IntEnum):
+    download = 1
+    analyze_blind_with_output_check = 2
+    analyze_blind_no_output_check = 3
+
+    @classmethod
+    def print_friendly_access_license(cls, value: int) -> str:
+        if cls.download == value:
+            return "sign+download"
+        if cls.analyze_blind_with_output_check == value:
+            return "sign+analyze (blind, with output check)"
+        if cls.analyze_blind_no_output_check == value:
+            return "sign+analyze (blind, without output check)"
 
 
 class RdxDatasetBase(SQLModel):
@@ -52,7 +62,11 @@ class RdxDatasetBase(SQLModel):
     researcher_id: int | None = Field(
         index=True, default=None, foreign_key="rdx_user.id"
     )
-    access_license: AccessLicense | None = Field(sa_column=Column(Enum(AccessLicense)))
+    access_license_id: int | None
+
+    @property
+    def access_license(self) -> AccessLicense:
+        return AccessLicense(self.access_license_id)
 
     @validator("files", pre=True)
     def name_must_contain_space(cls, v):
@@ -87,7 +101,7 @@ class RdxDatasetUpdate(SQLModel):
     description: str
     published: bool | None = None
     published_at: datetime | None = None
-    access_license: AccessLicense
+    access_license_id: int
     researcher_email: EmailStr
 
 

@@ -10,7 +10,7 @@ import { InfoCircle } from 'react-bootstrap-icons';
 import { Formik, Field } from 'formik';
 import FieldFeedback from './../form/fieldFeedback';
 import { useState } from 'react';
-import { AccessLicense, Dataset } from '../../types';
+import { AccessLicense, AccessLicenseUtil, Dataset } from '../../types';
 
 type Props = {
   storeValues: (values: Values) => Promise<Dataset>;
@@ -60,7 +60,7 @@ const PublicationForm: React.FC<Props> = ({
           title: dataset.title || '',
           authors: dataset.authors || '',
           description: dataset.description || '',
-          access_license: dataset.access_license || AccessLicense.download,
+          access_license_id: dataset.access_license_id || AccessLicense.download,
           researcher_email: '',
           published: true
         }}
@@ -135,9 +135,9 @@ const PublicationForm: React.FC<Props> = ({
               </Field>
             </Row>
             <Row className='mb-1'>
-              <Field name="access_license">
+              <Field name="access_license_id">
                 {(fp) => (
-                  <RForm.Group as={Col} controlId="access_license">
+                  <RForm.Group as={Col} controlId="access_license_id">
                     <RForm.Label>
                       <span className="lead">Access License <sup><a href="/policies" target="_blank"><InfoCircle /></a></sup></span>
                     </RForm.Label>
@@ -150,8 +150,8 @@ const PublicationForm: React.FC<Props> = ({
                       isValid={fp.meta.touched && !fp.meta.error}
                       isInvalid={fp.meta.touched && fp.meta.error}
                     >
-                      {Object.values(AccessLicense).map((val) => (
-                        <option key={val} value={val}>{val}</option>
+                      {Object.values(AccessLicense).filter((value) => typeof value == 'number').map((value: number) => (
+                        <option key={value} value={value}>{AccessLicenseUtil.toString(value)}</option>
                       ))}
                     </RForm.Control>
                   </RForm.Group>

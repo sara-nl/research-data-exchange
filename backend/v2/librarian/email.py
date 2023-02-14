@@ -18,13 +18,13 @@ def get_publication_message(rdx_user: RdxUser, rdx_dataset: RdxDataset) -> str:
     <p>Dear {rdx_user.email},</p>
 
     <p>Your dataset {rdx_dataset.title} has been published on RDX.</p>
-    
+
     <p>The dataset has the following metadata associated with it:</p>
     <p style="margin-left:2em">Title: {rdx_dataset.title}</p>
     <p style="margin-left:2em">Author(s): {rdx_dataset.authors}</p>
     <p style="margin-left:2em">Description: {rdx_dataset.description}</p>
     <p style="margin-left:2em">DOI: {rdx_dataset.doi}</p>
-    <p style="margin-left:2em">Access license: {rdx_dataset.access_license}. (You can learn more about the access license <a href="{policies_url}">here</a>.)</p>
+    <p style="margin-left:2em">Access license: {AccessLicense.print_friendly_access_license(rdx_dataset.access_license)}. (You can learn more about the access license <a href="{policies_url}">here</a>.)</p>
 
     <p>What happens next?</p>
 
@@ -50,7 +50,7 @@ def get_publication_message(rdx_user: RdxUser, rdx_dataset: RdxDataset) -> str:
 def send_publication_email(rdx_user: RdxUser, rdx_dataset: RdxDataset):
     mail_client = MailClient(
         receiver=rdx_user.email,
-        subject=f"Your dataset is published on RDX",
+        subject="Your dataset is published on RDX",
         message=get_publication_message(rdx_user, rdx_dataset),
     )
     mail_client.mail()
@@ -106,7 +106,10 @@ def send_access_email(
         message = get_download_message(
             rdx_analyst, rdx_dataset, rdx_dataset_analyst_link
         )
-    if rdx_dataset.access_license == AccessLicense.analyze:
+    if rdx_dataset.access_license in [
+        AccessLicense.analyze_blind_with_output_check,
+        AccessLicense.analyze_blind_no_output_check,
+    ]:
         message = get_analyze_message(
             rdx_analyst, rdx_dataset, rdx_dataset_analyst_link
         )

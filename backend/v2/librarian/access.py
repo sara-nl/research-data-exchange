@@ -63,11 +63,13 @@ def give_access_to_dataset(
     rdx_dataset_analyst_link = next(
         link for link in rdx_analyst.dataset_links if link.dataset_id == rdx_dataset.id
     )
-    if rdx_dataset.access_license == AccessLicense.analyze:
-        print("Processing access license sign+analyze")
+    if rdx_dataset.access_license == AccessLicense.analyze_blind_with_output_check:
+        print("Processing access license sign+analyze (blind, with output check)")
+    if rdx_dataset.access_license == AccessLicense.analyze_blind_no_output_check:
+        print("Processing access license sign+analyze (blind, without output check)")
     if rdx_dataset.access_license == AccessLicense.download:
         print("Processing access license sign+download")
-        if rdx_dataset_analyst_link.download_url == None:
+        if rdx_dataset_analyst_link.download_url is None:
             create_public_link_to_dataset(
                 session, rdx_dataset, rdx_dataset_analyst_link
             )
