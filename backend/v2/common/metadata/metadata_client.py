@@ -12,7 +12,6 @@ class DataPortalMetadata(BaseModel):
 
 
 class MetaDataClient(BaseModel):
-
     DOMAIN_CLIENT_MAPPINGS: ClassVar = {"figshare.com": "figshare"}
 
     @classmethod

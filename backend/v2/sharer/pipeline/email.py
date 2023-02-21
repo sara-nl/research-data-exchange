@@ -44,7 +44,6 @@ def get_misconfiguration_message(
     problem: str,
     solution: str,
 ) -> str:
-
     return f"""
     {MailClient.BODY_OPEN}
     <p>Dear {rdx_share.additional_info_owner},</p>

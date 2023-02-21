@@ -14,7 +14,6 @@ from .settings import email_settings
 
 
 class MailClient(BaseModel):
-
     receiver: EmailStr
     subject: str
     message: str
