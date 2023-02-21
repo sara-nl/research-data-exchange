@@ -62,7 +62,7 @@
               environment:
                 APPLICATION: "sharer"
 
-            librarian:
+            api:
               image: "{{ docker_registry_url }}/backend/v2:{{ lookup('env', 'DOCKER_IMAGE_TAG') }}"
               restart: "always"
               depends_on:
@@ -73,12 +73,12 @@
               env_file:
                 - /etc/rdx/.env
               environment:
-                APPLICATION: "librarian"
+                APPLICATION: "api"
 
             frontend:
               image: "{{ docker_registry_url }}/frontend:{{ lookup('env', 'DOCKER_IMAGE_TAG') }}"
               restart: "always"
-              depends_on: [librarian]
+              depends_on: [app]
               ports:
                 - 3000:3000
               environment:

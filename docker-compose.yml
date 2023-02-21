@@ -17,7 +17,7 @@ services:
     extra_hosts:
       - "mh.surfsara.nl:192.168.65.2"
 
-  librarian:
+  api:
     build: backend/v2/
     restart: "always"
     depends_on:
@@ -28,7 +28,7 @@ services:
     env_file:
       - backend/v2/.env
     environment:
-      APPLICATION: "librarian"
+      APPLICATION: "api"
     # map mail server host to host.docker.internal IP so container can reach tunnel to mail server
     extra_hosts:
       - "mh.surfsara.nl:192.168.65.2"
@@ -36,11 +36,11 @@ services:
   frontend:
     build: frontend
     restart: "always"
-    depends_on: [librarian]
+    depends_on: [api]
     ports:
       - 3000:3000
     environment:
-      RDX_BACKEND_URL: http://librarian:8000
+      RDX_BACKEND_URL: http://api:8000
 
   postgres:
     image: postgres:14-alpine

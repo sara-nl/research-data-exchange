@@ -1,7 +1,6 @@
 from datetime import datetime
 
-from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, status
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from pydantic import HttpUrl
 from sqlmodel import Session
 
@@ -18,31 +17,19 @@ from common.models.rdx_models import (
 )
 from common.models.utils import create_rdx_user
 
-from .access import get_analyst, get_public_dataset_by_doi, give_access_to_dataset
-from .email import send_publication_email
-
-app = FastAPI(
-    openapi_url="/api/openapi.json", docs_url="/api/docs", redoc_url="/api/redoc"
+from ..librarian.access import (
+    get_analyst,
+    get_public_dataset_by_doi,
+    give_access_to_dataset,
 )
+from ..librarian.email import send_publication_email
 
 db = DBClient()
 
-# TODO: use .env to set origins and CORS
-origins = [
-    "http://localhost",
-    "http://localhost:3000",
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+router = APIRouter()
 
 
-@app.get("/api/dataset/{dataset_id}", response_model=RdxDatasetReadWithShare)
+@router.get("/api/dataset/{dataset_id}", response_model=RdxDatasetReadWithShare)
 def get_dataset(
     *,
     session: Session = Depends(db.get_session_dependency),
@@ -63,7 +50,7 @@ def get_dataset(
     return rdx_dataset
 
 
-@app.patch("/api/dataset/{dataset_id}", response_model=RdxDatasetReadWithShare)
+@router.patch("/api/dataset/{dataset_id}", response_model=RdxDatasetReadWithShare)
 def publish_dataset(
     *,
     session: Session = Depends(db.get_session_dependency),
@@ -104,7 +91,9 @@ def publish_dataset(
     return rdx_dataset
 
 
-@app.get("/api/dataset/{dataset_doi:path}/access", response_model=PublicRdxDatasetRead)
+@router.get(
+    "/api/dataset/{dataset_doi:path}/access", response_model=PublicRdxDatasetRead
+)
 def get_public_dataset(
     *,
     session: Session = Depends(db.get_session_dependency),
@@ -113,7 +102,7 @@ def get_public_dataset(
     return get_public_dataset_by_doi(session, dataset_doi)
 
 
-@app.post("/api/dataset/{dataset_doi:path}/access", status_code=201)
+@router.post("/api/dataset/{dataset_doi:path}/access", status_code=201)
 def request_access_to_dataset(
     *,
     session: Session = Depends(db.get_session_dependency),
@@ -140,7 +129,7 @@ def request_access_to_dataset(
     background_tasks.add_task(give_access_to_dataset, session, rdx_dataset, rdx_analyst)
 
 
-@app.get("/api/metadata", response_model=DataPortalMetadata)
+@router.get("/api/metadata", response_model=DataPortalMetadata)
 def get_public_dataset(
     *,
     _: RdxUser = Depends(get_rdx_user),

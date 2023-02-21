@@ -12,13 +12,15 @@ from sqlmodel import Column, Enum, Field, Relationship, SQLModel
 class RdxAnalystDatasetLink(SQLModel, table=True):
     __tablename__ = "rdx_analyst_dataset"
     id: int | None = Field(
-        sa_column=Column("id", Integer, primary_key=True, autoincrement=True)
+        sa_column=Column(
+            "id", Integer, primary_key=True, autoincrement=True, unique=True
+        )
     )
     dataset_id: Optional[int] = Field(
-        default=None, foreign_key="rdx_dataset.id", primary_key=True
+        default=None, foreign_key="rdx_dataset.id", nullable=False
     )
     analyst_id: Optional[int] = Field(
-        default=None, foreign_key="rdx_analyst.id", primary_key=True
+        default=None, foreign_key="rdx_analyst.id", nullable=False
     )
     download_url: HttpUrl | None = None
     download_share_id: int | None = Field(index=True, default=None)
@@ -262,3 +264,30 @@ class RdxAnalystUpdate(SQLModel):
     email: EmailStr
     name: str
     agree: bool | None = None
+
+
+class JobStatus(str, enum.Enum):
+    new = "new"
+    running = "running"
+    failed = "failed"
+    failed_notified = "failed_notified"
+    finished = "finished"
+    finished_notified = "finished_notified"
+
+
+class RdxJob(SQLModel, table=True):
+    __tablename__ = "rdx_job"
+    id: int | None = Field(
+        sa_column=Column("id", Integer, primary_key=True, autoincrement=True)
+    )
+    rdx_analyst_dataset_link_id: int | None = Field(
+        default=None, foreign_key="rdx_analyst_dataset.id"
+    )
+    status: str = Field(index=True)
+    script_location: HttpUrl
+    workspace_id: str | None
+    workspace_status: str | None
+    results_dir: str | None
+
+    def get_status(self) -> JobStatus:
+        return JobStatus(self.status)
