@@ -226,7 +226,6 @@ class RdxShareReadWithDataset(RdxShareRead):
 
 
 class RdxUserBase(SQLModel):
-
     id: int | None = Field(default=None, primary_key=True)
     email: EmailStr = Field(index=True)
     token: str = Field(index=True)
