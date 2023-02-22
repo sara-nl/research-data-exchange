@@ -13,6 +13,10 @@ elif [[ ${APPLICATION} == "sharer" ]]; then
     echo "Starting sharer..."
     pipenv run python sharer/sharer.py
     exit 0
+elif [[ ${APPLICATION} == "lab_runner" ]]; then
+    echo "Starting lab runner..."
+    pipenv run python lab_runner/lab_runner.py
+    exit 0
 elif [[ ${APPLICATION} == "api" ]]; then
     echo "Starting api..."
     pipenv run uvicorn --host 0.0.0.0 api.main:app

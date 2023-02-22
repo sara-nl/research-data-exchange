@@ -17,6 +17,20 @@ services:
     extra_hosts:
       - "mh.surfsara.nl:192.168.65.2"
 
+  lab_runner:
+    build: backend/v2/
+    restart: "always"
+    depends_on:
+      db-migrations:
+        condition: service_completed_successfully
+    env_file:
+      - backend/v2/.env
+    environment:
+      APPLICATION: "lab_runner"
+    # map mail server host to host.docker.internal IP so container can reach tunnel to mail server
+    extra_hosts:
+      - "mh.surfsara.nl:192.168.65.2"
+
   api:
     build: backend/v2/
     restart: "always"
