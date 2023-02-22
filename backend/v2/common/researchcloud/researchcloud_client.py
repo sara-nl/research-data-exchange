@@ -30,7 +30,11 @@ class ResearchCloudClient(BaseModel):
             )
         except Exception as error:
             print(f"Could not create workspace in ResearchCloud: {error}")
-            return
+            raise error
+
+        if r.status_code != 201:
+            print(f"Could not create workspace in ResearchCloud: {r.content}")
+            raise Exception(f"Could not create workspace in ResearchCloud: {r.content}")
 
         body = json.loads(r.content)
         return body["id"]
@@ -47,6 +51,7 @@ class ResearchCloudClient(BaseModel):
             print(
                 f"Could not get workspace (id={workspace_id}) from ResearchCloud: {error}"
             )
+            raise error
 
         body = json.loads(r.content)
         return body["results"][0]["status"]
@@ -57,7 +62,7 @@ class ResearchCloudClient(BaseModel):
             print(
                 f"Cannot delete workspace (id={workspace_id}) because status is {status} instead of 'running'."
             )
-            return
+            raise Exception("Cannot delete workspace that is not 'running'")
         check_token()
         headers = {"authorization": os.getenv("RSC_ACCESS_TOKEN")}
         try:
@@ -69,3 +74,4 @@ class ResearchCloudClient(BaseModel):
             print(
                 f"Could not delete workspace (id={workspace_id}) from ResearchCloud: {error}"
             )
+            raise error

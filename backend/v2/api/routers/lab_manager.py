@@ -9,7 +9,6 @@ from common.models.rdx_models import (
     JobStatus,
     RdxAnalyst,
     RdxAnalystDatasetLink,
-    RdxDataset,
     RdxJob,
 )
 
@@ -37,11 +36,10 @@ def submit_analysis_job(
             status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden resource"
         )
 
-    rdx_dataset = session.get(RdxDataset, rdx_analyst_dataset_link.dataset_id)
-    if not rdx_dataset or not rdx_dataset.published:
+    if not rdx_analyst_dataset_link.dataset.published:
         raise HTTPException(status=404, detail="Dataset not found")
 
-    if rdx_dataset.access_license in [AccessLicense.download]:
+    if rdx_analyst_dataset_link.dataset.access_license in [AccessLicense.download]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden resource"
         )

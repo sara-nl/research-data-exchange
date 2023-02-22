@@ -62,6 +62,17 @@
               environment:
                 APPLICATION: "sharer"
 
+            lab_runner:
+              image: "{{ docker_registry_url }}/backend/v2:{{ lookup('env', 'DOCKER_IMAGE_TAG') }}"
+              restart: "always"
+              depends_on:
+                db-migrations:
+                  condition: service_completed_successfully
+              env_file:
+                - /etc/rdx/.env
+              environment:
+                APPLICATION: "lab_runner"
+
             api:
               image: "{{ docker_registry_url }}/backend/v2:{{ lookup('env', 'DOCKER_IMAGE_TAG') }}"
               restart: "always"

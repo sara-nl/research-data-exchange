@@ -31,7 +31,7 @@ def get_workspace_payload(name: str, script_location: str, researchdrive_path) -
             "subscription_tag": "rsc-live_f21ee29a-6301-4d68-b22c-0d2ec3bde491",
             "subscription_group_id": "e6ea9ca7-e833-4150-8dfd-1dcd6c49f75c",
             "co_name": "{research_cloud_settings.co_name}",
-            "host_name": "tools2data2",
+            "host_name": "{name}",
             "subscription_resource_type": "VM",
             "flavours": [
                 {{

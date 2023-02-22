@@ -268,11 +268,14 @@ class RdxAnalystUpdate(SQLModel):
 
 class JobStatus(str, enum.Enum):
     new = "new"
+    created = "created"
     running = "running"
     failed = "failed"
     failed_notified = "failed_notified"
+    failed_notified_deleted = "failed_notified_deleted"
     finished = "finished"
     finished_notified = "finished_notified"
+    finished_notified_deleted = "finished_notified_deleted"
 
 
 class RdxJob(SQLModel, table=True):
