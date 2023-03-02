@@ -18,7 +18,7 @@ from common.owncloud.owncloud_client import OwnCloudClient
 from .email import send_access_email, send_access_notification_email
 
 
-def get_public_dataset_by_doi(session: Session, doi: str):
+def get_public_dataset_by_doi(session: Session, doi: str) -> RdxDataset:
     rdx_dataset = session.exec(select(RdxDataset).where(RdxDataset.doi == doi)).first()
     if not rdx_dataset:
         raise HTTPException(
@@ -31,7 +31,7 @@ def get_public_dataset_by_doi(session: Session, doi: str):
     return rdx_dataset
 
 
-def get_analyst(session: Session, analyst_data: RdxAnalystUpdate):
+def get_analyst(session: Session, analyst_data: RdxAnalystUpdate) -> RdxAnalyst:
     rdx_analyst = session.exec(
         select(RdxAnalyst).where(RdxAnalyst.email == analyst_data.email)
     ).first()

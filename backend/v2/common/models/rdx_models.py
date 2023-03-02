@@ -294,3 +294,7 @@ class RdxJob(SQLModel, table=True):
 
     def get_status(self) -> JobStatus:
         return JobStatus(self.status)
+
+
+class RdxJobSubmission(SQLModel):
+    script_location: HttpUrl
