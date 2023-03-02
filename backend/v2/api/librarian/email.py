@@ -87,9 +87,13 @@ def get_analyze_message(
 
     <p>You have requested access to the dataset '{rdx_dataset.title}'.</p>
 
-    <p>Unfortunately, this dataset can only be accessed in a secure analysis environment which is still under construction.</p>
+    <p>This dataset can only be accessed in a secure analysis environment.</p>
 
-    <p>When this analysis environment becomes available, you can access this dataset. Thank you for your patience!</p>
+    <a style="font-size: 18px; color: #008cba;" href="{app_settings.web_url}/analyze/{rdx_dataset_analyst_link.id}?token={rdx_analyst.token}">Proceed to secure analysis environment</a>
+
+    <p>Please note that the link above is valid for a limited amount of time and will expire on <span style="white-space: nowrap">
+    {rdx_analyst.token_expires_at.strftime("%c")}</span>. If you need more time, request access to the dataset again, and you will receive an email like this one with a new link.
+    </p>
 
     <p>For more information, please contact the RDX support team: <a href="mailto:{MailClient.SENDER}">{MailClient.SENDER}</a>
     {MailClient.BODY_CLOSE}

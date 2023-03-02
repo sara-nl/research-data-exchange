@@ -3,7 +3,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlmodel import Session, select
 
 from common.db.db_client import DBClient
-from common.models.rdx_models import RdxAnalyst, RdxUser
+from common.models.rdx_models import RdxAnalyst, RdxAnalystDatasetLink, RdxUser
 
 db = DBClient()
 
@@ -58,3 +58,19 @@ def get_rdx_analyst(
         )
 
     return rdx_analyst
+
+
+def get_rdx_analyst_dataset_link(
+    rdx_analyst_dataset_link_id: int,
+    session: Session = Depends(db.get_session_dependency),
+) -> RdxAnalystDatasetLink:
+    rdx_analyst_dataset_link = session.get(
+        RdxAnalystDatasetLink, rdx_analyst_dataset_link_id
+    )
+    if not rdx_analyst_dataset_link:
+        raise HTTPException(status=404, detail="Dataset not found")
+
+    if not rdx_analyst_dataset_link.dataset.published:
+        raise HTTPException(status=404, detail="Dataset not found")
+
+    return rdx_analyst_dataset_link
