@@ -89,7 +89,7 @@
             frontend:
               image: "{{ docker_registry_url }}/frontend:{{ lookup('env', 'DOCKER_IMAGE_TAG') }}"
               restart: "always"
-              depends_on: [app]
+              depends_on: [api]
               ports:
                 - 3000:3000
               environment:
