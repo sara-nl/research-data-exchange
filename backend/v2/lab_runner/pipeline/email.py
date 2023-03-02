@@ -12,7 +12,7 @@ def get_message_for_researcher(
 
     <p>A job on RDX for your dataset {dataset.title} has just finished with status: {job.status}.</p>
 
-    <p>You can view the results of the analysis here: TODO</p>
+    <p>You can view the results of the analysis <a href="{job.results_url}">here</a>.</p>
 
     <p>
         After you have verified the output and made sure it has satisfied your requirements, please share the results folder in ResearchDrive with the researcher.
@@ -34,7 +34,7 @@ def get_message_for_analyst(
 
     <p>Your job on RDX for the dataset {dataset.title} has just finished with status: {job.status}.</p>
 
-    <p>You can view the results of your analysis here: TODO</p>
+    <p>You can view the results of your analysis <a href="{job.results_url}">here</a>.</p>
 
     <p>If you need any other kind of support, please get in touch with the RDX support team: <a href="mailto:{MailClient.SENDER}">{MailClient.SENDER}</a>
     </p>

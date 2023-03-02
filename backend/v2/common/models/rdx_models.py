@@ -291,6 +291,8 @@ class RdxJob(SQLModel, table=True):
     workspace_id: str | None
     workspace_status: str | None
     results_dir: str | None
+    results_url: HttpUrl | None = None
+    results_share_id: int | None = Field(index=True, default=None)
 
     def get_status(self) -> JobStatus:
         return JobStatus(self.status)

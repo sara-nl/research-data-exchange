@@ -3,7 +3,9 @@ from datetime import datetime, timedelta
 from .settings import research_cloud_settings
 
 
-def get_workspace_payload(name: str, script_location: str, researchdrive_path) -> str:
+def get_workspace_payload(
+    name: str, script_location: str, researchdrive_path: str, results_dir: str
+) -> str:
     end_time = datetime.now() + timedelta(hours=12)
 
     return f"""
@@ -18,6 +20,10 @@ def get_workspace_payload(name: str, script_location: str, researchdrive_path) -
             {{
                 "key": "webdav_base_folder_dataset",
                 "value": "{researchdrive_path}"
+            }},
+            {{
+                "key": "webdav_base_folder_results",
+                "value": "{results_dir}"
             }}
         ],
         "send_early_deletion_notification": false,
@@ -105,6 +111,10 @@ def get_workspace_payload(name: str, script_location: str, researchdrive_path) -
                 {{
                     "key": "webdav_base_folder_dataset",
                     "value": "{researchdrive_path}"
+                }},
+                {{
+                    "key": "webdav_base_folder_results",
+                    "value": "{results_dir}"
                 }}
             ],
             "wallet_name": "{research_cloud_settings.wallet_name}",

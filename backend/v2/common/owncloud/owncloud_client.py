@@ -114,3 +114,13 @@ class OwnCloudClient(BaseModel):
         except Exception as error:
             print(f"Failed to download conditions {src_path}: {error}")
             raise error
+
+    def create_dir(self, path: str) -> bool:
+        try:
+            result = self.oc.mkdir(path)
+        except Exception as error:
+            print(f"Failed to create directory {path}: {error}")
+            raise error
+        if not result:
+            raise Exception(f"Failed to create directory {path}: {error}")
+        return result
