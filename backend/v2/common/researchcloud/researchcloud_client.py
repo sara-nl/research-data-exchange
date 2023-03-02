@@ -10,12 +10,14 @@ from .workspace_payload import get_workspace_payload
 
 class ResearchCloudClient(BaseModel):
     def create_workspace(
-        self, name: str, script_location: str, researchdrive_path: str
+        self, name: str, script_location: str, researchdrive_path: str, results_dir: str
     ) -> str:
         check_token()
 
         payload = json.loads(
-            get_workspace_payload(name, script_location, researchdrive_path)
+            get_workspace_payload(
+                name, script_location, researchdrive_path, results_dir
+            )
         )
         headers = {
             "authorization": os.getenv("RSC_ACCESS_TOKEN"),
@@ -58,11 +60,11 @@ class ResearchCloudClient(BaseModel):
 
     def delete_workspace(self, workspace_id: str):
         status = self.get_workspace_status(workspace_id)
-        if status != "running":
+        if status not in ["running", "failed"]:
             print(
-                f"Cannot delete workspace (id={workspace_id}) because status is {status} instead of 'running'."
+                f"Cannot delete workspace (id={workspace_id}) because status is {status} instead of 'running' or 'failed'."
             )
-            raise Exception("Cannot delete workspace that is not 'running'")
+            raise Exception("Cannot delete workspace that is not 'running' or 'failed'")
         check_token()
         headers = {"authorization": os.getenv("RSC_ACCESS_TOKEN")}
         try:
