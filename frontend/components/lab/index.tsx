@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { Dataset, AccessLicense } from '../../types';
+import { Dataset, Job, AccessLicense } from '../../types';
 import JobForm, { Values as FormValues } from './form';
+import JobOverview from './table';
 import { Container, Row, Button, Col, Form, InputGroup } from 'react-bootstrap';
 import { Alert } from 'react-bootstrap';
 
 type Props = {
   dataset?: Dataset;
+  jobs?: Array<Job>;
   submitUrl: string;
   token: string;
 };
 
-const Lab: React.FC<Props> = ({ dataset, submitUrl, token }) => {
+const Lab: React.FC<Props> = ({ dataset, jobs, submitUrl, token }) => {
   const [submitted, setSubmitted] = useState<Boolean | undefined>(false);
   type StoreValues = (values: FormValues) => Promise<FormValues>;
   // FIXME Can be extracted as common code
@@ -34,34 +36,43 @@ const Lab: React.FC<Props> = ({ dataset, submitUrl, token }) => {
       <Container>
         <Row className="access-layout my-5">
           <Col sm={8} className="right-side pr-3">
-            {Boolean(submitted) ? (
-              <Alert variant="success" className="px-5">
-                <h4 className="alert-heading">Request submitted!</h4>
-                <p>
-                  We've submitted your job to analyze the dataset. Depending on your algorithm, the job can take fifteen minutes up to several hours.
-                </p>
-                {dataset.access_license_id == AccessLicense.analyze_blind_no_output_check ? (
+            <Row>
+              {Boolean(submitted) ? (
+                <Alert variant="success" className="px-5">
+                  <h4 className="alert-heading">Request submitted!</h4>
                   <p>
-                    When the results are ready, you will receive an email.
-                    If the email doesn't arrive within a couple hours, please check
-                    your spam folder.
+                    We've submitted your job to analyze the dataset. Depending on your algorithm, the job can take fifteen minutes up to several hours.
                   </p>
-                ) : (
-                <p>
-                  When the results are ready, the owner of this dataset will receive an email.
-                  They will verify the output of your analysis and decide whether to share the results with you.
-                </p>
-                )
-                }
-              </Alert>
-            ) : (
-              <JobForm
-                storeValues={storeValues}
-                onSuccessSubmission={(values) => {
-                  setSubmitted(values != undefined);
-                }}
+                  {dataset.access_license_id == AccessLicense.analyze_blind_no_output_check ? (
+                    <p>
+                      When the results are ready, you will receive an email.
+                      If the email doesn't arrive within a couple hours, please check
+                      your spam folder.
+                    </p>
+                  ) : (
+                    <p>
+                      When the results are ready, the owner of this dataset will receive an email.
+                      They will verify the output of your analysis and decide whether to share the results with you.
+                    </p>
+                  )
+                  }
+                </Alert>
+              ) : (
+                <JobForm
+                  storeValues={storeValues}
+                  onSuccessSubmission={(values) => {
+                    setSubmitted(values != undefined);
+                  }}
+                />
+              )}
+            </Row>
+            <Row className="mt-5">
+              <JobOverview
+                jobs={jobs}
               />
-            )}
+
+
+            </Row>
           </Col>
           <Col sm={4} className="left-side">
             <div className="dataset-content">
@@ -73,7 +84,7 @@ const Lab: React.FC<Props> = ({ dataset, submitUrl, token }) => {
                   </div>
                   <div className="group mt-3">
                     <div className="dataset-title">
-                    <h5>Files</h5>
+                      <h5>Files</h5>
                     </div>
                     {dataset.files.map((file) => (
                       <div
