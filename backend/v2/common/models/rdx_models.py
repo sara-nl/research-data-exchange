@@ -300,3 +300,9 @@ class RdxJob(SQLModel, table=True):
 
 class RdxJobSubmission(SQLModel):
     script_location: HttpUrl
+
+
+class RdxJobRead(SQLModel):
+    id: int
+    script_location: HttpUrl
+    status: str

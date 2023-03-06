@@ -52,3 +52,9 @@ export type Share = {
   path?: string;
   share_time: Date;
 };
+
+export type Job = {
+  id: number;
+  script_location: string;
+  status: string;
+}
