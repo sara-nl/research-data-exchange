@@ -221,6 +221,7 @@ class PublicRdxDatasetRead(SQLModel):
     description: str
     files: list[str]
     conditions_url: HttpUrl
+    access_license_id: int
 
 
 class RdxShareReadWithDataset(RdxShareRead):
