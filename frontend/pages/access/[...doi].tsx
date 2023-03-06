@@ -69,6 +69,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     files: response.files,
     conditionsUrlProxy: transformDownloadLink(response.conditions_url),
     conditions_url: response.conditions_url + '/download',
+    access_license_id: response.access_license_id,
   };
 
   return {
