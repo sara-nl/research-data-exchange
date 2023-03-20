@@ -1,7 +1,7 @@
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .routers import lab_manager, librarian
+from .routers import lab_manager, librarian, dashboard
 
 app = FastAPI(
     openapi_url="/api/openapi.json", docs_url="/api/docs", redoc_url="/api/redoc"
@@ -23,3 +23,4 @@ app.add_middleware(
 
 app.include_router(librarian.router)
 app.include_router(lab_manager.router)
+app.include_router(dashboard.router)
