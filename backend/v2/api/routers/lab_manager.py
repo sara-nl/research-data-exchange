@@ -75,7 +75,7 @@ def submit_analysis_job(
 @router.get(
     "/api/lab/{rdx_analyst_dataset_link_id}/job", response_model=list[RdxJobRead]
 )
-def submit_analysis_job(
+def get_analysis_jobs(
     *,
     session: Session = Depends(db.get_session_dependency),
     rdx_analyst: RdxAnalyst = Depends(get_rdx_analyst),
