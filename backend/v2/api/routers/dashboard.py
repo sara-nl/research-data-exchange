@@ -12,9 +12,6 @@ from common.models.rdx_models import (
 
 from ..dashboard.email import send_dashboard_signin_email
 
-# from sqlalchemy import func
-
-
 db = DBClient()
 
 router = APIRouter()
