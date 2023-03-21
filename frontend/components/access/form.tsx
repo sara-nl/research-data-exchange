@@ -60,7 +60,7 @@ const AccessForm: React.FC<Props> = ({
     return (
       <Alert variant="danger" className="mb-5">
         <p className="mb-0">
-          We could not request acess for dataset because of error :
+          We could not request access for dataset because of error :
           {outOfService}. Please email rdx@surf.nl describing this problem.
         </p>
       </Alert>
