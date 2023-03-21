@@ -3,11 +3,7 @@ from sqlmodel import Session, select
 
 from common.api.dependencies import get_rdx_user
 from common.db.db_client import DBClient
-from common.models.rdx_models import (
-    RdxSigninRequest,
-    RdxUser,
-    RdxDataset
-)
+from common.models.rdx_models import RdxDataset, RdxSigninRequest, RdxUser
 
 from ..dashboard.email import send_dashboard_signin_email
 
@@ -41,7 +37,9 @@ def submit_analysis_job(
     session.add(rdx_user)
     session.commit()
 
-    background_tasks.add_task(send_dashboard_signin_email, rdx_user, signin_request.role)
+    background_tasks.add_task(
+        send_dashboard_signin_email, rdx_user, signin_request.role
+    )
 
     # session.get(RdxUser).where
 

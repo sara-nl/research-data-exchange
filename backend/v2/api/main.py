@@ -1,7 +1,7 @@
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .routers import lab_manager, librarian, dashboard
+from .routers import dashboard, lab_manager, librarian
 
 app = FastAPI(
     openapi_url="/api/openapi.json", docs_url="/api/docs", redoc_url="/api/redoc"
