@@ -303,6 +303,11 @@ class RdxJobSubmission(SQLModel):
     script_location: HttpUrl
 
 
+class RdxSigninRequest(SQLModel):
+    role: str
+    email: EmailStr
+
+
 class RdxJobRead(SQLModel):
     id: int
     script_location: HttpUrl
