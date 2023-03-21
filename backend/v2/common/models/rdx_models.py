@@ -312,3 +312,8 @@ class RdxJobRead(SQLModel):
     id: int
     script_location: HttpUrl
     status: str
+
+
+class DatasetsPerLicense(SQLModel):
+    access_license_id: int
+    total: int

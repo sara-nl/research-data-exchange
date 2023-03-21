@@ -1,8 +1,6 @@
 import NavBarComponent from '../../components/navBar';
 import SignInComponent from '../../components/dashboard/signin';
 import Footer from '../../components/footer';
-import { Dataset } from '../../types';
-import Error, { ErrorProps } from 'next/error';
 import Head from 'next/head';
 import { GetServerSideProps } from 'next';
 
