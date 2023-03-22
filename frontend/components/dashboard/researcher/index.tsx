@@ -26,24 +26,6 @@ const ResearcherDashboard: React.FC<Props> = ({ datasetStatsArray }) => {
             </Col>
           </Row>
         ))}
-        {/* <Row className="m-5">
-          <Table striped bordered hover size="sm">
-            <thead>
-              <tr>
-                <th>Access policy</th>
-                <th>Number of datasets</th>
-              </tr>
-            </thead>
-            <tbody>
-              {datasetsPerPolicy.map((dpp, i) => (
-                <tr key={i}>
-                  <td>{AccessLicenseUtil.toString(dpp.access_license_id)}</td>
-                  <td>{dpp.total}</td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </Row> */}
       </Container>
     </section>
   );

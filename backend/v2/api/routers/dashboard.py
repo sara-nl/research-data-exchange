@@ -80,7 +80,6 @@ def get_dataset_statistics(
         .order_by(RdxDataset.published_at)
     ).all()
 
-    print(datasets[0].analyst_links)
     datasets_with_stats = map(
         create_dataset_stat_model_from_dataset,
         datasets,
