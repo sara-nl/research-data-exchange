@@ -5,10 +5,12 @@ from common.api.dependencies import get_rdx_user
 from common.db.db_client import DBClient
 from common.models.rdx_models import (
     DatasetsPerLicense,
+    DatasetStat,
     RdxDataset,
     RdxSigninRequest,
     RdxUser,
 )
+from common.models.utils import create_dataset_stat_model_from_dataset
 
 from ..dashboard.email import send_dashboard_signin_email
 
@@ -50,7 +52,7 @@ def signin_to_dashboard(
 @router.get(
     "/api/dashboard/data_steward/datasets", response_model=list[DatasetsPerLicense]
 )
-def get_analysis_jobs(
+def get_datasets_per_license(
     *,
     session: Session = Depends(db.get_session_dependency),
     rdx_user: RdxUser = Depends(get_rdx_user),
@@ -63,3 +65,23 @@ def get_analysis_jobs(
         .order_by(RdxDataset.access_license_id)
     ).all()
     return datasets_per_license
+
+
+@router.get("/api/dashboard/researcher/datasets", response_model=list[DatasetStat])
+def get_dataset_statistics(
+    *,
+    session: Session = Depends(db.get_session_dependency),
+    rdx_user: RdxUser = Depends(get_rdx_user),
+):
+    datasets = session.exec(
+        select(RdxDataset)
+        .where(RdxDataset.researcher_id == rdx_user.id)
+        .where(RdxDataset.published == True)
+        .order_by(RdxDataset.published_at)
+    ).all()
+
+    datasets_with_stats = map(
+        create_dataset_stat_model_from_dataset,
+        datasets,
+    )
+    return list(datasets_with_stats)
