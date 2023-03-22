@@ -58,3 +58,8 @@ export type Job = {
   script_location: string;
   status: string;
 }
+
+export type DatasetsPerPolicy = {
+  access_license_id: number;
+  total: number;
+}
