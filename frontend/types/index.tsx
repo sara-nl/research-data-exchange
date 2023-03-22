@@ -31,7 +31,7 @@ export enum AccessLicense {
 
 export namespace AccessLicenseUtil {
   export function toString(accessLicense: number): string {
-    switch(accessLicense) {
+    switch (accessLicense) {
       case AccessLicense.download: {
         return "sign+download";
       }
@@ -62,4 +62,13 @@ export type Job = {
 export type DatasetsPerPolicy = {
   access_license_id: number;
   total: number;
+}
+
+export type DatasetStats = {
+  id: number;
+  doi: string;
+  title: string;
+  access_license_id: number;
+  signed: number;
+  analyzed: number;
 }
