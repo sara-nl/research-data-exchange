@@ -1,6 +1,7 @@
 from sqlmodel import select
 
 from common.db.db_client import DBClient
+from common.owncloud.owncloud_client import OwnCloudClient
 
 from .rdx_models import DatasetStat, RdxDataset, RdxUser
 
@@ -48,5 +49,15 @@ def create_dataset_stat_model_from_dataset(dataset: RdxDataset) -> DatasetStat:
 
     for analyst_link in dataset.analyst_links:
         dataset_stat_model.analyzed += len(analyst_link.jobs)
+
+    with OwnCloudClient() as oc_client:
+        try:
+            dataset_stat_model.owncloud_private_link = oc_client.get_private_link(
+                dataset.rdx_share.path
+            )
+        except Exception as error:
+            print(
+                f"Cannot retrieve private link for dataset (id={dataset.id}): {error}"
+            )
 
     return dataset_stat_model

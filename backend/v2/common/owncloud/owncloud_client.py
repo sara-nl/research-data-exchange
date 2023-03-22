@@ -46,6 +46,26 @@ class OwnCloudClient(BaseModel):
     def __exit__(self, exc_type, exc_value, traceback):
         self.oc.logout()
 
+    def get_share(self, share_id: int) -> owncloud.ShareInfo:
+        print(f"Getting share from owncloud with share_id {share_id}")
+        try:
+            return self.oc.get_share(share_id=share_id)
+        except Exception as error:
+            print(f"Error getting share info: {error}")
+            raise error
+
+    def get_private_link(self, path: str) -> owncloud.FileInfo:
+        print(f"Getting file info from owncloud for {path}")
+        try:
+            file_info = self.oc.file_info(path=path, properties=["oc:fileid"])
+            print(file_info)
+            file_id = file_info.attributes["{http://owncloud.org/ns}fileid"]
+            print(f"{own_cloud_settings.webdav_server_uri}/index.php/f/{file_id}")
+            return f"{own_cloud_settings.webdav_server_uri}/index.php/f/{file_id}"
+        except Exception as error:
+            print(f"Error getting file info: {error}")
+            raise error
+
     def get_shares(self, path: str = "/") -> list[owncloud.ShareInfo]:
         print(f"Getting shares from owncloud for path {path}")
         try:

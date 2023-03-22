@@ -336,3 +336,4 @@ class DatasetStat(SQLModel):
     access_license_id: int
     signed: int = 0
     analyzed: int = 0
+    owncloud_private_link: HttpUrl | None = None
