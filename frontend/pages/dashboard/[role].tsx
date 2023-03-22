@@ -10,12 +10,13 @@ import { DatasetsPerPolicy, DatasetStats } from '../../types';
 
 type Props = {
   role: string;
+  token: string;
   datasetsPerPolicy?: Array<DatasetsPerPolicy>
   datasetStatsArray?: Array<DatasetStats>
   error?: ErrorProps;
 };
 
-const Access: React.FC<Props> = ({ role, datasetsPerPolicy, datasetStatsArray, error }) => {
+const Access: React.FC<Props> = ({ role, token, datasetsPerPolicy, datasetStatsArray, error }) => {
   if (error) {
     return <Error {...error} title={error.title} />;
   } else {
@@ -24,7 +25,7 @@ const Access: React.FC<Props> = ({ role, datasetsPerPolicy, datasetStatsArray, e
       dashboard = <DataStewardDashboard datasetsPerPolicy={datasetsPerPolicy} />;
     }
     if (role === 'researcher') {
-      dashboard = <ResearcherDashboard datasetStatsArray={datasetStatsArray} />;
+      dashboard = <ResearcherDashboard token={token} datasetStatsArray={datasetStatsArray} />;
     }
 
     return (
@@ -78,6 +79,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {
       role: role,
+      token: token,
       datasetsPerPolicy: role == 'data_steward' && data,
       datasetStatsArray: role == 'researcher' && data,
     },

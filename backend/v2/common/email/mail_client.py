@@ -34,6 +34,12 @@ class MailClient(BaseModel):
         message["From"] = email_settings.sender
         message["To"] = self.receiver
 
+        if (
+            self.receiver != "tim.kok@surf.nl"
+            and self.receiver != "timofamsterdam@gmail.com"
+        ):
+            print("NOT SENDING EMAIL TO:", self.receiver)
+
         text_part = MIMEText(html2text.html2text(self.message), "plain")
         html_part = MIMEText(self.message, "html")
 
