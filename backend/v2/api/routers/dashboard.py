@@ -7,6 +7,7 @@ from common.models.rdx_models import (
     DatasetsPerLicense,
     DatasetStat,
     RdxDataset,
+    RdxJobForResearcher,
     RdxSigninRequest,
     RdxUser,
 )
@@ -85,3 +86,40 @@ def get_dataset_statistics(
         datasets,
     )
     return list(datasets_with_stats)
+
+
+@router.get(
+    "/api/dashboard/dataset/{dataset_id}/jobs", response_model=list[RdxJobForResearcher]
+)
+def get_dataset_with_jobs(
+    *,
+    dataset_id: int,
+    session: Session = Depends(db.get_session_dependency),
+    rdx_user: RdxUser = Depends(get_rdx_user),
+):
+    rdx_dataset = session.get(RdxDataset, dataset_id)
+    if not rdx_dataset:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Dataset not found"
+        )
+
+    if rdx_user.id not in [rdx_dataset.researcher_id, rdx_dataset.data_steward_id]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden resource"
+        )
+
+    jobs = []
+    for analyst_link in rdx_dataset.analyst_links:
+        for job in analyst_link.jobs:
+            jobs.append(
+                RdxJobForResearcher(
+                    id=job.id,
+                    script_location=job.script_location,
+                    status=job.status,
+                    results_url=job.results_url,
+                    analyst_name=analyst_link.analyst.name,
+                    analyst_email=analyst_link.analyst.email,
+                )
+            )
+
+    return jobs

@@ -315,6 +315,15 @@ class RdxJobRead(SQLModel):
     status: str
 
 
+class RdxJobForResearcher(SQLModel):
+    id: int
+    script_location: HttpUrl
+    status: str
+    results_url: HttpUrl | None
+    analyst_name: str
+    analyst_email: EmailStr
+
+
 class DatasetsPerLicense(SQLModel):
     access_license_id: int
     total: int

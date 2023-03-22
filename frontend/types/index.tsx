@@ -57,6 +57,9 @@ export type Job = {
   id: number;
   script_location: string;
   status: string;
+  results_url?: string
+  analyst_name?: string
+  analyst_email?: string
 }
 
 export type DatasetsPerPolicy = {
