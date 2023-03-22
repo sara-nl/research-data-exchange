@@ -1,9 +1,14 @@
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
-from sqlmodel import Session, select
+from sqlmodel import Session, func, select
 
 from common.api.dependencies import get_rdx_user
 from common.db.db_client import DBClient
-from common.models.rdx_models import RdxDataset, RdxSigninRequest, RdxUser
+from common.models.rdx_models import (
+    DatasetsPerLicense,
+    RdxDataset,
+    RdxSigninRequest,
+    RdxUser,
+)
 
 from ..dashboard.email import send_dashboard_signin_email
 
@@ -40,3 +45,21 @@ def signin_to_dashboard(
     background_tasks.add_task(
         send_dashboard_signin_email, rdx_user, signin_request.role
     )
+
+
+@router.get(
+    "/api/dashboard/data_steward/datasets", response_model=list[DatasetsPerLicense]
+)
+def get_analysis_jobs(
+    *,
+    session: Session = Depends(db.get_session_dependency),
+    rdx_user: RdxUser = Depends(get_rdx_user),
+):
+    datasets_per_license = session.exec(
+        select(RdxDataset.access_license_id, func.count(RdxDataset.id).label("total"))
+        .where(RdxDataset.data_steward_id == rdx_user.id)
+        .where(RdxDataset.access_license_id != None)
+        .group_by(RdxDataset.access_license_id)
+        .order_by(RdxDataset.access_license_id)
+    ).all()
+    return datasets_per_license

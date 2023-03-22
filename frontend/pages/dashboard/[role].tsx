@@ -1,19 +1,31 @@
 import NavBarComponent from '../../components/navBar';
+import DataStewardDashboard from '../../components/dashboard/dataSteward';
 import Footer from '../../components/footer';
 import Error, { ErrorProps } from 'next/error';
 import Head from 'next/head';
 import { GetServerSideProps } from 'next';
+import { DatasetsPerPolicy } from '../../types';
+
 
 type Props = {
-  role?: string;
-  submitUrl?: string;
+  role: string;
+  datasetsPerPolicy?: Array<DatasetsPerPolicy>
   error?: ErrorProps;
 };
 
-const Access: React.FC<Props> = ({ role, submitUrl, error }) => {
+const Access: React.FC<Props> = ({ role, datasetsPerPolicy, error }) => {
   if (error) {
     return <Error {...error} title={error.title} />;
   } else {
+    let dashboard;
+    if (role === 'data_steward') {
+      dashboard = <DataStewardDashboard datasetsPerPolicy={datasetsPerPolicy} />;
+    }
+    if (role === 'researcher') {
+      // TODO in other issue
+      dashboard = null;
+    }
+
     return (
       <main>
         <Head>
@@ -25,7 +37,7 @@ const Access: React.FC<Props> = ({ role, submitUrl, error }) => {
           <title>RDX</title>
         </Head>
         <NavBarComponent email={role} />
-        {/* TODO */}
+        {dashboard}
         <Footer />
       </main>
     );
@@ -38,14 +50,32 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   if (role != 'data_steward' && role != 'researcher') {
     return {
-        props: { error: { statusCode: 400, title: `role ${role} invalid` } },
+      props: { error: { statusCode: 400, title: `role ${role} invalid` } },
+    };
+  }
+
+  const obj = {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token
+    }
+  }
+
+  const res = await fetch(`${process.env.RDX_BACKEND_URL}/api/dashboard/${role}/datasets`, obj);
+
+  if (!res.ok) {
+    const body = await res.json();
+    return {
+      props: { error: { statusCode: res.status, title: body.detail } },
     };
   }
 
   return {
     props: {
       role: role,
-    //   submitUrl: `${process.env.RDX_BACKEND_URL}/api/dataset/${encodeURIComponent(doi.join('/'))}/access`,
+      datasetsPerPolicy: await res.json(),
     },
   };
 };
