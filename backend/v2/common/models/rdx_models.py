@@ -28,6 +28,7 @@ class RdxAnalystDatasetLink(SQLModel, table=True):
 
     dataset: "RdxDataset" = Relationship(sa_relationship_kwargs={"viewonly": True})
     analyst: "RdxAnalyst" = Relationship(sa_relationship_kwargs={"viewonly": True})
+    jobs: list["RdxJob"] = Relationship(sa_relationship_kwargs={"viewonly": True})
 
 
 class AccessLicense(enum.IntEnum):
@@ -317,3 +318,12 @@ class RdxJobRead(SQLModel):
 class DatasetsPerLicense(SQLModel):
     access_license_id: int
     total: int
+
+
+class DatasetStat(SQLModel):
+    id: int
+    doi: str
+    title: str
+    access_license_id: int
+    signed: int = 0
+    analyzed: int = 0

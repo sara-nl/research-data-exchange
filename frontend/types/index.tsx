@@ -63,3 +63,12 @@ export type DatasetsPerPolicy = {
   access_license_id: number;
   total: number;
 }
+
+export type DatasetStats = {
+  id: number;
+  doi: string
+  title: string
+  access_license_id: number;
+  signed: number;
+  analyzed: number;
+}

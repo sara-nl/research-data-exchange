@@ -1,19 +1,21 @@
 import NavBarComponent from '../../components/navBar';
 import DataStewardDashboard from '../../components/dashboard/dataSteward';
+import ResearcherDashboard from '../../components/dashboard/researcher'
 import Footer from '../../components/footer';
 import Error, { ErrorProps } from 'next/error';
 import Head from 'next/head';
 import { GetServerSideProps } from 'next';
-import { DatasetsPerPolicy } from '../../types';
+import { DatasetsPerPolicy, DatasetStats } from '../../types';
 
 
 type Props = {
   role: string;
   datasetsPerPolicy?: Array<DatasetsPerPolicy>
+  datasetStatsArray?: Array<DatasetStats>
   error?: ErrorProps;
 };
 
-const Access: React.FC<Props> = ({ role, datasetsPerPolicy, error }) => {
+const Access: React.FC<Props> = ({ role, datasetsPerPolicy, datasetStatsArray, error }) => {
   if (error) {
     return <Error {...error} title={error.title} />;
   } else {
@@ -22,8 +24,7 @@ const Access: React.FC<Props> = ({ role, datasetsPerPolicy, error }) => {
       dashboard = <DataStewardDashboard datasetsPerPolicy={datasetsPerPolicy} />;
     }
     if (role === 'researcher') {
-      // TODO in other issue
-      dashboard = null;
+      dashboard = <ResearcherDashboard datasetStatsArray={datasetStatsArray} />;
     }
 
     return (
@@ -72,10 +73,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
+  const data = await res.json()
+
   return {
     props: {
       role: role,
-      datasetsPerPolicy: await res.json(),
+      datasetsPerPolicy: role == 'data_steward' && data,
+      datasetStatsArray: role == 'researcher' && data,
     },
   };
 };

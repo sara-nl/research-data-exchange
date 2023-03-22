@@ -2,7 +2,7 @@ from sqlmodel import select
 
 from common.db.db_client import DBClient
 
-from .rdx_models import RdxUser
+from .rdx_models import DatasetStat, RdxDataset, RdxUser
 
 
 def create_rdx_user(db: DBClient, email: str) -> RdxUser:
@@ -35,3 +35,18 @@ def create_rdx_user(db: DBClient, email: str) -> RdxUser:
             session.commit()
             session.refresh(new_user)
         return new_user
+
+
+def create_dataset_stat_model_from_dataset(dataset: RdxDataset) -> DatasetStat:
+    dataset_stat_model = DatasetStat(
+        id=dataset.id,
+        doi=dataset.doi,
+        title=dataset.title,
+        access_license_id=dataset.access_license_id,
+        signed=len(dataset.analyst_links),
+    )
+
+    for analyst_link in dataset.analyst_links:
+        dataset_stat_model.analyzed += len(analyst_link.jobs)
+
+    return dataset_stat_model
