@@ -41,7 +41,10 @@ def signin_to_dashboard(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
 
-    rdx_user.create_new_token()
+    new_token, token_expires_at = RdxUser.create_new_token()
+    rdx_user.token = new_token
+    rdx_user.token_expires_at = token_expires_at
+
     session.add(rdx_user)
     session.commit()
     session.refresh(rdx_user)
