@@ -44,6 +44,7 @@ def signin_to_dashboard(
     rdx_user.create_new_token()
     session.add(rdx_user)
     session.commit()
+    session.refresh(rdx_user)
 
     background_tasks.add_task(
         send_dashboard_signin_email, rdx_user, signin_request.role
