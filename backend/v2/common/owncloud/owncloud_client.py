@@ -58,7 +58,6 @@ class OwnCloudClient(BaseModel):
         print(f"Getting file info from owncloud for {path}")
         try:
             file_info = self.oc.file_info(path=path, properties=["oc:fileid"])
-            print(file_info)
             file_id = file_info.attributes["{http://owncloud.org/ns}fileid"]
             print(f"{own_cloud_settings.webdav_server_uri}/index.php/f/{file_id}")
             return f"{own_cloud_settings.webdav_server_uri}/index.php/f/{file_id}"
