@@ -1,4 +1,4 @@
-from sqlmodel import select, Session
+from sqlmodel import Session, select
 
 from common.db.db_client import DBClient
 from common.owncloud.owncloud_client import OwnCloudClient
@@ -38,8 +38,9 @@ def create_rdx_user(db: DBClient, email: str) -> RdxUser:
         return new_user
 
 
-def create_dataset_stat_model_from_dataset(session: Session, dataset: RdxDataset) -> DatasetStat:
-
+def create_dataset_stat_model_from_dataset(
+    session: Session, dataset: RdxDataset
+) -> DatasetStat:
     if not dataset.owncloud_private_link:
         with OwnCloudClient() as oc_client:
             try:

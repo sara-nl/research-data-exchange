@@ -87,7 +87,9 @@ def get_dataset_statistics(
 
     datasets_with_stats = []
     for dataset in datasets:
-        datasets_with_stats.append(create_dataset_stat_model_from_dataset(session, dataset))
+        datasets_with_stats.append(
+            create_dataset_stat_model_from_dataset(session, dataset)
+        )
 
     return datasets_with_stats
 

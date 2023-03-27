@@ -40,9 +40,7 @@ def create_dataset(db: DBClient, new_share: RdxShare) -> RdxDataset:
             conditions_share_id, conditions_url = oc_client.make_public_link(
                 f"{new_share.get_path()}/conditions.pdf"
             )
-            owncloud_private_link = oc_client.get_private_link(
-                new_share.get_path()
-            )
+            owncloud_private_link = oc_client.get_private_link(new_share.get_path())
         except Exception as error:
             print(
                 f"Failed to create download link for share {new_share.get_id()}: {new_share.get_path()}/conditions.pdf"
@@ -59,7 +57,7 @@ def create_dataset(db: DBClient, new_share: RdxShare) -> RdxDataset:
                 conditions_url=conditions_url,
                 condtions_share_id=conditions_share_id,
                 data_steward_id=new_share.data_steward.id,
-                owncloud_private_link=owncloud_private_link
+                owncloud_private_link=owncloud_private_link,
             )
 
             session.add(rdx_dataset)
