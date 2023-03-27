@@ -41,6 +41,10 @@ def get_publication_message(rdx_user: RdxUser, rdx_dataset: RdxDataset) -> str:
 
     <p>3. Get notified</p>
     <p>You'll get an email when someone requests access to this dataset.</p>
+
+    <p>4. Get insights</p>
+    <p>You can see an overview of the datasets shared with RDX in the <a href="{app_settings.web_url}/dashboard">RDX Dashboard</a>.</p>
+
     <hr>
     <p><a href="{access_url}">Go to the dataset access page</a>.</p>
     {MailClient.BODY_CLOSE}
@@ -137,6 +141,8 @@ def get_access_notification_message(
 
     <p>For your information, we received an access request for your dataset '{rdx_dataset.rdx_share.path}' from {rdx_analyst.name} &lt;{rdx_analyst.email}&gt;.</p>
     <p>This is an informational email, no action is required.</p>
+
+    <p>You can see an overview of the datasets shared with RDX in the <a href="{app_settings.web_url}/dashboard">RDX Dashboard</a>.</p>
 
     <p>Need help? Contact RDX support team: <a href="mailto:{MailClient.SENDER}">{MailClient.SENDER}</a>
     {MailClient.BODY_CLOSE}
