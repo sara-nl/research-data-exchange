@@ -74,4 +74,5 @@ export type DatasetStats = {
   access_license_id: number;
   signed: number;
   analyzed: number;
+  owncloud_private_link: string;
 }

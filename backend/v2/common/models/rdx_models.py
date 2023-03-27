@@ -66,6 +66,7 @@ class RdxDatasetBase(SQLModel):
         index=True, default=None, foreign_key="rdx_user.id"
     )
     access_license_id: int | None
+    owncloud_private_link: HttpUrl | None = None
 
     @property
     def access_license(self) -> AccessLicense:
@@ -336,3 +337,4 @@ class DatasetStat(SQLModel):
     access_license_id: int
     signed: int = 0
     analyzed: int = 0
+    owncloud_private_link: HttpUrl | None = None
