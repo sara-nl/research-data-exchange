@@ -36,6 +36,8 @@ def get_message_for_analyst(
 
     <p>You can view the results of your analysis <a href="{job.results_url}">here</a>.</p>
 
+    <p>You can also see an overview of the datasets shared with RDX in the <a href="{app_settings.web_url}/dashboard">RDX Dashboard</a>.</p>
+
     <p>If you need any other kind of support, please get in touch with the RDX support team: <a href="mailto:{MailClient.SENDER}">{MailClient.SENDER}</a>
     </p>
     {MailClient.BODY_CLOSE}

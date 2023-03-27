@@ -41,6 +41,10 @@ const PublicationConfirmation: React.FC<Props> = ({ accessUrl }) => {
       <p className="text-justify">
         You'll get an email when someone requests access to this dataset.
       </p>
+      <h5 className="text-center">4. Get insights</h5>
+      <p className="text-justify">
+        You can see an overview of the datasets shared with RDX in the <a href="/dashboard">RDX Dashboard</a>.
+      </p>
       <hr />
       <p className="text-center alert-link">
         <a href={accessUrl}>Go to the dataset access page</a>.
