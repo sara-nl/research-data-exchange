@@ -85,12 +85,11 @@ def get_dataset_statistics(
         .order_by(RdxDataset.published_at)
     ).all()
 
-    datasets_with_stats = map(
-        create_dataset_stat_model_from_dataset,
-        datasets,
-    )
+    datasets_with_stats = []
+    for dataset in datasets:
+        datasets_with_stats.append(create_dataset_stat_model_from_dataset(session, dataset))
 
-    return list(datasets_with_stats)
+    return datasets_with_stats
 
 
 @router.get(
