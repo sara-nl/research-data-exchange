@@ -1,22 +1,22 @@
 import * as React from 'react';
 import {
-  Container,
   Row,
   Button,
   Col,
   Form as RForm,
-  InputGroup,
   Alert,
 } from 'react-bootstrap';
+import { InfoCircle } from 'react-bootstrap-icons';
 import { Formik, Field } from 'formik';
 import FieldFeedback from './../form/fieldFeedback';
 import { useState } from 'react';
-import Error, { ErrorProps } from 'next/error';
+import { AccessLicense, AccessLicenseUtil, Dataset } from '../../types';
 
 type Props = {
-  storeValues: (values: Values) => Promise<Values>;
-  onSuccessSubmission: (values: Values) => Promise<void> | void;
+  storeValues: (values: Values) => Promise<Dataset>;
+  onSuccessSubmission: (dataset: Dataset) => Promise<void> | void;
   header: string;
+  dataset: Dataset;
 };
 
 export type Values = {
@@ -24,10 +24,12 @@ export type Values = {
   title: string;
   authors: string;
   description: string;
+  published?: boolean;
 };
 
 const PublicationForm: React.FC<Props> = ({
   header,
+  dataset,
   storeValues,
   onSuccessSubmission,
 }) => {
@@ -48,12 +50,24 @@ const PublicationForm: React.FC<Props> = ({
 
   return (
     <React.Fragment>
-      <Alert variant="secondary" className="mb-5">
+      <Alert variant="info" className="mb-5">
         <p className="mb-0">{header}</p>
       </Alert>
 
       <Formik
-        initialValues={{ doi: '', title: '', authors: '', description: '' }}
+        initialValues={{
+          doi: dataset.doi || '',
+          title: dataset.title || '',
+          authors: dataset.authors || '',
+          description: dataset.description || '',
+          access_license_id: dataset.access_license_id || AccessLicense.download,
+          researcher_email: '',
+          published: true
+        }}
+        enableReinitialize
+        validateOnMount={true}
+        validateOnChange={true}
+        validateOnBlur={false}
         validate={(values) => {
           const errors: {} = {};
 
@@ -76,6 +90,12 @@ const PublicationForm: React.FC<Props> = ({
             errors['description'] = 'Please enter publication description.';
           }
 
+          if (!values.researcher_email) {
+            errors['researcher_email'] = 'Please enter the researcher\'s email address.';
+          } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.researcher_email)) {
+            errors['researcher_email'] = 'Please enter a valid email address';
+          }
+
           return errors;
         }}
         onSubmit={async (values, actions) => {
@@ -88,17 +108,57 @@ const PublicationForm: React.FC<Props> = ({
         }}
       >
         {({
-          handleChange,
           handleSubmit,
-          handleBlur,
-          values,
           errors,
-          isValidating,
           isValid,
-          dirty,
         }) => (
-          <RForm noValidate validated={!errors} onSubmit={handleSubmit}>
-            <RForm.Row>
+          <RForm validated={!errors} onSubmit={handleSubmit}>
+            <Row className='mb-1'>
+              <Field name="researcher_email">
+                {(fp) => (
+                  <RForm.Group as={Col} controlId="researcher_email">
+                    <RForm.Label>
+                      <span className="lead">Researcher's email</span> <sup>required</sup>
+                    </RForm.Label>
+                    <RForm.Control
+                      required
+                      type="email"
+                      value={fp.field.value}
+                      onBlur={fp.field.onBlur}
+                      onChange={fp.field.onChange}
+                      isValid={fp.meta.touched && !fp.meta.error}
+                      isInvalid={fp.meta.touched && fp.meta.error}
+                    />
+                    <FieldFeedback {...fp} />
+                  </RForm.Group>
+                )}
+              </Field>
+            </Row>
+            <Row className='mb-1'>
+              <Field name="access_license_id">
+                {(fp) => (
+                  <RForm.Group as={Col} controlId="access_license_id">
+                    <RForm.Label>
+                      <span className="lead">Access License <sup><a href="/policies" target="_blank"><InfoCircle /></a></sup></span>
+                    </RForm.Label>
+                    <RForm.Control
+                      required
+                      as="select"
+                      value={fp.field.value}
+                      onBlur={fp.field.onBlur}
+                      onChange={fp.field.onChange}
+                      isValid={fp.meta.touched && !fp.meta.error}
+                      isInvalid={fp.meta.touched && fp.meta.error}
+                    >
+                      {Object.values(AccessLicense).filter((value) => typeof value == 'number').map((value: number) => (
+                        <option key={value} value={value}>{AccessLicenseUtil.toString(value)}</option>
+                      ))}
+                    </RForm.Control>
+                  </RForm.Group>
+                )}
+              </Field>
+            </Row>
+            <Row className='mb-1'>
               <Field name="doi">
                 {(fp) => (
                   <RForm.Group as={Col} controlId="doi">
@@ -122,8 +182,8 @@ const PublicationForm: React.FC<Props> = ({
                   </RForm.Group>
                 )}
               </Field>
-            </RForm.Row>
-            <RForm.Row>
+            </Row>
+            <Row className='mb-1'>
               <Field name="title">
                 {(fp) => (
                   <RForm.Group as={Col} controlId="title">
@@ -143,8 +203,8 @@ const PublicationForm: React.FC<Props> = ({
                   </RForm.Group>
                 )}
               </Field>
-            </RForm.Row>
-            <RForm.Row>
+            </Row>
+            <Row className='mb-1'>
               <Field name="authors">
                 {(fp) => (
                   <RForm.Group as={Col} controlId="authors">
@@ -164,8 +224,8 @@ const PublicationForm: React.FC<Props> = ({
                   </RForm.Group>
                 )}
               </Field>
-            </RForm.Row>
-            <RForm.Row>
+            </Row>
+            <Row className='mb-1'>
               <Field name="description">
                 {(fp) => (
                   <RForm.Group as={Col} controlId="description">
@@ -187,14 +247,19 @@ const PublicationForm: React.FC<Props> = ({
                   </RForm.Group>
                 )}
               </Field>
-            </RForm.Row>
-            <Button
-              disabled={!dirty || !isValid}
-              type="submit"
-              variant="primary"
-            >
-              Publish
-            </Button>
+            </Row>
+            <Row>
+              <Col >
+                <Button
+                  className="submit-button"
+                  disabled={!isValid}
+                  type="submit"
+                  variant="primary"
+                >
+                  Publish
+                </Button>
+              </Col>
+            </Row>
           </RForm>
         )}
       </Formik>

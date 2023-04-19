@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { Dataset } from '../../types';
+import { AccessLicenseUtil, Dataset } from '../../types';
 import AccessForm, { Values as FormValues } from './form';
 import { Container, Row, Button, Col, Form, InputGroup } from 'react-bootstrap';
 import { Alert } from 'react-bootstrap';
+import { InfoCircle } from 'react-bootstrap-icons';
 
 type Props = {
   dataset?: Dataset;
@@ -73,11 +74,21 @@ const Access: React.FC<Props> = ({ dataset, submitUrl }) => {
                           width="25px"
                           height="25px"
                         />
-                        <span className="ml-2">{file}</span>
+                        <span className="dataset-file ml-2">{file}</span>
                       </div>
                     ))}
                   </div>
                 </div>
+              </div>
+            </div>
+            <div className="mt-5">
+              <div className="attached-title">
+                <h4>
+                  Access license <sup><a href="/policies" target="_blank"><InfoCircle /></a></sup>
+                </h4>
+                <span className="ml-3">
+                  {AccessLicenseUtil.toString(dataset.access_license_id)}
+                </span>
               </div>
             </div>
             <div className="mt-5">

@@ -4,58 +4,74 @@
 
 services:
   sharer:
-    # image: git.ia.surfsara.nl:5050/soil/rdx/backend:${DOCKER_IMAGE_TAG}
-    image: rdx-backend:latest
+    build: backend/v2/
     restart: "always"
-    depends_on: [postgres]
+    depends_on:
+      db-migrations:
+        condition: service_completed_successfully
+    env_file:
+      - backend/v2/.env
     environment:
-      RDX_APP_NAME: "sharer"
-      LOG_LEVEL: "info"
-      RDX_SMTP_HOST: ${RDX_SMTP_HOST}
-      RDX_SMTP_PORT: ${RDX_SMTP_PORT}
-      RDX_SMTP_USER: ${RDX_SMTP_USER}
-      RDX_SMTP_PASSWORD: ${RDX_SMTP_PASSWORD}
-      RDX_WEB_URL: ${RDX_WEB_URL}
-      RDX_WEBDAV_PASSWORD: ${RDX_WEBDAV_PASSWORD}
-      RDX_WEBDAV_USER: ${RDX_WEBDAV_USER}
-      DB_HOST: "postgres"
-      DB_NAME: "postgres"
-      DB_USER: "postgres"
-      DB_PORT: 5432
-  librarian:
-    # image: git.ia.surfsara.nl:5050/soil/rdx/backend:${DOCKER_IMAGE_TAG}
-    image: rdx-backend:latest
+      APPLICATION: "sharer"
+    # map mail server host to host.docker.internal IP so container can reach tunnel to mail server
+    extra_hosts:
+      - "mh.surfsara.nl:192.168.65.2"
+
+  lab_runner:
+    build: backend/v2/
     restart: "always"
-    depends_on: [postgres]
+    depends_on:
+      db-migrations:
+        condition: service_completed_successfully
+    env_file:
+      - backend/v2/.env
+    environment:
+      APPLICATION: "lab_runner"
+    # map mail server host to host.docker.internal IP so container can reach tunnel to mail server
+    extra_hosts:
+      - "mh.surfsara.nl:192.168.65.2"
+
+  api:
+    build: backend/v2/
+    restart: "always"
+    depends_on:
+      db-migrations:
+        condition: service_completed_successfully
     ports:
-      - 8081:8081
+      - 8000:8000
+    env_file:
+      - backend/v2/.env
     environment:
-      RDX_APP_NAME: "librarian"
-      LOG_LEVEL: "info"
-      RDX_WEBDAV_PASSWORD: ${RDX_WEBDAV_PASSWORD}
-      RDX_WEBDAV_USER: ${RDX_WEBDAV_USER}
-      RDX_SMTP_HOST: ${RDX_SMTP_HOST}
-      RDX_SMTP_PORT: ${RDX_SMTP_PORT}
-      RDX_SMTP_USER: ${RDX_SMTP_USER}
-      RDX_SMTP_PASSWORD: ${RDX_SMTP_PASSWORD}
-      DB_HOST: "postgres"
-      DB_NAME: "postgres"
-      DB_USER: "postgres"
-      DB_PORT: 5432
+      APPLICATION: "api"
+    # map mail server host to host.docker.internal IP so container can reach tunnel to mail server
+    extra_hosts:
+      - "mh.surfsara.nl:192.168.65.2"
 
   frontend:
-    image: rdx-frontend:latest
+    build: frontend
     restart: "always"
-    depends_on: [librarian]
+    depends_on: [api]
     ports:
       - 3000:3000
     environment:
-      RDX_BACKEND_URL: http://librarian:8081
-      RDX_PDF_HEADERS_PROXY_URL: ${RDX_PDF_HEADERS_PROXY_URL}
+      RDX_BACKEND_URL: http://api:8000
+
   postgres:
-    image: postgres:13-alpine
+    image: postgres:14-alpine
     restart: "always"
     ports:
       - 5432:5432
     environment:
-      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_DB: ${DB_NAME:-postgres}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+
+  db-migrations:
+    build: backend/v2/
+    environment:
+        APPLICATION: "database-migrations"
+    env_file:
+      - backend/v2/.env
+    depends_on:
+        postgres:
+            condition: service_started

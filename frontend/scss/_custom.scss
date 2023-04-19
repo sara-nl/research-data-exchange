@@ -3,6 +3,8 @@ $white: #fff;
 $bg-color: #fff;
 $theme-colors: (
   'primary': #071d41,
+  'info': #0c5460,
+  'light': #d1ecf1,
 );
 
 %title {
@@ -68,7 +70,7 @@ $theme-colors: (
   margin-top: 5rem;
 }
 
-ul.disc > li {
+ul.disc>li {
   list-style: disc;
 }
 
@@ -85,6 +87,7 @@ ul.disc > li {
 
 .name-text {
   width: 300px;
+
   @media only screen and (max-width: 600px) {
     width: 100%;
   }
@@ -92,6 +95,7 @@ ul.disc > li {
 
 .email-text {
   width: 300px;
+
   @media only screen and (max-width: 600px) {
     width: 100%;
   }
@@ -101,13 +105,16 @@ ul.disc > li {
   .right-side {
     order: 1;
   }
+
   .left-side {
     order: 2;
   }
+
   @media only screen and (max-width: 600px) {
     .right-side {
       order: 2;
     }
+
     .left-side {
       order: 1;
     }
@@ -118,13 +125,16 @@ ul.disc > li {
   .right-side {
     order: 1;
   }
+
   .left-side {
     order: 2;
   }
+
   @media only screen and (max-width: 600px) {
     .right-side {
       order: 2;
     }
+
     .left-side {
       order: 1;
     }
@@ -141,15 +151,16 @@ ul.disc > li {
   max-height: 300px;
 }
 
-.attached-item {
-  // flex-direction: row;
-  // @media only screen and (max-width: 600px) {
-  //   flex-direction: row-reverse;
-  // }
-}
+// .attached-item {
+// flex-direction: row;
+// @media only screen and (max-width: 600px) {
+//   flex-direction: row-reverse;
+// }
+// }
 
 ::-webkit-scrollbar {
   -webkit-appearance: none;
+  appearance: none;
 }
 
 ::-webkit-scrollbar:vertical {
@@ -175,4 +186,8 @@ ul.disc > li {
 .home-logo {
   max-width: 100%;
   max-height: 60px;
+}
+
+.submit-button {
+  margin-top: 0.5rem;
 }

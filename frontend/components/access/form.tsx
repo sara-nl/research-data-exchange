@@ -2,6 +2,7 @@ import {
   Button,
   Col,
   Form as RForm,
+  Row,
   FormGroup as RFormGroup,
   Alert,
 } from 'react-bootstrap';
@@ -10,9 +11,11 @@ import { Dataset } from '../../types';
 import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
 import FieldFeedback from '../form/fieldFeedback';
-import { Tooltip } from 'react-bootstrap';
-import { OverlayTrigger } from 'react-bootstrap';
-import AgreeToConditions from './form/AgreeToConditions';
+import {
+  OverlayTrigger,
+  Tooltip,
+} from 'react-bootstrap';
+
 
 const PDFViewer = dynamic(() => import('../pdf-view'), {
   ssr: false,
@@ -57,7 +60,7 @@ const AccessForm: React.FC<Props> = ({
     return (
       <Alert variant="danger" className="mb-5">
         <p className="mb-0">
-          We could not request acess for dataset because of error :
+          We could not request access for dataset because of error :
           {outOfService}. Please email rdx@surf.nl describing this problem.
         </p>
       </Alert>
@@ -105,13 +108,13 @@ const AccessForm: React.FC<Props> = ({
       }) => (
         <React.Fragment>
           <div>
-            <Alert variant="info" className="px-5">
+            <Alert key="info" variant="info">
               <h4>You are about to request access to a dataset</h4>
               Please read the following use conditions carefully. You can
               download the dataset only if you fully agree to them. Your name
               and email address along with the fact of agreement will be stored
-              in our system in order to ensure that the data is used
-              appropriately.
+              in our system and shared with the data owner to ensure that the data is used
+              appropriately and to generate usage statistics.
             </Alert>
           </div>
           <div className="pdf-view" onScroll={handleScroll}>
@@ -120,17 +123,13 @@ const AccessForm: React.FC<Props> = ({
 
           <RForm noValidate validated={!errors} onSubmit={handleSubmit}>
             <p className="text-center">
-              <a
-                className="badge badge-secondary"
-                download="Research_Data_Exchange_Conditions"
-                href={dataset.conditionsUrl}
+              <Button
+                href={dataset.conditions_url}
+                color="transparent"
                 onClick={() => setDownloadedConditions(true)}
-              >
-                Download PDF
-              </a>
+              >Download PDF</Button>
             </p>
-
-            <RForm.Row className="mt-2">
+            <Row className="mt-2">
               <Field name="agree">
                 {(fp: FieldProps) => (
                   <RForm.Group
@@ -138,34 +137,40 @@ const AccessForm: React.FC<Props> = ({
                     controlId="agree"
                     className="text-center"
                   >
-                    {!canAgree ? (
                       <OverlayTrigger
                         placement="bottom-start"
                         overlay={
-                          <Tooltip id="tooltip-disabled">
-                            To agree you must fully read or download the
-                            conditions first
+                          <Tooltip hidden={canAgree} id="tooltip-disabled">
+                            To agree you must first fully read the conditions or download them
                           </Tooltip>
                         }
                       >
-                        <AgreeToConditions
-                          disabled={!canAgree}
-                          formikFieldProps={fp}
-                        />
+                        <span className="d-inline-block">
+                          <RForm.Check
+                            type="checkbox"
+                            required
+                            label={
+                              <React.Fragment>
+                                <span className="lead">
+                                  I hereby agree to the terms and conditions{' '}
+                                </span>
+                                <sup className="font-weight-light">required</sup>
+                              </React.Fragment>
+                            }
+                            disabled={!canAgree}
+                            value={fp.field.value}
+                            onBlur={fp.field.onBlur}
+                            onChange={fp.field.onChange}
+                          />
+                        </span>
                       </OverlayTrigger>
-                    ) : (
-                      <AgreeToConditions
-                        disabled={!canAgree}
-                        formikFieldProps={fp}
-                      />
-                    )}
                   </RForm.Group>
                 )}
               </Field>
-            </RForm.Row>
-            <RForm.Row>
+            </Row>
+            <Row>
               <Field name="name">
-                {(fp) => (
+                {(fp) =>
                   <RForm.Group as={Col} controlId="name">
                     <RForm.Label>
                       <span className="lead">Name</span>{' '}
@@ -184,10 +189,10 @@ const AccessForm: React.FC<Props> = ({
                     />
                     <FieldFeedback {...fp} />
                   </RForm.Group>
-                )}
+                }
               </Field>
-            </RForm.Row>
-            <RForm.Row>
+            </Row>
+            <Row>
               <Field name="email">
                 {(fp) => (
                   <RForm.Group as={Col} controlId="email">
@@ -210,7 +215,7 @@ const AccessForm: React.FC<Props> = ({
                   </RForm.Group>
                 )}
               </Field>
-            </RForm.Row>
+            </Row>
 
             <Button
               disabled={!dirty || !isValid || isSubmitting}
