@@ -137,4 +137,4 @@ deploy_prod:
   variables:
     ANSIBLE_INVENTORY: "inventory-prod.yml"
     RDX_WEB_URL: $RDX_WEB_URL_PROD
-    ENV_FILE: $CI_PROJECT_DIR/../$CI_PROJECT_NAME.tmp/ENV_FILE_TEST
+    ENV_FILE: $CI_PROJECT_DIR/../$CI_PROJECT_NAME.tmp/ENV_FILE_PROD
