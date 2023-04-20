@@ -10,7 +10,7 @@ variables:
   KANIKO_CONFIG: '{"auths":{"$CI_REGISTRY":{"username":"$CI_REGISTRY_USER","password":"$CI_REGISTRY_PASSWORD"}}}'
   DOCKER_IMAGE_TAG: "$CI_COMMIT_SHORT_SHA"
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-  RDX_BACKEND_URL: "http://api:8000"
+  RDX_BACKEND_URL: "http://librarian:8000"
   RDX_PDF_HEADERS_PROXY_URL: "https://rdx.lab.surf.nl/conditions"
   RDX_WEB_URL_PROD: "http://rdx.lab.surf.nl"
   RDX_WEB_URL_TEST: "https://rdx-test.lab.surf.nl"
