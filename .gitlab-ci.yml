@@ -12,7 +12,7 @@ variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   RDX_BACKEND_URL: "http://api:8000"
   RDX_PDF_HEADERS_PROXY_URL: "https://rdx.lab.surf.nl/conditions"
-  RDX_WEB_URL_PROD: "http://rdx.lab.surf.nl"
+  RDX_WEB_URL_PROD: "https://rdx.lab.surf.nl"
   RDX_WEB_URL_TEST: "https://rdx-test.lab.surf.nl"
 
 after_script:
