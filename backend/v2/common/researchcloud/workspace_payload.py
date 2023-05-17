@@ -7,6 +7,7 @@ def get_workspace_payload(
     name: str, script_location: str, researchdrive_path: str, results_dir: str
 ) -> str:
     end_time = datetime.now() + timedelta(hours=12)
+    backslash = '\\'
 
     return f"""
     {{
@@ -27,11 +28,11 @@ def get_workspace_payload(
             }},
             {{
                 "key": "webdav_password",
-                "value": "{{\"key\":\"{research_cloud_settings.webdav_password_co_secret}\", \"sensitive\": 0}}"
+                "value": "{{{backslash}"key{backslash}":{backslash}"{research_cloud_settings.webdav_password_co_secret}{backslash}", {backslash}"sensitive{backslash}": 0}}"
             }},
             {{
                 "key": "webdav_user",
-                "value": "{{\"key\":\"{research_cloud_settings.webdav_user_co_secret}\", \"sensitive\": 0}}"
+                "value": "{{{backslash}"key{backslash}":{backslash}"{research_cloud_settings.webdav_user_co_secret}{backslash}", {backslash}"sensitive{backslash}": 0}}"
             }}
         ],
         "send_early_deletion_notification": false,
@@ -127,11 +128,11 @@ def get_workspace_payload(
                 }},
                 {{
                     "key": "webdav_password",
-                    "value": "{{\"key\":\"{research_cloud_settings.webdav_password_co_secret}\", \"sensitive\": 0}}"
+                    "value": "{{{backslash}"key{backslash}":{backslash}"{research_cloud_settings.webdav_password_co_secret}{backslash}", {backslash}"sensitive{backslash}": 0}}"
                 }},
                 {{
                     "key": "webdav_user",
-                    "value": "{{\"key\":\"{research_cloud_settings.webdav_user_co_secret}\", \"sensitive\": 0}}"
+                    "value": "{{{backslash}"key{backslash}":{backslash}"{research_cloud_settings.webdav_user_co_secret}{backslash}", {backslash}"sensitive{backslash}": 0}}"
                 }}
             ],
             "wallet_name": "{research_cloud_settings.wallet_name}",
