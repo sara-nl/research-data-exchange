@@ -7,7 +7,7 @@ def get_workspace_payload(
     name: str, script_location: str, researchdrive_path: str, results_dir: str
 ) -> str:
     end_time = datetime.now() + timedelta(hours=12)
-    backslash = '\\'
+    backslash = "\\"
 
     return f"""
     {{
