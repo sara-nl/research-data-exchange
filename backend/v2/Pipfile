@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-fastapi = "0.88.0"
+fastapi = "0.98.0"
 uvicorn = {extras = ["standard"], version = "0.20.0"}
 python-dotenv = "0.21.0"
 pyocclient = "0.6"
