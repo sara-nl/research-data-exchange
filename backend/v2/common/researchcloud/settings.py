@@ -9,6 +9,8 @@ class ResearchCloudSettings(BaseSettings):
     wallet_id: str
     wallet_name: str
     owner_id: str
+    webdav_password_co_secret: str
+    webdav_user_co_secret: str
 
     class Config:
         env_prefix = "research_cloud_"
