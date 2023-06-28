@@ -60,108 +60,73 @@ def fetch_new_token():
         COOKIES.update(r.cookies.get_dict())
 
     r2 = requests.get(
-        "https://proxy.sram.surf.nl/saml2sp/disco?entityID=https://login.eduid.nl",
+        "https://proxy.sram.surf.nl/saml2sp/disco?entityID=https://test-idp.sram.surf.nl/saml/saml2/idp/metadata.php",
         cookies=COOKIES,
     )
 
     for r in r2.history:
-        if "engine.surfconext.nl" in r.url:
-            SURF_CONEXT_SERVER_ID = r.cookies.get("HTTPSERVERID")
+        if "test-idp.sram.surf.nl/saml/module.php" in r.url:
             parsed_url = urllib.parse.urlparse(r.url)
             SRAM_RELAY_STATE = urllib.parse.parse_qs(parsed_url.query)["RelayState"][0]
         COOKIES.update(r.cookies.get_dict())
 
-    request_id = r2.url.split("login/")[1]
+    COOKIES.update(r2.cookies.get_dict())
 
-    data = {"email": "rdx@surf.nl"}
-    r3 = requests.post(
-        "https://login.eduid.nl/myconext/api/idp/service/email",
-        json=data,
-        headers={"referer": r2.url},
-        cookies=COOKIES,
-    )
+    r3 = requests.get(r2.url, cookies=COOKIES)
+    parsed_url = urllib.parse.urlparse(r3.url)
+    auth_state = urllib.parse.parse_qs(parsed_url.query)["AuthState"][0]
 
     COOKIES.update(r3.cookies.get_dict())
-    COOKIES["username"] = "rdx@surf.nl"
-    COOKIES["login_preference"] = "usePassword"
-    COOKIES["REMEMBER_ME_QUESTION_ASKED_COOKIE"] = "true"
-    COOKIES["BROWSER_SESSION"] = "true"
 
+    params = {"AuthState": auth_state}
     data = {
-        "user": {
-            "email": research_cloud_settings.user,
-            "password": research_cloud_settings.password,
-        },
-        "authenticationRequestId": request_id,
-        "usePassword": "true",
+        "username": research_cloud_settings.user,
+        "password": research_cloud_settings.password,
     }
-    r4 = requests.put(
-        "https://login.eduid.nl/myconext/api/idp/magic_link_request",
+    r4 = requests.post(
+        "https://test-idp.sram.surf.nl/saml/module.php/core/loginuserpass",
         headers={
-            "content-type": "application/json",
-            "referer": f"https://login.eduid.nl/usepassword/{request_id}",
+            "content-type": "application/x-www-form-urlencoded",
         },
-        json=data,
+        data=data,
         cookies=COOKIES,
+        params=params,
     )
 
-    body = json.loads(r4.content)
-    magic_url = body["url"]
-    magic_url_reference = magic_url.split("?")[1]
+    r4_saml_response = BeautifulSoup(r4.content, features="html.parser").find(
+        "input", {"name": "SAMLResponse"}
+    )["value"]
 
-    r5 = requests.get(
-        f"{magic_url}&force=true",
-        headers={
-            "content-type": "application/json",
-            "referer": f"https://login.eduid.nl/remember?{magic_url_reference}&redirect=https%3A%2F%2Flogin.eduid.nl%2Fsaml%2Fguest-idp%2Fmagic",
-        },
-        cookies=COOKIES,
+    data = {
+        "SAMLResponse": r4_saml_response,
+        "RelayState": SRAM_RELAY_STATE,
+    }
+
+    r5 = requests.post(
+        "https://proxy.sram.surf.nl/saml2sp/acs/post", data=data, cookies=COOKIES
     )
     r5_saml_response = BeautifulSoup(r5.content, features="html.parser").find(
         "input", {"name": "SAMLResponse"}
     )["value"]
-    data = {"SAMLResponse": r5_saml_response}
-    COOKIES["HTTPSERVERID"] = SURF_CONEXT_SERVER_ID
-
-    r6 = requests.post(
-        "https://engine.surfconext.nl/authentication/sp/consume-assertion",
-        headers={"content-type": "application/x-www-form-urlencoded"},
-        data=data,
-        cookies=COOKIES,
-    )
-    r6_saml_response = BeautifulSoup(r6.content, features="html.parser").find(
-        "input", {"name": "SAMLResponse"}
-    )["value"]
-    data = {
-        "SAMLResponse": r6_saml_response,
-        "RelayState": SRAM_RELAY_STATE,
-    }
-
-    r7 = requests.post(
-        "https://proxy.sram.surf.nl/saml2sp/acs/post", data=data, cookies=COOKIES
-    )
-    r7_saml_response = BeautifulSoup(r7.content, features="html.parser").find(
-        "input", {"name": "SAMLResponse"}
-    )["value"]
-    r7_relay_state = BeautifulSoup(r7.content, features="html.parser").find(
+    r5_relay_state = BeautifulSoup(r5.content, features="html.parser").find(
         "input", {"name": "RelayState"}
     )["value"]
-    data = {"SAMLResponse": r7_saml_response, "RelayState:": r7_relay_state}
+    data = {"SAMLResponse": r5_saml_response, "RelayState:": r5_relay_state}
 
-    r8 = requests.post(
+    r6 = requests.post(
         "https://oauth2.live.surfresearchcloud.nl/saml/acs/",
         headers={"content-type": "application/x-www-form-urlencoded"},
         data=data,
         allow_redirects=False,
     )
-    RSC_COOKIES = r8.cookies.get_dict()
+    RSC_COOKIES = r6.cookies.get_dict()
 
-    r9 = requests.get(
+    r7 = requests.get(
         "https://oauth2.live.surfresearchcloud.nl/oauth2/",
         params=params1,
         cookies=RSC_COOKIES,
     )
-    normalized_url = r9.url.replace(
+    normalized_url = r7.url.replace(
         "portal.live.surfresearchcloud.nl/#", "portal.live.surfresearchcloud.nl/?"
     )
     parsed_rsc_url = urllib.parse.urlparse(normalized_url)
