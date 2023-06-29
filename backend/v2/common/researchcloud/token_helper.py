@@ -44,10 +44,12 @@ def set_new_token():
 def fetch_new_token():
     response = requests.post(
         "https://oauth2.live.surfresearchcloud.nl/token/",
-        headers={
-            "Content-Type": "application/json"
+        headers={"Content-Type": "application/json"},
+        json={
+            "client_id": f"{research_cloud_settings.client_id}",
+            "client_secret": f"{research_cloud_settings.client_secret}",
+            "grant_type": "client_credentials",
         },
-        json={"client_id":f"{research_cloud_settings.client_id}", "client_secret":f"{research_cloud_settings.client_secret}", "grant_type":"client_credentials"}
     )
 
     body = json.loads(response.content)
