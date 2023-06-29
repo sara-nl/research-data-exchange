@@ -2,8 +2,8 @@ from pydantic import BaseSettings
 
 
 class ResearchCloudSettings(BaseSettings):
-    user: str
-    password: str
+    client_id: str
+    client_secret: str
     co_id: str
     co_name: str
     wallet_id: str
