@@ -7,10 +7,12 @@ from sqlmodel import Session, select
 
 from common.models.rdx_models import (
     AccessLicense,
+    JobStatus,
     RdxAnalyst,
     RdxAnalystDatasetLink,
     RdxAnalystUpdate,
     RdxDataset,
+    RdxJob,
     RdxUser,
 )
 from common.owncloud.owncloud_client import OwnCloudClient
@@ -67,6 +69,14 @@ def give_access_to_dataset(
         print("Processing access license sign+analyze (blind, with output check)")
     if rdx_dataset.access_license == AccessLicense.analyze_blind_no_output_check:
         print("Processing access license sign+analyze (blind, without output check)")
+    if rdx_dataset.tinker_license():
+        print("Processing access tinker license")
+        new_job = RdxJob(
+            rdx_analyst_dataset_link_id=rdx_dataset_analyst_link.id,
+            status=JobStatus.new,
+        )
+    session.add(new_job)
+    session.commit()
     if rdx_dataset.access_license == AccessLicense.download:
         print("Processing access license sign+download")
         if rdx_dataset_analyst_link.download_url is None:
