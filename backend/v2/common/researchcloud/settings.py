@@ -2,13 +2,15 @@ from pydantic import BaseSettings
 
 
 class ResearchCloudSettings(BaseSettings):
-    user: str
-    password: str
+    client_id: str
+    client_secret: str
     co_id: str
     co_name: str
     wallet_id: str
     wallet_name: str
     owner_id: str
+    webdav_password_co_secret: str
+    webdav_user_co_secret: str
 
     class Config:
         env_prefix = "research_cloud_"
