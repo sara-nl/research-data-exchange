@@ -75,8 +75,8 @@ def give_access_to_dataset(
             rdx_analyst_dataset_link_id=rdx_dataset_analyst_link.id,
             status=JobStatus.new,
         )
-    session.add(new_job)
-    session.commit()
+        session.add(new_job)
+        session.commit()
     if rdx_dataset.access_license == AccessLicense.download:
         print("Processing access license sign+download")
         if rdx_dataset_analyst_link.download_url is None:
