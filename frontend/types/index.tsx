@@ -27,6 +27,8 @@ export enum AccessLicense {
   download = 1,
   analyze_blind_with_output_check = 2,
   analyze_blind_no_output_check = 3,
+  analyze_tinker_with_output_check = 4,
+  analyze_tinker_no_output_check = 5,
 }
 
 export namespace AccessLicenseUtil {
@@ -40,6 +42,12 @@ export namespace AccessLicenseUtil {
       }
       case AccessLicense.analyze_blind_no_output_check: {
         return "sign+analyze (blind, without output check)";
+      }
+      case AccessLicense.analyze_tinker_with_output_check: {
+        return "sign+analyze (tinker, with output check)";
+      }
+      case AccessLicense.analyze_tinker_no_output_check: {
+        return "sign+analyze (tinker, without output check)";
       }
     }
   }

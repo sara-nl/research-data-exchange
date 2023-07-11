@@ -1,3 +1,4 @@
+from cryptography.fernet import Fernet
 from pydantic import AnyHttpUrl, BaseSettings
 
 
@@ -7,6 +8,10 @@ class AppSettings(BaseSettings):
         "https://researchdrive.surfsara.nl/remote.php/webdav"
     )
     webdav_results_basedir: str
+    encryption_key: bytes
+
+    def get_fernet(self) -> Fernet:
+        return Fernet(self.encryption_key)
 
     class Config:
         env_prefix = "rdx_"

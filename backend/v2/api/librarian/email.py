@@ -80,7 +80,7 @@ def get_download_message(
     """
 
 
-def get_analyze_message(
+def get_analyze_message_blind(
     rdx_analyst: RdxAnalyst,
     rdx_dataset: RdxDataset,
     rdx_dataset_analyst_link: RdxAnalystDatasetLink,
@@ -104,6 +104,24 @@ def get_analyze_message(
     """
 
 
+def get_analyze_message_tinker(
+    rdx_analyst: RdxAnalyst,
+    rdx_dataset: RdxDataset,
+    rdx_dataset_analyst_link: RdxAnalystDatasetLink,
+) -> str:
+    return f"""
+    {MailClient.BODY_OPEN}
+    <p>Dear {rdx_analyst.name},</p>
+
+    <p>You have requested access to the dataset '{rdx_dataset.title}'.</p>
+
+    <p>A secure workspace will be created for you now. Once this workspace is ready, you will receive another email.</p>
+
+    <p>For more information, please contact the RDX support team: <a href="mailto:{MailClient.SENDER}">{MailClient.SENDER}</a>
+    {MailClient.BODY_CLOSE}
+    """
+
+
 def send_access_email(
     rdx_analyst: RdxAnalyst,
     rdx_dataset: RdxDataset,
@@ -114,11 +132,13 @@ def send_access_email(
         message = get_download_message(
             rdx_analyst, rdx_dataset, rdx_dataset_analyst_link
         )
-    if rdx_dataset.access_license in [
-        AccessLicense.analyze_blind_with_output_check,
-        AccessLicense.analyze_blind_no_output_check,
-    ]:
-        message = get_analyze_message(
+    if rdx_dataset.blind_license():
+        message = get_analyze_message_blind(
+            rdx_analyst, rdx_dataset, rdx_dataset_analyst_link
+        )
+
+    if rdx_dataset.tinker_license():
+        message = get_analyze_message_tinker(
             rdx_analyst, rdx_dataset, rdx_dataset_analyst_link
         )
 
