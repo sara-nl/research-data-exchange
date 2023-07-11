@@ -1,10 +1,6 @@
 from sqlmodel import Session, or_, select
 
-from common.models.rdx_models import (
-    JobStatus,
-    RdxAnalystDatasetLink,
-    RdxJob,
-)
+from common.models.rdx_models import JobStatus, RdxAnalystDatasetLink, RdxJob
 from common.researchcloud.researchcloud_client import ResearchCloudClient
 
 rsc_client = ResearchCloudClient()
