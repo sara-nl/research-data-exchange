@@ -38,7 +38,7 @@ def get_finished_jobs(session: Session) -> list[RdxJob]:
     return list(finished_jobs)
 
 
-def delete_workspace(session: Session, job: RdxJob) -> bool:
+def delete_workspace(job: RdxJob) -> bool:
     try:
         rsc_client.delete_workspace(job.workspace_id)
     except Exception as error:
