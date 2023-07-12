@@ -1,5 +1,11 @@
 from common.email.mail_client import MailClient
-from common.models.rdx_models import AccessLicense, RdxAnalyst, RdxDataset, RdxJob, RdxUser
+from common.models.rdx_models import (
+    AccessLicense,
+    RdxAnalyst,
+    RdxDataset,
+    RdxJob,
+    RdxUser,
+)
 from common.settings.app_settings import app_settings
 
 
@@ -9,9 +15,7 @@ def get_workspace_message_for_analyst(
     if dataset.access_license == AccessLicense.analyze_tinker_with_output_check:
         results_message = f"After your workspace is automatically deleted, in 8 hours, you will receive your results after the data owner ({researcher.email}) has verified the output."
     else:
-        results_message = (
-            "After your workspace is automatically deleted, in 8 hours, you will receive your results."
-        )
+        results_message = "After your workspace is automatically deleted, in 8 hours, you will receive your results."
 
     backslash = "\\"
 

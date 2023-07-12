@@ -37,8 +37,8 @@ const Access: React.FC<Props> = ({ dataset, submitUrl }) => {
               <Alert variant="success" className="px-5">
                 <h4 className="alert-heading">Request submitted!</h4>
                 <p>
-                  📬 We've sent an email with the access link for downloading
-                  dataset files and the conditions document to your address.
+                  📬 We've sent an email with the access link for the
+                  dataset and the conditions document to your address.
                 </p>
                 <p>
                   If the email doesn't arrive within a few minutes, please check

@@ -14,7 +14,8 @@ alembic = "==1.8.1"
 psycopg2-binary = "==2.9.5"
 email-validator = "==v1.3.0"
 fairly = "==0.2.0"
-beautifulsoup4 = "==4.11.2"
+cryptography = "==41.0.1"
+passwordgenerator = "==1.5.1"
 
 [dev-packages]
 black = "*"

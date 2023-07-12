@@ -103,6 +103,18 @@ class OwnCloudClient(BaseModel):
         print("link_info", link_info)
         return (link_info.get_id(), link_info.get_link())
 
+    def make_public_upload_link(self, file_path: str, password: str) -> tuple[int, str]:
+        print(f"Creating public upload link for {file_path}")
+        try:
+            link_info: owncloud.ShareInfo = self.oc.share_file_with_link(
+                path=file_path, public_upload=True, password=password
+            )
+        except Exception as error:
+            print(f"Failed to create download link {error}")
+            raise error
+        print("link_info", link_info)
+        return (link_info.get_id(), link_info.get_link())
+
     def delete_share(self, share_id: int) -> bool:
         print(f"Deleting share with ID {share_id}")
         try:

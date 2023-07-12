@@ -5,20 +5,40 @@ import requests
 from pydantic import BaseModel
 
 from .token_helper import check_token
-from .workspace_payload import get_workspace_payload
+from .workspace_payload import get_blind_workspace_payload, get_tinker_workspace_payload
 
 
 class ResearchCloudClient(BaseModel):
-    def create_workspace(
+    def create_blind_workspace(
         self, name: str, script_location: str, researchdrive_path: str, results_dir: str
     ) -> str:
-        check_token()
-
         payload = json.loads(
-            get_workspace_payload(
+            get_blind_workspace_payload(
                 name, script_location, researchdrive_path, results_dir
             )
         )
+
+        return self.create_workspace(payload)
+
+    def create_tinker_workspace(
+        self,
+        name: str,
+        username: str,
+        password: str,
+        researchdrive_path: str,
+        upload_url: str,
+    ) -> str:
+        payload = json.loads(
+            get_tinker_workspace_payload(
+                name, username, password, researchdrive_path, upload_url
+            )
+        )
+
+        return self.create_workspace(payload)
+
+    def create_workspace(self, payload: str) -> str:
+        check_token()
+
         headers = {
             "authorization": os.getenv("RSC_ACCESS_TOKEN"),
             "content-type": "application/json",
@@ -42,6 +62,16 @@ class ResearchCloudClient(BaseModel):
         return body["id"]
 
     def get_workspace_status(self, workspace_id: str) -> str:
+        workspace = self.get_workspace(workspace_id)
+        return workspace["status"]
+
+    def get_workspace_ip(self, workspace_id: str) -> str:
+        workspace = self.get_workspace(workspace_id)
+        if "resource_meta" in workspace.keys():
+            return workspace["resource_meta"]["ip"]
+        return False
+
+    def get_workspace(self, workspace_id: str) -> dict:
         check_token()
         headers = {"authorization": os.getenv("RSC_ACCESS_TOKEN")}
         try:
@@ -56,7 +86,7 @@ class ResearchCloudClient(BaseModel):
             raise error
 
         body = json.loads(r.content)
-        return body["results"][0]["status"]
+        return body["results"][0]
 
     def delete_workspace(self, workspace_id: str):
         status = self.get_workspace_status(workspace_id)

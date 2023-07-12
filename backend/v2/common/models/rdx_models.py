@@ -4,9 +4,12 @@ import secrets
 from datetime import datetime, timedelta
 from typing import Any, Optional
 
+from passwordgenerator import pwgenerator
 from pydantic import EmailStr, HttpUrl, PrivateAttr, validator
 from sqlalchemy import JSON, Integer, Sequence
 from sqlmodel import Column, Enum, Field, Relationship, SQLModel
+
+from common.settings.app_settings import app_settings
 
 
 class RdxAnalystDatasetLink(SQLModel, table=True):
@@ -35,6 +38,8 @@ class AccessLicense(enum.IntEnum):
     download = 1
     analyze_blind_with_output_check = 2
     analyze_blind_no_output_check = 3
+    analyze_tinker_with_output_check = 4
+    analyze_tinker_no_output_check = 5
 
     @classmethod
     def print_friendly_access_license(cls, value: int) -> str:
@@ -44,6 +49,10 @@ class AccessLicense(enum.IntEnum):
             return "sign+analyze (blind, with output check)"
         if cls.analyze_blind_no_output_check == value:
             return "sign+analyze (blind, without output check)"
+        if cls.analyze_tinker_with_output_check == value:
+            return "sign+analyze (tinker, with output check)"
+        if cls.analyze_tinker_no_output_check == value:
+            return "sign+analyze (tinker, without output check)"
 
 
 class RdxDatasetBase(SQLModel):
@@ -67,6 +76,18 @@ class RdxDatasetBase(SQLModel):
     )
     access_license_id: int | None
     owncloud_private_link: HttpUrl | None = None
+
+    def blind_license(self) -> bool:
+        return self.access_license in [
+            AccessLicense.analyze_blind_no_output_check,
+            AccessLicense.analyze_blind_with_output_check,
+        ]
+
+    def tinker_license(self) -> bool:
+        return self.access_license in [
+            AccessLicense.analyze_tinker_no_output_check,
+            AccessLicense.analyze_tinker_with_output_check,
+        ]
 
     @property
     def access_license(self) -> AccessLicense:
@@ -271,8 +292,10 @@ class RdxAnalystUpdate(SQLModel):
 
 class JobStatus(str, enum.Enum):
     new = "new"
+    creating = "creating"
     created = "created"
     running = "running"
+    running_notified = "running_notified"
     failed = "failed"
     failed_notified = "failed_notified"
     failed_notified_deleted = "failed_notified_deleted"
@@ -290,15 +313,30 @@ class RdxJob(SQLModel, table=True):
         default=None, foreign_key="rdx_analyst_dataset.id"
     )
     status: str = Field(index=True)
-    script_location: HttpUrl
+    script_location: HttpUrl | None
     workspace_id: str | None
     workspace_status: str | None
     results_dir: str | None
     results_url: HttpUrl | None = None
     results_share_id: int | None = Field(index=True, default=None)
+    upload_url: HttpUrl | None = None
+    upload_share_id: int | None = Field(index=True, default=None)
+    workspace_username: str | None
+    workspace_password: str | None
+    workspace_ip: str | None
 
     def get_status(self) -> JobStatus:
         return JobStatus(self.status)
+
+    def set_password(self):
+        fernet = app_settings.get_fernet()
+        new_password = pwgenerator.generate()
+        encrypted_password = fernet.encrypt(new_password.encode())
+        self.workspace_password = encrypted_password.decode()
+
+    def get_password(self) -> str:
+        fernet = app_settings.get_fernet()
+        return fernet.decrypt(self.workspace_password).decode()
 
 
 class RdxJobSubmission(SQLModel):
