@@ -42,7 +42,34 @@ def email_user(session: Session, job: RdxJob) -> bool:
     )
     dataset = rdx_analyst_dataset_link.dataset
     analyst = rdx_analyst_dataset_link.analyst
-    if dataset.access_license == AccessLicense.analyze_blind_with_output_check:
+    researcher = session.get(
+            RdxUser, rdx_analyst_dataset_link.dataset.researcher_id
+        )
+
+    mail_client = MailClient(
+        receiver=analyst.email,
+        subject=f"Tinker workspace ready for dataset {dataset.title}",
+        message=get_workspace_message_for_analyst(analyst, job, dataset, researcher),
+    )
+
+    try:
+        mail_client.mail()
+    except Exception as error:
+        print(f"Failed to send email for job (id={job.id}: {error}")
+        return False
+    return True
+
+
+def send_finished_job_email(session: Session, job: RdxJob) -> bool:
+    rdx_analyst_dataset_link = session.get(
+        RdxAnalystDatasetLink, job.rdx_analyst_dataset_link_id
+    )
+    dataset = rdx_analyst_dataset_link.dataset
+    analyst = rdx_analyst_dataset_link.analyst
+    if dataset.access_license in [
+        AccessLicense.analyze_blind_with_output_check,
+        AccessLicense.analyze_tinker_with_output_check,
+    ]:
         researcher = session.get(
             RdxUser, rdx_analyst_dataset_link.dataset.researcher_id
         )
