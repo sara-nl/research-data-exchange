@@ -78,11 +78,12 @@ def send_tinker_ready_email(session: Session, job: RdxJob) -> bool:
     )
     dataset = rdx_analyst_dataset_link.dataset
     analyst = rdx_analyst_dataset_link.analyst
+    researcher = session.get(RdxUser, rdx_analyst_dataset_link.dataset.researcher_id)
 
     mail_client = MailClient(
         receiver=analyst.email,
         subject=f"Tinker workspace ready for dataset {dataset.title}",
-        message=get_workspace_message_for_analyst(analyst, job, dataset),
+        message=get_workspace_message_for_analyst(analyst, job, dataset, researcher),
     )
 
     try:
