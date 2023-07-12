@@ -115,7 +115,9 @@ def get_analyze_message_tinker(
 
     <p>You have requested access to the dataset '{rdx_dataset.title}'.</p>
 
-    <p>A secure workspace will be created for you now. Once this workspace is ready, you will receive another email.</p>
+    <p>A secure workspace will be created for you now. Please note that this process takes about 30 minutes.</p>
+
+    <p>Once this workspace is ready, you will receive another email.</p>
 
     <p>For more information, please contact the RDX support team: <a href="mailto:{MailClient.SENDER}">{MailClient.SENDER}</a>
     {MailClient.BODY_CLOSE}
