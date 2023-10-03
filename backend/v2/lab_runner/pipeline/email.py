@@ -26,7 +26,7 @@ def get_workspace_message_for_analyst(
     <p>A tinker workspace to analyze the dataset {dataset.title} is ready for you. The workspace will be automatically deleted in 8 hours.</p>
 
     <h3>Access</h3>
-    <p>You can access the workspace with an RDP client, such as Microsoft Remote Desktop.</p>
+    <p>You can access the workspace with an RDP client, such as <a href="https://apps.apple.com/nl/app/microsoft-remote-desktop/id1295203466">Microsoft Remote Desktop for Mac</a> and <a href="https://apps.microsoft.com/store/detail/microsoft-remote-desktop/9WZDNCRFJ3PS">Microsoft Remote Desktop for Windows</a>.</p>
 
     <p>
         You can use the following information to connect to the workspace:
@@ -36,6 +36,20 @@ def get_workspace_message_for_analyst(
             <li>Password: {job.get_password()}</li>
         </ul>
     </p>
+
+    <p>
+        To access the workspace with an RDP client follow these steps:
+        <ol>
+            <li>Open <a href="https://apps.apple.com/nl/app/microsoft-remote-desktop/id1295203466">Microsoft Remote Desktop for Mac</a> or <a href="https://apps.microsoft.com/store/detail/microsoft-remote-desktop/9WZDNCRFJ3PS">Microsoft Remote Desktop for Windows</a>.</li>
+            <li>Click on the '+' sign and then on "Add PC".</li>
+            <li>Enter {job.workspace_ip} in the "PC name" field.</li>
+            <li>Click on "Add"</li>
+            <li>Double click on the thumbnail for the newly created PC in the overview.</li>
+            <li>Enter {job.workspace_username}@src.local in the "Username" field.</li>
+            <li>Enter {job.get_password()} in the "Password" field.</li>
+            <li>Click on "Connect"</li>
+        </ol>
+
 
     <h3>Analyzing the data</h3>
     <p>
