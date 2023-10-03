@@ -43,11 +43,11 @@ def get_workspace_message_for_analyst(
             <li>Open <a href="https://apps.apple.com/nl/app/microsoft-remote-desktop/id1295203466">Microsoft Remote Desktop for Mac</a> or <a href="https://apps.microsoft.com/store/detail/microsoft-remote-desktop/9WZDNCRFJ3PS">Microsoft Remote Desktop for Windows</a>.</li>
             <li>Click on the '+' sign and then on "Add PC".</li>
             <li>Enter {job.workspace_ip} in the "PC name" field.</li>
-            <li>Click on "Add"</li>
+            <li>Click on "Add".</li>
             <li>Double click on the thumbnail for the newly created PC in the overview.</li>
             <li>Enter {job.workspace_username}@src.local in the "Username" field.</li>
             <li>Enter {job.get_password()} in the "Password" field.</li>
-            <li>Click on "Connect"</li>
+            <li>Click on "Connect".</li>
         </ol>
 
 

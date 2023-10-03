@@ -8,10 +8,11 @@ import { InfoCircle } from 'react-bootstrap-icons';
 
 type Props = {
   dataset?: Dataset;
+  tinkerLicense?: boolean;
   submitUrl: string;
 };
 
-const Access: React.FC<Props> = ({ dataset, submitUrl }) => {
+const Access: React.FC<Props> = ({ dataset, tinkerLicense, submitUrl }) => {
   const [submitted, setSubmitted] = useState<Boolean | undefined>(false);
   type StoreValues = (values: FormValues) => Promise<FormValues>;
   // FIXME Can be extracted as common code
@@ -48,6 +49,7 @@ const Access: React.FC<Props> = ({ dataset, submitUrl }) => {
             ) : (
               <AccessForm
                 dataset={dataset}
+                tinkerLicense={tinkerLicense}
                 storeValues={storeValues}
                 onSuccessSubmission={(values) => {
                   setSubmitted(values != undefined);
