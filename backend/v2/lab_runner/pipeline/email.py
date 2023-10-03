@@ -47,7 +47,7 @@ def get_workspace_message_for_analyst(
             <li>Double click on the thumbnail for the newly created PC in the overview.</li>
             <li>Enter {job.workspace_username}@src.local in the "Username" field.</li>
             <li>Enter {job.get_password()} in the "Password" field.</li>
-            <li>Click on "Connect".</li>
+            <li>Click on "Continue".</li>
         </ol>
 
 
