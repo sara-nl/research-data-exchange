@@ -29,12 +29,14 @@ export type Values = {
 
 type Props = {
   dataset?: Dataset;
+  tinkerLicense?: boolean;
   storeValues: (values: Values) => Promise<Values>;
   onSuccessSubmission: (values: Values) => Promise<void> | void;
 };
 
 const AccessForm: React.FC<Props> = ({
   dataset,
+  tinkerLicense,
   storeValues,
   onSuccessSubmission,
 }) => {
@@ -110,11 +112,20 @@ const AccessForm: React.FC<Props> = ({
           <div>
             <Alert key="info" variant="info">
               <h4>You are about to request access to a dataset</h4>
-              Please read the following use conditions carefully. You can
-              download the dataset only if you fully agree to them. Your name
-              and email address along with the fact of agreement will be stored
-              in our system and shared with the data owner to ensure that the data is used
-              appropriately and to generate usage statistics.
+              <p>
+                Please read the following use conditions carefully. You can
+                download the dataset only if you fully agree to them. Your name
+                and email address along with the fact of agreement will be stored
+                in our system and shared with the data owner to ensure that the data is used
+                appropriately and to generate usage statistics.
+              </p>
+              {tinkerLicense &&
+                <p>
+                  <b>Note:</b> When you request access to this dataset, a workspace will be created for you within 30 minutes that will be <b>automatically deleted after 8 hours</b>.
+                  If you are currently unable to analyze the dataset, please request access at a later time.
+                </p>
+              }
+
             </Alert>
           </div>
           <div className="pdf-view" onScroll={handleScroll}>
@@ -137,33 +148,33 @@ const AccessForm: React.FC<Props> = ({
                     controlId="agree"
                     className="text-center"
                   >
-                      <OverlayTrigger
-                        placement="bottom-start"
-                        overlay={
-                          <Tooltip hidden={canAgree} id="tooltip-disabled">
-                            To agree you must first fully read the conditions or download them
-                          </Tooltip>
-                        }
-                      >
-                        <span className="d-inline-block">
-                          <RForm.Check
-                            type="checkbox"
-                            required
-                            label={
-                              <React.Fragment>
-                                <span className="lead">
-                                  I hereby agree to the terms and conditions{' '}
-                                </span>
-                                <sup className="font-weight-light">required</sup>
-                              </React.Fragment>
-                            }
-                            disabled={!canAgree}
-                            value={fp.field.value}
-                            onBlur={fp.field.onBlur}
-                            onChange={fp.field.onChange}
-                          />
-                        </span>
-                      </OverlayTrigger>
+                    <OverlayTrigger
+                      placement="bottom-start"
+                      overlay={
+                        <Tooltip hidden={canAgree} id="tooltip-disabled">
+                          To agree you must first fully read the conditions or download them
+                        </Tooltip>
+                      }
+                    >
+                      <span className="d-inline-block">
+                        <RForm.Check
+                          type="checkbox"
+                          required
+                          label={
+                            <React.Fragment>
+                              <span className="lead">
+                                I hereby agree to the terms and conditions{' '}
+                              </span>
+                              <sup className="font-weight-light">required</sup>
+                            </React.Fragment>
+                          }
+                          disabled={!canAgree}
+                          value={fp.field.value}
+                          onBlur={fp.field.onBlur}
+                          onChange={fp.field.onChange}
+                        />
+                      </span>
+                    </OverlayTrigger>
                   </RForm.Group>
                 )}
               </Field>

@@ -1,18 +1,19 @@
 import NavBarComponent from '../../components/navBar';
 import AccessComponent from '../../components/access';
 import Footer from '../../components/footer';
-import { Dataset } from '../../types';
+import { AccessLicense, Dataset } from '../../types';
 import Error, { ErrorProps } from 'next/error';
 import Head from 'next/head';
 import { GetServerSideProps } from 'next';
 
 type Props = {
   dataset?: Dataset;
+  tinkerLicense?: boolean;
   submitUrl: string;
   error?: ErrorProps;
 };
 
-const Access: React.FC<Props> = ({ dataset, submitUrl, error }) => {
+const Access: React.FC<Props> = ({ dataset, tinkerLicense, submitUrl, error }) => {
   if (error) {
     return <Error {...error} title={error.title} />;
   } else {
@@ -27,7 +28,7 @@ const Access: React.FC<Props> = ({ dataset, submitUrl, error }) => {
           <title>RDX</title>
         </Head>
         <NavBarComponent email="" />
-        <AccessComponent dataset={dataset} submitUrl={submitUrl} />
+        <AccessComponent dataset={dataset} tinkerLicense={tinkerLicense} submitUrl={submitUrl} />
         <Footer />
       </main>
     );
@@ -52,7 +53,7 @@ function transformDownloadLink(conditionsUrl: string) {
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const doi = (context.query.doi as string[]) || [];
   const res = await fetch(
-     `${process.env.RDX_BACKEND_URL}/api/dataset/${encodeURIComponent(doi.join('/'))}/access`
+    `${process.env.RDX_BACKEND_URL}/api/dataset/${encodeURIComponent(doi.join('/'))}/access`
   );
 
   if (!res.ok) {
@@ -63,7 +64,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   var response = await res.json();
 
-  const dataset : Dataset = {
+  const dataset: Dataset = {
     title: response.title,
     description: response.description,
     files: response.files,
@@ -75,6 +76,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {
       dataset: dataset,
+      tinkerLicense: [AccessLicense.analyze_tinker_no_output_check, AccessLicense.analyze_tinker_with_output_check].includes(dataset.access_license_id),
       submitUrl: `${process.env.RDX_BACKEND_URL}/api/dataset/${encodeURIComponent(doi.join('/'))}/access`,
     },
   };
